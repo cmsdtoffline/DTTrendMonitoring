@@ -174,12 +174,10 @@ void EfficiencyMonitor::Loop()
 				    10.,12.,14.,16.,18.
 				    ,20.,22.,24.,26.,28.
 				    ,30.,32.,34.,36.,38.,
-				    40.,44.,48.,60.,70.,
-				    90.};
-				    //				    50.,58.,62.,94.};
-
-   std::vector<float> PUe;  //  = {1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.};
-   std::vector<float> Lumie; //  = {1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1.,1,};
+				    40.,44.,48.,50.,58.,
+				    62.,72.,82.,94.};
+   std::vector<float> PUe;  
+   std::vector<float> Lumie;
 
    for (std::vector<float>::iterator lumi = lumislice.begin() ; lumi != lumislice.end(); ++lumi) Lumie.push_back(1.);
    for (std::vector<float>::iterator pu = PUslice.begin() ; pu != PUslice.end(); ++pu) PUe.push_back(1.);
@@ -190,29 +188,66 @@ void EfficiencyMonitor::Loop()
    const int nPUpoints   = PUe.size();
    const int nLumiPoints = Lumie.size();
 
+   int nPoints = -1;
    std::cout<<"nPUpoints "<<nPUpoints<<" nLumiPoints "<<nLumiPoints<<std::endl;
 
-   vector<vector<vector<vector<int>>>> v4
-   for (int ivar=0; ivar<2; ivar++){
-     v4.push_back( vector<vector<vector<int>>>())
-     for (int ipoint=0; ipoint<nLumiPoints; ipoint++){
-       v4[ivar].push_back(vector<vector<int> >())
-       for (int iwh=0; iwh<5; iwh++){
-	 v4[ivar][ipoint].push_back(vector<int>())
-        for (int ist=0; ist<4; ist++){
-	  v4[ivar][ipoint][ist].push_back(0);
-	}
-       }
-     }
-   }
-		 
-   int Num_phiMBWh[2][nLumiPoints][4][5];  int Den_phiMBWh[2][nLumiPoints][4][5]; //  Lumi, nLumiPoints punti, 4 stazioni, 5 ruote
-   int Num_theMBWh[2][nLumiPoints][3][5];  int Den_theMBWh[2][nLumiPoints][3][5]; //  Lumi, nLumiPoints punti, 3 stazioni, 5 ruote
-   int NumA_phiMBWh[2][nLumiPoints][4][5]; int NumA_theMBWh[2][nLumiPoints][3][5];// 'A' stands for 'Associated'
+   vector<vector<vector<vector<int>>>> v4;
 
-   int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
-   int Num_phiMB4Bot[2][nLumiPoints];      int Den_phiMB4Bot[2][nLumiPoints];     //  Lumi nLumiPoints punti
-   int NumA_phiMB4Top[2][5][nLumiPoints];  int NumA_phiMB4Bot[2][nLumiPoints];    // 'A' stands for 'Associated'
+   vector<vector<vector<vector<int>>>> Num_phiMBWh;
+   vector<vector<vector<vector<int>>>> Den_phiMBWh;
+   vector<vector<vector<vector<int>>>> Num_theMBWh;
+   vector<vector<vector<vector<int>>>> Den_theMBWh;
+   vector<vector<vector<vector<int>>>> NumA_phiMBWh;
+   vector<vector<vector<vector<int>>>> NumA_theMBWh;
+
+
+   
+   vector<vector< int > >   Num_phiMB4Bot;
+   vector<vector< int > >   Den_phiMB4Bot;
+   
+   vector<vector<vector< int > > >  Num_phiMB4Top;
+   vector<vector<vector< int > > >  Den_phiMB4Top;
+
+   vector<vector<vector< int > > >  NumA_phiMB4Top;
+   vector<vector<vector< int > > >  NumA_phiMB4Bot;
+
+
+   for (int ivar=0; ivar<2; ivar++){
+     v4.push_back( vector<vector<vector< int > > > () ) ;
+     if(ivar==0) nPoints = nLumiPoints;
+     else if(ivar==1) nPoints = nPUpoints;
+      for (int ipoint=0; ipoint<nPoints; ipoint++){
+	 v4[ivar].push_back(vector<vector<int> >());
+	   for (int iwh=0; iwh<5; iwh++){
+	     v4[ivar][ipoint].push_back(vector<int>());
+	       for (int ist=0; ist<4; ist++){
+
+		 if (ist==3) continue;
+		 v4[ivar][ipoint][iwh].push_back(0);
+		 Num_phiMBWh[ivar][ipoint][iwh].push_back(0);
+		 Den_phiMBWh[ivar][ipoint][iwh].push_back(0);
+		 Num_theMBWh[ivar][ipoint][iwh].push_back(0);
+		 Den_theMBWh[ivar][ipoint][iwh].push_back(0);
+		 NumA_phiMBWh[ivar][ipoint][iwh].push_back(0);
+		 NumA_theMBWh[ivar][ipoint][iwh].push_back(0);		 
+	       }
+	       Num_phiMB4Top[ivar][iwh][ipoint].push_back(0);	      
+	       Den_phiMB4Top[ivar][iwh][ipoint].push_back(0);	      
+	       NumA_phiMB4Top[ivar][iwh][ipoint].push_back(0);	      
+	       NumA_phiMB4Bot[ivar][iwh][ipoint].push_back(0);	      
+	   }
+	   Num_phiMB4Bot[ivar][ipoint].push_back(0);	      
+	   Den_phiMB4Bot[ivar][ipoint].push_back(0);	      
+      }
+   }
+   
+   std::cout<<v4[0][0][0][0];
+
+
+   //   int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
+   // int NumA_phiMB4Top[2][5][nLumiPoints];  int NumA_phiMB4Bot[2][nLumiPoints];    // 'A' stands for 'Associated'   
+   // int Num_phiMB4Bot[2][nLumiPoints];      int Den_phiMB4Bot[2][nLumiPoints];     //  Lumi nLumiPoints punti
+ 
 
 
 
