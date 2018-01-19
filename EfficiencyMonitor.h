@@ -76,6 +76,7 @@ class EfficiencyMonitor {
 public :
 
    std::string dataset;
+   std::string fileName;
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
@@ -428,7 +429,7 @@ public :
    TBranch        *b_Nhlt;   //!
    TBranch        *b_NrpcRecHits;   //!
 
-   EfficiencyMonitor(TTree *tree=0);
+   EfficiencyMonitor(TTree *tree=0,  std::string extFileName = "");
    virtual ~EfficiencyMonitor();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -444,7 +445,7 @@ public :
 #endif
 
 #ifdef EfficiencyMonitor_cxx
-EfficiencyMonitor::EfficiencyMonitor(TTree *tree) : fChain(0)
+EfficiencyMonitor::EfficiencyMonitor(TTree *tree , std::string extFileName) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree
@@ -487,6 +488,7 @@ EfficiencyMonitor::EfficiencyMonitor(TTree *tree) : fChain(0)
       // f->GetObject("DTTree",tree);
 
    }
+      fileName = extFileName;
    Init(tree);
 }
 
