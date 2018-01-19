@@ -192,22 +192,27 @@ void EfficiencyMonitor::Loop()
 
    std::cout<<"nPUpoints "<<nPUpoints<<" nLumiPoints "<<nLumiPoints<<std::endl;
 
-   int Num_phiMBWh_Lumi[nLumiPoints][4][5];  int Den_phiMBWh_Lumi[nLumiPoints][4][5]; //  Lumi, nLumiPoints punti, 4 stazioni, 5 ruote
-   int Num_theMBWh_Lumi[nLumiPoints][3][5];  int Den_theMBWh_Lumi[nLumiPoints][3][5]; //  Lumi, nLumiPoints punti, 3 stazioni, 5 ruote
-   int NumA_phiMBWh_Lumi[nLumiPoints][4][5]; int NumA_theMBWh_Lumi[nLumiPoints][3][5];// 'A' stands for 'Associated'
+   vector<vector<vector<vector<int>>>> v4
+   for (int ivar=0; ivar<2; ivar++){
+     v4.push_back( vector<vector<vector<int>>>())
+     for (int ipoint=0; ipoint<nLumiPoints; ipoint++){
+       v4[ivar].push_back(vector<vector<int> >())
+       for (int iwh=0; iwh<5; iwh++){
+	 v4[ivar][ipoint].push_back(vector<int>())
+        for (int ist=0; ist<4; ist++){
+	  v4[ivar][ipoint][ist].push_back(0);
+	}
+       }
+     }
+   }
+		 
+   int Num_phiMBWh[2][nLumiPoints][4][5];  int Den_phiMBWh[2][nLumiPoints][4][5]; //  Lumi, nLumiPoints punti, 4 stazioni, 5 ruote
+   int Num_theMBWh[2][nLumiPoints][3][5];  int Den_theMBWh[2][nLumiPoints][3][5]; //  Lumi, nLumiPoints punti, 3 stazioni, 5 ruote
+   int NumA_phiMBWh[2][nLumiPoints][4][5]; int NumA_theMBWh[2][nLumiPoints][3][5];// 'A' stands for 'Associated'
 
-   int Num_phiMB4Top_Lumi[5][nLumiPoints];   int Den_phiMB4Top_Lumi[5][nLumiPoints];  //  PU, nLumiPoints punti
-   int Num_phiMB4Bot_Lumi[nLumiPoints];      int Den_phiMB4Bot_Lumi[nLumiPoints];     //  Lumi nLumiPoints punti
-   int NumA_phiMB4Top_Lumi[5][nLumiPoints];  int NumA_phiMB4Bot_Lumi[nLumiPoints];    // 'A' stands for 'Associated'
-
-
-   int Num_phiMBWh_PU[nPUPoints][4][5];  int Den_phiMBWh_PU[nPUPoints][4][5]; //  PU, nPUPoints punti, 4 stazioni, 5 ruote
-   int Num_theMBWh_PU[nPUPoints][3][5];  int Den_theMBWh_PU[nPUPoints][3][5]; //  PU, nPUPoints punti, 3 stazioni, 5 ruote
-   int NumA_phiMBWh_PU[nPUPoints][4][5]; int NumA_theMBWh_PU[nPUPoints][3][5];// 'A' stands for 'Associated'
-
-   int Num_phiMB4Top_PU[5][nPUPoints];   int Den_phiMB4Top_PU[5][nPUPoints];  //  PU, nPUPoints punti
-   int Num_phiMB4Bot_PU[nPUPoints];      int Den_phiMB4Bot_PU[nPUPoints];     //  PU nPUPoints punti
-   int NumA_phiMB4Top_PU[5][nPUPoints];  int NumA_phiMB4Bot_PU[nPUPoints];    // 'A' stands for 'Associated'
+   int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
+   int Num_phiMB4Bot[2][nLumiPoints];      int Den_phiMB4Bot[2][nLumiPoints];     //  Lumi nLumiPoints punti
+   int NumA_phiMB4Top[2][5][nLumiPoints];  int NumA_phiMB4Bot[2][nLumiPoints];    // 'A' stands for 'Associated'
 
 
 
@@ -226,7 +231,7 @@ void EfficiencyMonitor::Loop()
           NumA_theMBWh[ivar][ipoint][ist][iwh] = 0;
 	  Den_theMBWh[ivar][ipoint][ist][iwh]  = 0;
         }
-        Num_phiMB4Top_Lumi[ivar][iwh][ipoint] = 0;
+        Num_phiMB4Top[ivar][iwh][ipoint] = 0;
         NumA_phiMB4Top[ivar][iwh][ipoint]= 0;
         Den_phiMB4Top[ivar][iwh][ipoint] = 0;
 
