@@ -19,7 +19,8 @@ MaxDead = 0 allows an umbiased selection.
 If MaxDead > 0, dead wires will have efficiency zero while alive wires in the same segment won't contribute!
 */
 
-int lessentries=1000000;
+
+int lessentries = 100;
 
 
 void EfficiencyMonitor::PreLoop()
@@ -29,7 +30,7 @@ void EfficiencyMonitor::PreLoop()
 
   Long64_t nentries = fChain->GetEntriesFast();
 
-  //nentries=lessentries;
+  nentries=lessentries;
 
   Long64_t nbytes = 0, nb = 0;
 
@@ -37,7 +38,9 @@ void EfficiencyMonitor::PreLoop()
   std::string deadname;
 
   deadname.append("DeadList_Run2016");
+  //deadname.append("DeadList_run");
   deadname = deadname + dataset + ".txt";;
+  //  deadname = deadname +std::to_string(runnumber)+".txt";;
 
   cout<<deadname<<endl;
   DeadList.open (deadname.c_str());
@@ -87,16 +90,22 @@ void EfficiencyMonitor::PreLoop()
         if (ist!=3 && ise>11) continue;
         for (int isl=0; isl<3; isl++) { // Loop on super layers BEGIN
           if (isl==1 && ist==3) continue;
-          if (isl==1) nwire=58;
-          else if (ist==0) nwire=49;
-          else if (ist==1) nwire=60;
-          else if (ist==2) nwire=72;
-          else if (ist==3) {
-            if (ise==3 || ise ==12 ) nwire=72;
-            else if( ise==9 || ise ==13 ) nwire=60;
-            else if (ise==8 || ise ==10) nwire =49;
-            else nwire=92;
-          }
+           if (isl==1){
+	     //chimney chambers
+	     if (( iwh==1 && ise==2 ) || ( iwh==3 && ise==3 ) ) nwire = 48;
+	     else  nwire=57; 
+	   }
+           else if (ist==0) nwire = 49;
+           else if (ist==1) nwire = 60;
+           else if (ist==2) nwire = 72;
+           else if (ist == 3) {
+	     // Following conditions are put in order of decrising average of number of entries per chamber to increase velocity.
+	     if (ise == 3 || ise == 12 )    nwire = 72;
+             else if ( ise==7 || ise ==11 ) nwire = 92;
+             else if ( ise==9 || ise ==13 ) nwire = 60;
+             else if ( ise==8 || ise ==10 ) nwire = 48;
+             else nwire = 96;
+	   }
 
           NwireTot+=(nwire*4);
 
@@ -145,19 +154,19 @@ void EfficiencyMonitor::Loop()
   Long64_t nentries = fChain->GetEntriesFast();
   char go;
 
-  //nentries=lessentries;
+  nentries=lessentries;
 
   Long64_t nbytes = 0, nb = 0;
 
   // COUNTERS:
 
-  int Num_phiMBWh[2][22][4][5];  int Den_phiMBWh[2][22][4][5]; // 2 variabili (run, time), 22 punti, 4 stazioni, 5 ruote
-  int Num_theMBWh[2][22][3][5];  int Den_theMBWh[2][22][3][5]; // 2 variabili (run, time), 22 punti, 3 stazioni, 5 ruote
-  int NumA_phiMBWh[2][22][4][5]; int NumA_theMBWh[2][22][3][5];// 'A' stands for 'Associated'
+  int Num_phiMBWh[2][22][4][5];  int Den_phiMBWh[2][22][4][5];  // 2 variabili (run, time), 22 punti, 4 stazioni, 5 ruote
+  int Num_theMBWh[2][22][3][5];  int Den_theMBWh[2][22][3][5];  // 2 variabili (run, time), 22 punti, 3 stazioni, 5 ruote
+  int NumA_phiMBWh[2][22][4][5]; int NumA_theMBWh[2][22][3][5]; // 'A' stands for 'Associated'
 
-  int Num_phiMB4Top[2][5][22];  int Den_phiMB4Top[2][5][22]; // 2 variabili (run, rime), 22 punti
-  int Num_phiMB4Bot[2][22];     int Den_phiMB4Bot[2][22];    // 2 variabili (run, time), 22 punti
-  int NumA_phiMB4Top[2][5][22]; int NumA_phiMB4Bot[2][22];   // 'A' stands for 'Associated'
+  int Num_phiMB4Top[2][5][22];   int Den_phiMB4Top[2][5][22];   // 2 variabili (run, rime), 22 punti
+  int Num_phiMB4Bot[2][22];      int Den_phiMB4Bot[2][22];      // 2 variabili (run, time), 22 punti
+  int NumA_phiMB4Top[2][5][22];  int NumA_phiMB4Bot[2][22];     // 'A' stands for 'Associated'
 
   for (int ivar=0; ivar<2; ivar++){
     for (int ipoint=0; ipoint<22; ipoint++) {
@@ -330,16 +339,22 @@ void EfficiencyMonitor::Loop()
               else if (iex > 7) {expSL=3; expLay-=8;}
             }
             int nwire=0;
-            if (expSL==2) nwire=58;
-            else if (dtsegm4D_station->at(iseg)==1) nwire=49;
-            else if (dtsegm4D_station->at(iseg)==2) nwire=60;
-            else if (dtsegm4D_station->at(iseg)==3) nwire=72;
-            else if (dtsegm4D_station->at(iseg)==4) {
-              if (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13) nwire=72;
-              else if( dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14 ) nwire=60;
-              else if (dtsegm4D_sector->at(iseg)==9 ||dtsegm4D_sector->at(iseg)==11) nwire =49;
-              else nwire=92;
-            }
+
+	   if (expSL==2){
+	     //chimney chambers
+	     if (( dtsegm4D_wheel->at(iseg)==-1 && dtsegm4D_station->at(iseg)==3 ) || ( dtsegm4D_wheel->at(iseg)==1 && dtsegm4D_station->at(iseg)==4 ) ) nwire = 48;
+	     else nwire=57;
+	   }
+	   else if (dtsegm4D_station->at(iseg)==1) nwire = 49;
+           else if (dtsegm4D_station->at(iseg)==2) nwire = 60;
+           else if (dtsegm4D_station->at(iseg)==3) nwire = 72;
+           else if (dtsegm4D_station->at(iseg)==4) {
+	     if (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)        nwire = 72;
+             else if( dtsegm4D_sector->at(iseg)==8  || dtsegm4D_sector->at(iseg)==12 ) nwire = 92;
+             else if( dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14 ) nwire = 60;
+	     else if( dtsegm4D_sector->at(iseg)==9  || dtsegm4D_sector->at(iseg)==11 ) nwire = 48;
+             else nwire = 96;
+	   }
 
             Float_t expW = (*expWire)(iex);
 
@@ -859,21 +874,26 @@ void EfficiencyMonitor::Loop()
   TGraphErrors* MB1Wh0Run   = new TGraphErrors (22,runslice,  eff,         rune,   err);
 
 
-  new TCanvas();
+  TCanvas *c1  = new TCanvas();
   MB4TopYB2Run->SetTitle("MB4TopYB2Run");
   MB4TopYB2Run->SetMarkerStyle(20);
   MB4TopYB2Run->Draw("ap");
+  c1->SaveAs("MB4.png");
 
 
-  new TCanvas();
+  TCanvas *c2  = new TCanvas();
+
   MB1Wh0Run->SetTitle("MB1Wh0Run");
   MB1Wh0Run->SetMarkerStyle(20);
   MB1Wh0Run->Draw("ap");
+  c2->SaveAs("MB1Wh0.png");
 
-  new TCanvas();
+  TCanvas *c3  = new TCanvas();
+
   MB1Wh2Run->SetTitle("MB1Wh2Run");
   MB1Wh2Run->SetMarkerStyle(20);
   MB1Wh2Run->Draw("ap");
+  c3->SaveAs("MB1Wh2.png");
 
   results.close();
   results_csv.close();
@@ -888,7 +908,7 @@ void EfficiencyMonitor::PostLoop()
 
   Long64_t nentries = fChain->GetEntriesFast();
 
-  //nentries=lessentries;
+  nentries=lessentries;
 
   Long64_t nbytes = 0, nb = 0;
   char go;
@@ -1081,23 +1101,29 @@ void EfficiencyMonitor::PostLoop()
         if (ist!=3 && ise>11) continue;
         for (int isl=0; isl<3; isl++) {
           if (isl==1 && ist==3) continue;
-          if (isl==1) nwire=58;
-          else if (ist==0) nwire=49;
-          else if (ist==1) nwire=60;
-          else if (ist==2) nwire=72;
-          else if (ist==3) {
-            if (ise==3 || ise ==12 ) nwire=72;
-            else if( ise==9 || ise ==13 ) nwire=60;
-            else if (ise==8 || ise ==10) nwire =49;
-            else nwire=92;
-          }
-
+	  if (isl==1){
+	    //chimney chambers
+	    if (( iwh==1 && ise==2 ) || ( iwh==3 && ise==3 ) ) nwire = 48;
+	    else nwire=57; 
+	  }
+	  else if (ist==0) nwire = 49;
+	  else if (ist==1) nwire = 60;
+	  else if (ist==2) nwire = 72;
+	  
+	  else if (ist == 3) {
+	    if (ise == 3 || ise == 12 )    nwire = 72;
+	    else if ( ise==7 || ise ==11 ) nwire = 92;
+	    else if ( ise==8 || ise ==10 ) nwire = 48;
+	    else if ( ise==9 || ise ==13 ) nwire = 60;
+	    else nwire = 96;
+	  }
+	  
           NwireTot+=(nwire*4);
-
+	  
           for (int ilay=0; ilay<4; ilay++) {
             for (int iw=1; iw<nwire+1; iw++) {
               if (extr_occupancy[iwh][ise][ist][isl][ilay]->GetBinContent(iw)==0){
-
+		
                 bool expDead=false;
                 for (int idead=0; idead<Ndead; idead++) {
                   if (dead[idead][0] != iwh-2) continue;
