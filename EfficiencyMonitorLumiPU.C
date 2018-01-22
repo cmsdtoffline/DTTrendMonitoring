@@ -191,53 +191,93 @@ void EfficiencyMonitor::Loop()
    int nPoints = -1;
    std::cout<<"nPUpoints "<<nPUpoints<<" nLumiPoints "<<nLumiPoints<<std::endl;
 
-   vector<vector<vector<vector<int>>>> v4;
+   vector<vector<vector<vector<int>>>> v4; 
 
-   vector<vector<vector<vector<int>>>> Num_phiMBWh;
-   vector<vector<vector<vector<int>>>> Den_phiMBWh;
-   vector<vector<vector<vector<int>>>> Num_theMBWh;
-   vector<vector<vector<vector<int>>>> Den_theMBWh;
-   vector<vector<vector<vector<int>>>> NumA_phiMBWh;
-   vector<vector<vector<vector<int>>>> NumA_theMBWh;
+   vector<vector<vector<vector<int> > > > Num_phiMBWh;
+   vector<vector<vector<vector<int> > > > NumA_phiMBWh;
+   vector<vector<vector<vector<int> > > > Den_phiMBWh;
+   vector<vector<vector<vector<int> > > > Num_theMBWh;
+   vector<vector<vector<vector<int> > > > NumA_theMBWh;
+   vector<vector<vector<vector<int> > > > Den_theMBWh; 
+
+   vector<vector<vector<int> > >          Num_phiMB4Top;
+   vector<vector<vector<int> > >          Den_phiMB4Top;
+   vector<vector<vector<int> > >          NumA_phiMB4Top;
 
 
+   vector<vector<int> >                   Num_phiMB4Bot;
+   vector<vector<int> >                   NumA_phiMB4Bot;
+   vector<vector<int> >                   Den_phiMB4Bot;  
+
+   //   vector<vector<vector<int> > >  NumA_phiMB4Bot;
    
-   vector<vector< int > >   Num_phiMB4Bot;
-   vector<vector< int > >   Den_phiMB4Bot;
-   
-   vector<vector<vector< int > > >  Num_phiMB4Top;
-   vector<vector<vector< int > > >  Den_phiMB4Top;
-
-   vector<vector<vector< int > > >  NumA_phiMB4Top;
-   vector<vector<vector< int > > >  NumA_phiMB4Bot;
-
-
    for (int ivar=0; ivar<2; ivar++){
      v4.push_back( vector<vector<vector< int > > > () ) ;
+     std::cout<<"hei1"<<std::endl;
+     Num_phiMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
+     NumA_phiMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
+     Den_phiMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
+     Num_theMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
+     NumA_theMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
+     Den_theMBWh.push_back( vector<vector<vector< int > > > () ) ; 	  
+     std::cout<<"hei2"<<std::endl;
+     Num_phiMB4Top.push_back(vector<vector<int> >());  
+     Den_phiMB4Top.push_back(vector<vector<int> >());  
+     NumA_phiMB4Top.push_back(vector<vector<int> >()); 
+     std::cout<<"hei2.1"<<std::endl;     
+     Num_phiMB4Bot.push_back(vector<int> ());  
+     NumA_phiMB4Bot.push_back(vector<int> ()); 
+     Den_phiMB4Bot.push_back(vector<int> ());  
+     std::cout<<"hei3"<<std::endl;
      if(ivar==0) nPoints = nLumiPoints;
      else if(ivar==1) nPoints = nPUpoints;
       for (int ipoint=0; ipoint<nPoints; ipoint++){
+     std::cout<<"hei4"<<std::endl;
 	 v4[ivar].push_back(vector<vector<int> >());
-	   for (int iwh=0; iwh<5; iwh++){
-	     v4[ivar][ipoint].push_back(vector<int>());
-	       for (int ist=0; ist<4; ist++){
+	 Num_phiMBWh[ivar].push_back(vector<vector<int> >());	  
+	 NumA_phiMBWh[ivar].push_back(vector<vector<int> >());	  
+	 Den_phiMBWh[ivar].push_back(vector<vector<int> >());	  
+	 Num_theMBWh[ivar].push_back(vector<vector<int> >());	  
+	 NumA_theMBWh[ivar].push_back(vector<vector<int> >());	  
+	 Den_theMBWh[ivar].push_back(vector<vector<int> >()); 	  
 
-		 if (ist==3) continue;
+	 std::cout<<"hei5"<<std::endl;	 
+	 Num_phiMB4Top[ivar].push_back(vector<int> ());  
+	 Den_phiMB4Top[ivar].push_back(vector<int> ());  
+	 NumA_phiMB4Top[ivar].push_back(vector<int> ()); 
+
+	   for (int iwh=0; iwh<5; iwh++){
+	     std::cout<<"hei6"<<std::endl;
+	     v4[ivar][ipoint].push_back(vector<int>());
+	     Num_phiMBWh[ivar][ipoint].push_back(vector<int>());	  
+	     NumA_phiMBWh[ivar][ipoint].push_back(vector<int>());	  
+	     Den_phiMBWh[ivar][ipoint].push_back(vector<int>());	  
+	     Num_theMBWh[ivar][ipoint].push_back(vector<int>());	  
+	     NumA_theMBWh[ivar][ipoint].push_back(vector<int>());	  
+	     Den_theMBWh[ivar][ipoint].push_back(vector<int>()); 	  
+
+	     for (int ist=0; ist<4; ist++){
+	       std::cout<<"hei7"<<std::endl;
 		 v4[ivar][ipoint][iwh].push_back(0);
 		 Num_phiMBWh[ivar][ipoint][iwh].push_back(0);
 		 Den_phiMBWh[ivar][ipoint][iwh].push_back(0);
+		 NumA_phiMBWh[ivar][ipoint][iwh].push_back(0);
+		 if (ist==3) continue;
 		 Num_theMBWh[ivar][ipoint][iwh].push_back(0);
 		 Den_theMBWh[ivar][ipoint][iwh].push_back(0);
-		 NumA_phiMBWh[ivar][ipoint][iwh].push_back(0);
 		 NumA_theMBWh[ivar][ipoint][iwh].push_back(0);		 
 	       }
-	       Num_phiMB4Top[ivar][iwh][ipoint].push_back(0);	      
-	       Den_phiMB4Top[ivar][iwh][ipoint].push_back(0);	      
-	       NumA_phiMB4Top[ivar][iwh][ipoint].push_back(0);	      
-	       NumA_phiMB4Bot[ivar][iwh][ipoint].push_back(0);	      
+	     std::cout<<"hei8"<<std::endl;
+	     Num_phiMB4Top[ivar][iwh].push_back(0);	      
+	     std::cout<<"hei8.1"<<std::endl;
+	     NumA_phiMB4Top[ivar][iwh].push_back(0);	      
+	     Den_phiMB4Top[ivar][iwh].push_back(0);	      
 	   }
-	   Num_phiMB4Bot[ivar][ipoint].push_back(0);	      
-	   Den_phiMB4Bot[ivar][ipoint].push_back(0);	      
+	   std::cout<<"hei9"<<std::endl;
+	   Num_phiMB4Bot[ivar].push_back(0);	      
+	   std::cout<<"hei9.1"<<std::endl;
+	   NumA_phiMB4Bot[ivar].push_back(0);	      
+	   Den_phiMB4Bot[ivar].push_back(0);	      
       }
    }
    
@@ -250,32 +290,31 @@ void EfficiencyMonitor::Loop()
  
 
 
-
    // Set all to 0
-   for (int ivar=0; ivar<2; ivar++){
-     for (int ipoint=0; ipoint<nLumiPoints; ipoint++){
-       for (int iwh=0; iwh<5; iwh++){
-        for (int ist=0; ist<4; ist++){
+   // for (int ivar=0; ivar<2; ivar++){
+   //   for (int ipoint=0; ipoint<nLumiPoints; ipoint++){
+   //     for (int iwh=0; iwh<5; iwh++){
+   //      for (int ist=0; ist<4; ist++){
 
- 	  Num_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
-          NumA_phiMBWh[ivar][ipoint][ist][iwh] = 0;
-	  Den_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
+   // 	  Num_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
+   //        NumA_phiMBWh[ivar][ipoint][ist][iwh] = 0;
+   // 	  Den_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
 
-          if (ist==3) continue;
-	  Num_theMBWh[ivar][ipoint][ist][iwh]  = 0;
-          NumA_theMBWh[ivar][ipoint][ist][iwh] = 0;
-	  Den_theMBWh[ivar][ipoint][ist][iwh]  = 0;
-        }
-        Num_phiMB4Top[ivar][iwh][ipoint] = 0;
-        NumA_phiMB4Top[ivar][iwh][ipoint]= 0;
-        Den_phiMB4Top[ivar][iwh][ipoint] = 0;
+   //        if (ist==3) continue;
+   // 	  Num_theMBWh[ivar][ipoint][ist][iwh]  = 0;
+   //        NumA_theMBWh[ivar][ipoint][ist][iwh] = 0;
+   // 	  Den_theMBWh[ivar][ipoint][ist][iwh]  = 0;
+   //      }
+   //      Num_phiMB4Top[ivar][iwh][ipoint] = 0;
+   //      NumA_phiMB4Top[ivar][iwh][ipoint]= 0;
+   //      Den_phiMB4Top[ivar][iwh][ipoint] = 0;
 
-       }
-       Num_phiMB4Bot[ivar][ipoint] = 0;
-       NumA_phiMB4Bot[ivar][ipoint]= 0;
-       Den_phiMB4Bot[ivar][ipoint] = 0;
-     }
-   }
+   //     }
+   //     Num_phiMB4Bot[ivar][ipoint] = 0;
+   //     NumA_phiMB4Bot[ivar][ipoint]= 0;
+   //     Den_phiMB4Bot[ivar][ipoint] = 0;
+   //   }
+   // }
 
    
    // DEAD CHANNELS (to skip):
@@ -462,43 +501,42 @@ void EfficiencyMonitor::Loop()
         else if (NHits==8) {
 
 	  for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
-
-
-	     // 2 variabili (Lumi, PU), 22 punti, 4 stazioni, 5 ruote 
-            Num_phiMBWh[0][Lumibin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
-            NumA_phiMBWh[0][Lumibin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
-            Den_phiMBWh[0][Lumibin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
-
-            Num_phiMBWh[1][PUbin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
-            NumA_phiMBWh[1][PUbin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
-            Den_phiMBWh[1][PUbin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
-
-	    // extra chamber of sector 4 (sector 13)
-            if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-
-	      // 2 variabili (Lumi, PU), 22 punti
-	      Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++;  
-              NumA_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-              Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-              Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-              NumA_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-              Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+	      
+	      // 2 variabili (Lumi, PU), 22 punti, 4 stazioni, 5 ruote 
+	      Num_phiMBWh[0][Lumibin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
+	      NumA_phiMBWh[0][Lumibin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
+	      Den_phiMBWh[0][Lumibin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
+	      
+	      Num_phiMBWh[1][PUbin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
+	      NumA_phiMBWh[1][PUbin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
+	      Den_phiMBWh[1][PUbin][dtsegm4D_station->at(iseg)-1][dtsegm4D_wheel->at(iseg)+2]++;
+	      
+	      // extra chamber of sector 4 (sector 13)
+	      if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
+		
+		// 2 variabili (Lumi, PU), 22 punti
+		Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++;  
+		NumA_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
+		Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
+		Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+		NumA_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+		Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+	      }
+	      
+	      // extra chamber of sector 10 (sector 14) 
+	      else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
+		// 2 variabili (Lumi, PU), 22 punti
+		Num_phiMB4Bot[0][Lumibin]++; 
+		NumA_phiMB4Bot[0][Lumibin]++; 
+		Den_phiMB4Bot[0][Lumibin]++;
+		Num_phiMB4Bot[1][PUbin]++;
+		NumA_phiMB4Bot[1][PUbin]++; 
+		Den_phiMB4Bot[1][PUbin]++;
+	      }
 	    }
-
-	    // extra chamber of sector 10 (sector 14) 
-            else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-	      // 2 variabili (Lumi, PU), 22 punti
-              Num_phiMB4Bot[0][Lumibin]++; 
-              NumA_phiMB4Bot[0][Lumibin]++; 
-              Den_phiMB4Bot[0][Lumibin]++;
-              Num_phiMB4Bot[1][PUbin]++;
-              NumA_phiMB4Bot[1][PUbin]++; 
-              Den_phiMB4Bot[1][PUbin]++;
-	  }
-	}
 	}
         else { // let's see how to treat missing layers
-
+	  
           for (int imiss=0; imiss<nmissing; imiss++) {
 
            int sl  = missingLayer[imiss][0] < 5 ? 0 : 1;
