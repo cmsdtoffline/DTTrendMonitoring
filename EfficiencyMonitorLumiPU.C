@@ -204,7 +204,6 @@ void EfficiencyMonitor::Loop()
    vector<vector<vector<int> > >          Den_phiMB4Top;
    vector<vector<vector<int> > >          NumA_phiMB4Top;
 
-
    vector<vector<int> >                   Num_phiMB4Bot;
    vector<vector<int> >                   NumA_phiMB4Bot;
    vector<vector<int> >                   Den_phiMB4Bot;  
@@ -627,24 +626,25 @@ void EfficiencyMonitor::Loop()
                 Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
                 Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
 
-                if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {		cout<<"Hei8.1"<<endl;
+                if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {	  cout<<"Hei8.1"<<endl;
                  Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
                  Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
 		}
                 else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14))
-		  {		cout<<"Hei8.2"<<endl;
-                 Num_phiMB4Bot[0][Lumibin]++; 
-                 Num_phiMB4Bot[1][PUbin]++; 
-		}
-	       cout<<"Hei9"<<endl;
+		  {	
+		    cout<<"Hei8.2"<<endl;
+		    Num_phiMB4Bot[0][Lumibin]++; 
+		    Num_phiMB4Bot[1][PUbin]++; 
+		  }
+		cout<<"Hei9"<<endl;
 	       }
 	       cout<<"Hei9.1"<<endl;
 	      }
-	       cout<<"Hei10"<<endl;
+	      cout<<"Hei10"<<endl;
 	  }
-	    
+	  
           else {
-	  cout<<"Hei11"<<endl;
+	    cout<<"Hei11"<<endl;
               for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
 
 	       //denominator
@@ -851,9 +851,9 @@ void EfficiencyMonitor::Loop()
 
 
    for (int ivar=0; ivar<2; ivar++) {
-     for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
        for (int iwh=0; iwh<5; iwh++){
          for (int ist=0; ist<4; ist++){
+	   for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
 
 	   if (Den_phiMBWh[ivar][iwh][ist][ipoint]>0.) {
             effPhiMBWh[ivar][iwh][ist][ipoint]=
@@ -866,7 +866,7 @@ void EfficiencyMonitor::Loop()
 	   }
            else {effPhiMBWh[ivar][iwh][ist][ipoint]=0.; errPhiMBWh[ivar][iwh][ist][ipoint]=0.;}
 
-           if (ist==3) continue;
+           if (ist!=3){ continue;
 
 	   if (Den_theMBWh[ivar][iwh][ist][ipoint]>0.) {
             effTheMBWh[ivar][iwh][ist][ipoint]=
@@ -875,10 +875,13 @@ void EfficiencyMonitor::Loop()
 	      sqrt(  double(Num_theMBWh[ivar][iwh][ist][ipoint])
 		     *(double(Den_theMBWh[ivar][iwh][ist][ipoint])-double(Num_theMBWh[ivar][iwh][ist][ipoint]))
 		     /double(Den_theMBWh[ivar][iwh][ist][ipoint]))
-                     /double(Den_theMBWh[ivar][iwh][ist][ipoint]);
+	      /double(Den_theMBWh[ivar][iwh][ist][ipoint]);
+	   }
 	   }
            else {effTheMBWh[ivar][iwh][ist][ipoint]=0.; errTheMBWh[ivar][iwh][ist][ipoint]=0.;}	 
+	   }
 	 }
+	 for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     
          if (Den_phiMB4Top[ivar][iwh][ipoint]>0.) {
             effMB4Top[ivar][iwh][ipoint]=double(Num_phiMB4Top[ivar][iwh][ipoint])/double(Den_phiMB4Top[ivar][iwh][ipoint]);
             errMB4Top[ivar][iwh][ipoint]=
@@ -892,7 +895,8 @@ void EfficiencyMonitor::Loop()
                           <<" +- "<<errMB4Top[ivar][iwh][ipoint]<<endl;
        }
 
-
+       }
+       for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     //hot
 
        if (Den_phiMB4Bot[ivar][ipoint]>0.) {
           effMB4Bot[ivar][ipoint]=double(Num_phiMB4Bot[ivar][ipoint])/double(Den_phiMB4Bot[ivar][ipoint]);
@@ -955,21 +959,26 @@ void EfficiencyMonitor::Loop()
    TGraphErrors* MB4TopYB2PU      = new TGraphErrors (nLumiPoints, &PUslice[0],  effMB4Top[1][4],&PUe[0],   errMB4Top[1][4]);
    TGraphErrors* MB4TopYB2Lumi    = new TGraphErrors (nLumiPoints, &lumislice[0],effMB4Top[0][4],&Lumie[0], errMB4Top[0][4]);
 
+   TGraphErrors* MB4BotPU      = new TGraphErrors (nLumiPoints, &PUslice[0],  effMB4Bot[1],&PUe[0],   errMB4Bot[1]);
+   TGraphErrors* MB4BotLumi    = new TGraphErrors (nLumiPoints, &lumislice[0],effMB4Bot[0],&Lumie[0], errMB4Bot[0]);
+
+
+
    float eff[nLumiPoints], err[nLumiPoints];
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[1][i][0][4]; err[i]=errPhiMBWh[1][i][0][4];}
+   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[1][4][0][i]; err[i]=errPhiMBWh[1][4][0][i];}
    TGraphErrors* MB1Wh2PU   = new TGraphErrors (nLumiPoints,&PUslice[0],  eff,         &PUe[0],   err);
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[0][i][0][4]; err[i]=errPhiMBWh[0][i][0][4];}
+   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[0][4][0][i]; err[i]=errPhiMBWh[0][4][0][i];}
    TGraphErrors* MB1Wh2Lumi   = new TGraphErrors (nLumiPoints,&lumislice[0],  eff,         &Lumie[0],   err);
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[1][i][0][2]; err[i]=errPhiMBWh[1][i][0][2];}
+   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[1][2][0][i]; err[i]=errPhiMBWh[1][2][0][i];}
    TGraphErrors* MB1Wh0PU   = new TGraphErrors (nLumiPoints,&PUslice[0],  eff,         &PUe[0],   err);
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[0][i][0][2]; err[i]=errPhiMBWh[0][i][0][2];}
+   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[0][2][0][i]; err[i]=errPhiMBWh[0][2][0][i];}
    TGraphErrors* MB1Wh0Lumi   = new TGraphErrors (nLumiPoints,&lumislice[0],  eff,         &Lumie[0],   err);
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effTheMBWh[0][i][0][2]; err[i]=errTheMBWh[0][i][0][2];}
+   for (int i=0; i<nLumiPoints; i++) {eff[i]=effTheMBWh[0][2][0][i]; err[i]=errTheMBWh[0][2][0][i];}
    TGraphErrors* MB1TheWh0Lumi   = new TGraphErrors (nLumiPoints,&lumislice[0],  eff,         &Lumie[0],   err);
 
 
@@ -988,7 +997,7 @@ void EfficiencyMonitor::Loop()
    MB4TopYB2PU->GetXaxis()->SetTitle("PU");
    MB4TopYB2PU->GetYaxis()->SetTitle("Eff.");
    MB4TopYB2PU->Draw("ap");
-   c1->SaveAs(("plot/"+fileName+"MB4TopYB2PU.png").c_str());
+   c1->SaveAs(("plot/"+fileName+"/"+fileName+"MB4TopYB2PU.png").c_str());
    
    TCanvas *c2  = new TCanvas();
    MB4TopYB2Lumi->SetTitle("MB4TopYB2Lumi");
@@ -996,8 +1005,24 @@ void EfficiencyMonitor::Loop()
    MB4TopYB2Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
    MB4TopYB2Lumi->GetYaxis()->SetTitle("Eff.");
    MB4TopYB2Lumi->Draw("ap");
-   c2->SaveAs(("plot/"+fileName+"MB4TopYB2Lumi.png").c_str());
+   c2->SaveAs(("plot/"+fileName+"/"+fileName+"MB4TopYB2Lumi.png").c_str());
    
+
+   TCanvas *cBotPu  = new TCanvas();
+   MB4BotPU->SetTitle("MB4BotPU");
+   MB4BotPU->SetMarkerStyle(20);
+   MB4BotPU->GetXaxis()->SetTitle("PU");
+   MB4BotPU->GetYaxis()->SetTitle("Eff.");
+   MB4BotPU->Draw("ap");
+   cBotPu->SaveAs(("plot/"+fileName+"/"+fileName+"MB4BotPU.png").c_str());
+   
+   TCanvas *cBotLumi = new TCanvas();
+   MB4BotLumi->SetTitle("MB4BotLumi");
+   MB4BotLumi->SetMarkerStyle(20);
+   MB4BotLumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
+   MB4BotLumi->GetYaxis()->SetTitle("Eff.");
+   MB4BotLumi->Draw("ap");
+   cBotLumi->SaveAs(("plot/"+fileName+"/"+fileName+"MB4BotLumi.png").c_str());
    
    TCanvas *c3  = new TCanvas();
    MB1Wh0PU->SetTitle("MB1Wh0PU");
@@ -1005,7 +1030,7 @@ void EfficiencyMonitor::Loop()
    MB1Wh0PU->GetXaxis()->SetTitle("PU");
    MB1Wh0PU->GetYaxis()->SetTitle("Eff.");
    MB1Wh0PU->Draw("ap");
-   c3->SaveAs(("plot/"+fileName+"MB1Wh0PU.png").c_str());
+   c3->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh0PU.png").c_str());
    
    TCanvas *c4  = new TCanvas();
    MB1Wh2PU->SetTitle("MB1Wh2PU");
@@ -1013,7 +1038,7 @@ void EfficiencyMonitor::Loop()
    MB1Wh2PU->GetXaxis()->SetTitle("PU");
    MB1Wh2PU->GetYaxis()->SetTitle("Eff.");
    MB1Wh2PU->Draw("ap");
-   c3->SaveAs(("plot/"+fileName+"MB1Wh2PU.png").c_str());
+   c4->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh2PU.png").c_str());
    
    TCanvas *c5  = new TCanvas();
    MB1Wh0Lumi->SetTitle("MB1Wh0Lumi");
@@ -1021,7 +1046,7 @@ void EfficiencyMonitor::Loop()
    MB1Wh0Lumi->GetYaxis()->SetTitle("Eff.");
    MB1Wh0Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
    MB1Wh0Lumi->Draw("ap");
-   c5->SaveAs(("plot/"+fileName+"MB1Wh0Lumi.png").c_str());
+   c5->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh0Lumi.png").c_str());
    
    TCanvas *c6  = new TCanvas();
    MB1Wh2Lumi->SetTitle("MB1Wh2Lumi");
@@ -1029,7 +1054,7 @@ void EfficiencyMonitor::Loop()
    MB1Wh2Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
    MB1Wh2Lumi->GetYaxis()->SetTitle("Eff.");
    MB1Wh2Lumi->Draw("ap");
-   c6->SaveAs(("plot/"+fileName+"MB1Wh2Lumi.png").c_str());
+   c6->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh2Lumi.png").c_str());
 
    TCanvas *c7  = new TCanvas();
    MB1TheWh0Lumi->SetTitle("MB1TheWh0Lumi");
@@ -1037,7 +1062,9 @@ void EfficiencyMonitor::Loop()
    MB1TheWh0Lumi->GetYaxis()->SetTitle("Eff.");
    MB1TheWh0Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
    MB1TheWh0Lumi->Draw("ap");
-   c5->SaveAs(("plot/"+fileName+"MB1TheWh0Lumi.png").c_str());
+   c7->SaveAs(("plot/"+fileName+"/"+fileName+"MB1TheWh0Lumi.png").c_str());
+
+
 
 
 }
