@@ -224,8 +224,8 @@ void EfficiencyMonitor::Loop()
      Num_phiMB4Bot.push_back(vector<int> ());  
      NumA_phiMB4Bot.push_back(vector<int> ()); 
      Den_phiMB4Bot.push_back(vector<int> ());  
-
-
+     
+     
      if(ivar==0) nPoints = nLumiPoints;
      else if(ivar==1) nPoints = nPUpoints;
      
@@ -252,11 +252,11 @@ void EfficiencyMonitor::Loop()
 	 Num_phiMBWh[ivar][iwh].push_back(vector<int>());	  
 	 NumA_phiMBWh[ivar][iwh].push_back(vector<int>());	  
 	 Den_phiMBWh[ivar][iwh].push_back(vector<int>());	  
-
+	 
 	 if (ist!=3){ 
-	 Num_theMBWh[ivar][iwh].push_back(vector<int>());	  
-	 NumA_theMBWh[ivar][iwh].push_back(vector<int>());	  
-	 Den_theMBWh[ivar][iwh].push_back(vector<int>()); 	  
+	   Num_theMBWh[ivar][iwh].push_back(vector<int>());	  
+	   NumA_theMBWh[ivar][iwh].push_back(vector<int>());	  
+	   Den_theMBWh[ivar][iwh].push_back(vector<int>()); 	  
 	 }
 	 
 	 for (int ipoint=0; ipoint<nPoints; ipoint++){
@@ -291,24 +291,24 @@ void EfficiencyMonitor::Loop()
    
    std::cout<<v4[0][0][0][0];
    
-
+   
    // int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
    // int NumA_phiMB4Top[2][5][nLumiPoints];  int NumA_phiMB4Bot[2][nLumiPoints];    // 'A' stands for 'Associated'   
    // int Num_phiMB4Bot[2][nLumiPoints];      int Den_phiMB4Bot[2][nLumiPoints];     //  Lumi nLumiPoints punti
- 
-
+   
+   
    //   Den_phiMBWh
-
+   
    // Set all to 0
    // for (int ivar=0; ivar<2; ivar++){
    //   for (int ipoint=0; ipoint<nLumiPoints; ipoint++){
    //     for (int iwh=0; iwh<5; iwh++){
    //      for (int ist=0; ist<4; ist++){
-
+   
    // 	  Num_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
    //        NumA_phiMBWh[ivar][ipoint][ist][iwh] = 0;
    // 	  Den_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
-
+   
    //        if (ist==3) continue;
    // 	  Num_theMBWh[ivar][ipoint][ist][iwh]  = 0;
    //        NumA_theMBWh[ivar][ipoint][ist][iwh] = 0;
@@ -317,24 +317,24 @@ void EfficiencyMonitor::Loop()
    //      Num_phiMB4Top[ivar][iwh][ipoint] = 0;
    //      NumA_phiMB4Top[ivar][iwh][ipoint]= 0;
    //      Den_phiMB4Top[ivar][iwh][ipoint] = 0;
-
+   
    //     }
    //     Num_phiMB4Bot[ivar][ipoint] = 0;
    //     NumA_phiMB4Bot[ivar][ipoint]= 0;
    //     Den_phiMB4Bot[ivar][ipoint] = 0;
    //   }
    // }
-
+   
    
    // DEAD CHANNELS (to skip):
-
+   
    cout<<" within Loop: Ndead "<<Ndead<<endl;
-
+   
    if (Ndead==0) {
      cout<<" READING FROM FILE !! "<<endl;
      ifstream txtin;
      std::string deadname;
-
+     
      
      if(fileName!="")    deadname.append("DeadList_"+fileName);
      else{
@@ -344,91 +344,91 @@ void EfficiencyMonitor::Loop()
      
      cout<<" reading from "<<deadname<<endl;
      txtin.open(deadname.c_str(),std::ifstream::in);
-
+     
      int idead    = 0;
      int prevlay  = 0; int prevSL = 0;
      int ndeadlay = 0;
-
+     
      do {
        txtin>>idead>>dead[Ndead][0]>>dead[Ndead][1]>>dead[Ndead][2]>>dead[Ndead][3]>>dead[Ndead][4]>>dead[Ndead][5];
-
+       
        if (dead[Ndead][3] == prevSL && dead[Ndead][4] == prevlay ) {
 	 ndeadlay++;
        }
        else {
          if (ndeadlay>20) cout<<"YB"<<dead[Ndead][0]<<"/Sect"<<dead[Ndead][1]<<"/MB"<<dead[Ndead][2]<<" SL"
-                             <<dead[Ndead][3]<<" L"
-                             <<dead[Ndead][4]<<" "<<ndeadlay+1<<" deads!!"<<endl;
+			      <<dead[Ndead][3]<<" L"
+			      <<dead[Ndead][4]<<" "<<ndeadlay+1<<" deads!!"<<endl;
          prevSL=dead[Ndead][3]; 
          prevlay=dead[Ndead][4]; 
          ndeadlay=0;
        }
        Ndead++;
-      }
+     }
      while (idead!=0);
    }
-
-
+   
+   
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
-
+     
      //  std::cout<<"entry "<<jentry<<std::endl;
-      Long64_t ientry = LoadTree(jentry);
-      if (ientry < 0) break;
-
-      nb = fChain->GetEntry(jentry);   nbytes += nb;
-      // if (Cut(ientry) < 0) continue;
-
-      if (jentry%1000 == 0) cout<<"Evento "<<jentry<<endl;
-
-      // identify Lumibin and PUbin
-      int Lumibin=-1; int PUbin=-1;
-
-
-      //Find lumi e PU bin
-      for (uint islice=0; islice<lumislice.size(); islice++) 
-	if (lumiperblock>=lumislice[islice]&&lumiperblock<lumislice[islice+1]) Lumibin=islice;
-      for (uint islice=0; islice<PUslice.size(); islice++) 
-	if (PV_Nvtx>=PUslice[islice]&&PV_Nvtx<PUslice[islice+1]) PUbin=islice;
-      
-      if (Lumibin<0) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
-      if (PUbin<0)   { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; }
-         
-      // First search for Phi segments
-
-      for (int iseg=0; iseg<Ndtsegments; iseg++) {
-	cout<<"Hei00"<<endl;
-        //selection
-        if (!dtsegm4D_hasPhi->at(iseg)) continue;
-	// In chambers 1,2,3 select only segments with also Z (theta) contribution.
-        if (dtsegm4D_station->at(iseg)!=4 && !dtsegm4D_hasZed->at(iseg)) continue;
-	cout<<"Hei01"<<endl;
-
-        int seg_phinhits = dtsegm4D_phinhits->at(iseg);
-
-        if (fabs(dtsegm4D_x_dir_loc->at(iseg))>0.7) continue; // angle
-
-        TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
-	//	expWire->Print(); //del
-
-	cout<<"Hei02"<<endl;
-        // If a hit is missing, let us check that the extrapolation doesn't fall beyond layer or cross a dead cell!
-        int NexpDead=0; bool OutOfLayer=false;
-
-        if (seg_phinhits < 8 ) {
+     Long64_t ientry = LoadTree(jentry);
+     if (ientry < 0) break;
+     
+     nb = fChain->GetEntry(jentry);   nbytes += nb;
+     // if (Cut(ientry) < 0) continue;
+     
+     if (jentry%1000 == 0) cout<<"Evento "<<jentry<<endl;
+     
+     // identify Lumibin and PUbin
+     int Lumibin=-1; int PUbin=-1;
+     
+     
+     //Find lumi e PU bin
+     for (uint islice=0; islice<lumislice.size(); islice++) 
+       if (lumiperblock>=lumislice[islice]&&lumiperblock<lumislice[islice+1]) Lumibin=islice;
+     for (uint islice=0; islice<PUslice.size(); islice++) 
+       if (PV_Nvtx>=PUslice[islice]&&PV_Nvtx<PUslice[islice+1]) PUbin=islice;
+     
+     if (Lumibin<0) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
+     if (PUbin<0)   { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; }
+     
+     // First search for Phi segments
+     
+     for (int iseg=0; iseg<Ndtsegments; iseg++) {
+       cout<<"Hei00"<<endl;
+       //selection
+       if (!dtsegm4D_hasPhi->at(iseg)) continue;
+       // In chambers 1,2,3 select only segments with also Z (theta) contribution.
+       if (dtsegm4D_station->at(iseg)!=4 && !dtsegm4D_hasZed->at(iseg)) continue;
+       cout<<"Hei01"<<endl;
+       
+       int seg_phinhits = dtsegm4D_phinhits->at(iseg);
+       
+       if (fabs(dtsegm4D_x_dir_loc->at(iseg))>0.7) continue; // angle
+       
+       TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
+       //	expWire->Print(); //del
+       
+       cout<<"Hei02"<<endl;
+       // If a hit is missing, let us check that the extrapolation doesn't fall beyond layer or cross a dead cell!
+       int NexpDead=0; bool OutOfLayer=false;
+       
+       if (seg_phinhits < 8 ) {
          for (int iex=0; iex<12; iex++) {
-	cout<<"Hei02.1"<<endl;
+	   cout<<"Hei02.1"<<endl;
 	   int expSL = 1;
            int expLay = iex+1;
 	   //associate layer with right super layer
            if (dtsegm4D_station->at(iseg) != 4){
 	     if (iex > 3 && iex<8) {expSL=2; expLay-=4;}
              else if (iex>7) {expSL=3; expLay-=8;}
- 	  }
+	   }
            else {
              if (iex > 3 && iex<8) continue;
              else if (iex > 7) {expSL=3; expLay-=8;}
- 	  }
-	cout<<"Hei02.2"<<endl;		
+	   }
+	   cout<<"Hei02.2"<<endl;		
 	   int nwire=0;
 	   if (expSL==2){
 	     //chimney chambers
@@ -445,7 +445,7 @@ void EfficiencyMonitor::Loop()
 	     else if( dtsegm4D_sector->at(iseg)==9  || dtsegm4D_sector->at(iseg)==11 ) nwire = 48;
              else nwire = 96;
 	   }
-
+	   
            Float_t expW = (*expWire)(iex);
 	   //	   std::cout<<"iex "<<iex<<" explay "<<expLay<<std::endl; //del
            if (expW>nwire) {
@@ -453,126 +453,126 @@ void EfficiencyMonitor::Loop()
 	     //	     std::cout<<"Out of layer "<<expW<<" nwire "<<nwire<<" "<<dtsegm4D_wheel->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_station->at(iseg)<<" "<<expSL<<" "<<expLay<<" "<<expW<<std::endl; //del
              break;
 	   }
-
-	cout<<"Hei03"<<endl;
+	   
+	   cout<<"Hei03"<<endl;
            for (int idead=0; idead<Ndead; idead++) {
-    	    if (dead[idead][0] != dtsegm4D_wheel->at(iseg))   continue;
-            if (dead[idead][1] != dtsegm4D_sector->at(iseg))  continue;
-            if (dead[idead][2] != dtsegm4D_station->at(iseg)) continue;
-            if (dead[idead][3] != expSL)  continue;  
-            if (dead[idead][4] != expLay) continue;
-            if (dead[idead][5] != expW)   continue; 
-            NexpDead++;
-	    //	    std::cout<<"dead "<<dtsegm4D_wheel->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_station->at(iseg)<<" "<<expSL<<" "<<expLay<<" "<<expW<<std::endl; //del
-            break;
+	     if (dead[idead][0] != dtsegm4D_wheel->at(iseg))   continue;
+	     if (dead[idead][1] != dtsegm4D_sector->at(iseg))  continue;
+	     if (dead[idead][2] != dtsegm4D_station->at(iseg)) continue;
+	     if (dead[idead][3] != expSL)  continue;  
+	     if (dead[idead][4] != expLay) continue;
+	     if (dead[idead][5] != expW)   continue; 
+	     NexpDead++;
+	     //	    std::cout<<"dead "<<dtsegm4D_wheel->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_station->at(iseg)<<" "<<expSL<<" "<<expLay<<" "<<expW<<std::endl; //del
+	     break;
 	   }
            if (NexpDead>MaxDead) break;
 	 }
          if (OutOfLayer)       continue; // this segment goes out of layer boundary
          if (NexpDead>MaxDead) continue; // this segment crosses dead cell(s): drop it!
-	}
-
-        int NHits=0; int missingLayer[3][2]; for (int imi=0; imi<3;imi++) {missingLayer[imi][0]=0;missingLayer[imi][1]=0;}
-        int nmissing=0;
-
-        TVectorF *hitSuperLayerPhi =(TVectorF*)dtsegm4D_phi_hitsSuperLayer->At(iseg);
-        TVectorF *hitLayerPhi      =(TVectorF*)dtsegm4D_phi_hitsLayer->At(iseg);
-        TVectorF *hitWirePhi       =(TVectorF*)dtsegm4D_phi_hitsWire->At(iseg);
-	cout<<"Hei04"<<endl;
-
-	// std::cout<<"SuperLayerphi"<<std::endl;
-	// hitSuperLayerPhi->Print();//del
-	// std::cout<<"Layerphi"<<std::endl;
-	// hitLayerPhi->Print(); //del
-	// std::cout<<"Wirephi"<<std::endl;
-	// hitWirePhi->Print(); //del
-
-	cout<<"Hei05"<<endl;
-        for (int ilay=1; ilay<9; ilay++) {
-  	  // Search for associated hits
-          bool foundh = false;
-	  for (int kk=0; kk<seg_phinhits; kk++) {
-	cout<<"Hei05.1"<<endl;
+       }
+       
+       int NHits=0; int missingLayer[3][2]; for (int imi=0; imi<3;imi++) {missingLayer[imi][0]=0;missingLayer[imi][1]=0;}
+       int nmissing=0;
+       
+       TVectorF *hitSuperLayerPhi =(TVectorF*)dtsegm4D_phi_hitsSuperLayer->At(iseg);
+       TVectorF *hitLayerPhi      =(TVectorF*)dtsegm4D_phi_hitsLayer->At(iseg);
+       TVectorF *hitWirePhi       =(TVectorF*)dtsegm4D_phi_hitsWire->At(iseg);
+       cout<<"Hei04"<<endl;
+       
+       // std::cout<<"SuperLayerphi"<<std::endl;
+       // hitSuperLayerPhi->Print();//del
+       // std::cout<<"Layerphi"<<std::endl;
+       // hitLayerPhi->Print(); //del
+       // std::cout<<"Wirephi"<<std::endl;
+       // hitWirePhi->Print(); //del
+       
+       cout<<"Hei05"<<endl;
+       for (int ilay=1; ilay<9; ilay++) {
+	 // Search for associated hits
+	 bool foundh = false;
+	 for (int kk=0; kk<seg_phinhits; kk++) {
+	   cout<<"Hei05.1"<<endl;
            int sl1  = (*hitSuperLayerPhi)(kk);
            int lay1 = (sl1==1) ? (*hitLayerPhi)(kk) : (*hitLayerPhi)(kk)+4; // hit layer 1-8
-
+	   
            if (lay1==ilay) {
 	     NHits++;
              foundh=true;
              break;
            }
-          }
-	cout<<"Hei06"<<endl;
-          if (!foundh) {
-	cout<<"Hei06.1"<<endl;
-	    if (nmissing<3) missingLayer[nmissing][0]=ilay;
-            nmissing++;
-          }
-	cout<<"Hei07"<<endl;
-	}
-	cout<<"Hei08"<<endl;
-        if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
-	cout<<"Hei09"<<endl;
-        if (NHits<nrequiredhit) continue;
-        else if (NHits==8) {
-	  cout<<"Hei1"<<endl;
-	  for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
-	      cout<<"Hei1.1"<<endl;
-	      // 2 variabili (Lumi, PU), 22 punti, 4 stazioni, 5 ruote 
-	      Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-	      NumA_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-	      Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-	      
-	      Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	      NumA_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	      Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	      
-	      // extra chamber of sector 4 (sector 13)
-	      if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-			  cout<<"Hei2"<<endl;
-		// 2 variabili (Lumi, PU), 22 punti
-		Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++;  
-		NumA_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-		Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-		Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-		NumA_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-		Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-	      }
-	      
-	      // extra chamber of sector 10 (sector 14) 
-	      else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-		cout<<"Hei3"<<endl;
-		// 2 variabili (Lumi, PU), 22 punti
-		Num_phiMB4Bot[0][Lumibin]++; 
-		NumA_phiMB4Bot[0][Lumibin]++; 
-		Den_phiMB4Bot[0][Lumibin]++;
-		Num_phiMB4Bot[1][PUbin]++;
-		NumA_phiMB4Bot[1][PUbin]++; 
-		Den_phiMB4Bot[1][PUbin]++;
-	      }
-	    }
-	}
-        else { // let's see how to treat missing layers
-       cout<<"Hei3.1"<<endl;
-          for (int imiss=0; imiss<nmissing; imiss++) {
-	    cout<<"Hei4"<<endl;
+	 }
+	 cout<<"Hei06"<<endl;
+	 if (!foundh) {
+	   cout<<"Hei06.1"<<endl;
+	   if (nmissing<3) missingLayer[nmissing][0]=ilay;
+	   nmissing++;
+	 }
+	 cout<<"Hei07"<<endl;
+       }
+       cout<<"Hei08"<<endl;
+       if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
+       cout<<"Hei09"<<endl;
+       if (NHits<nrequiredhit) continue;
+       else if (NHits==8) {
+	 cout<<"Hei1"<<endl;
+	 for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
+	     cout<<"Hei1.1"<<endl;
+	     // 2 variabili (Lumi, PU), 22 punti, 4 stazioni, 5 ruote 
+	     Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	     NumA_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	     Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	     
+	     Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	     NumA_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	     Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	     
+	     // extra chamber of sector 4 (sector 13)
+	     if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
+	       cout<<"Hei2"<<endl;
+	       // 2 variabili (Lumi, PU), 22 punti
+	       Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++;  
+	       NumA_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
+	       Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
+	       Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+	       NumA_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+	       Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+	     }
+	     
+	     // extra chamber of sector 10 (sector 14) 
+	     else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
+	       cout<<"Hei3"<<endl;
+	       // 2 variabili (Lumi, PU), 22 punti
+	       Num_phiMB4Bot[0][Lumibin]++; 
+	       NumA_phiMB4Bot[0][Lumibin]++; 
+	       Den_phiMB4Bot[0][Lumibin]++;
+	       Num_phiMB4Bot[1][PUbin]++;
+	       NumA_phiMB4Bot[1][PUbin]++; 
+	       Den_phiMB4Bot[1][PUbin]++;
+	     }
+	   }
+       }
+       else { // let's see how to treat missing layers
+	 cout<<"Hei3.1"<<endl;
+	 for (int imiss=0; imiss<nmissing; imiss++) {
+	   cout<<"Hei4"<<endl;
            int sl  = missingLayer[imiss][0] < 5 ? 0 : 1;
            int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
-
+	   
 	   // is there a digi within the expected tube?
-
+	   
            float digiW  = -1.;
            float d      = 1000000; //just a very big number
            int iex      = missingLayer[imiss][0] < 5 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]+3;
            Float_t expW = (*expWire)(iex);  //perche` float?
-
+	   
            for (int idigi=0; idigi<Ndigis; idigi++) {
-
+	     
              if (digi_time->at(idigi)<320 || digi_time->at(idigi)>700)  continue; //require only digis time inside time box
  	     if (digi_wheel->at(idigi)   != dtsegm4D_wheel->at(iseg))   continue;
 	     if (digi_sector->at(idigi)  != dtsegm4D_sector->at(iseg))  continue;
 	     if (digi_station->at(idigi) != dtsegm4D_station->at(iseg)) continue;
-
+	     
 	     if (digi_sl->at(idigi) == 2)            continue;
 	     if (digi_sl->at(idigi) == 1 && sl != 0) continue;
 	     if (digi_sl->at(idigi) == 3 && sl != 1) continue;
@@ -585,69 +585,67 @@ void EfficiencyMonitor::Loop()
 	       d=expW-digiW; 
 	     }
 	   }
-
+	   
            if ( fabs(d)< 1.1) {missingLayer[imiss][1]=1; } //non dovrebbe essere sempre un intero d?
-	  }
-
-          if (NHits==nrequiredhit) {
-	    cout<<"Hei4.1"<<endl;
-              for (int imiss=0; imiss<nmissing; imiss++) {
-		cout<<"Hei5"<<endl;
-		int sl = missingLayer[imiss][0] < 5 ? 0 : 1;
-		int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
-
-	       //denominator
-	       cout<<"Hei6 "<<0<<" "<<dtsegm4D_wheel->at(iseg)+2<<" "<<dtsegm4D_station->at(iseg)-1<<" "<<" "<<Lumibin<<" "<<PUbin<<endl;
-	       cout<<" "<<Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]<<std::endl;
-               Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-		cout<<"Hei6.1"<<endl;
-               Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-		cout<<"Hei6.2"<<endl;
-		cout<<"Hei6.21 "<<dtsegm4D_station->at(iseg)<<"  "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<std::endl;
-               if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		cout<<"Hei6.3"<<endl;
-                 Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-		cout<<"Hei6.4"<<endl;
-                 Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-	       }
-               else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
-		 cout<<"Hei7"<<endl;
-                 Den_phiMB4Bot[0][Lumibin]++;
-                 Den_phiMB4Bot[1][PUbin]++;
-	       }
-	       cout<<"Hei7.1"<<endl;
-	       cout<<"Hei7.1 "<<missingLayer[imiss][1]<<endl;
-               if (missingLayer[imiss][1]) {
-		cout<<"Hei8"<<endl;
-		// numerator
-                Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-                Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-
-                if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {	  cout<<"Hei8.1"<<endl;
+	 }
+	 
+	 if (NHits==nrequiredhit) {
+	   cout<<"Hei4.1"<<endl;
+	   for (int imiss=0; imiss<nmissing; imiss++) {
+	     int sl = missingLayer[imiss][0] < 5 ? 0 : 1;
+	     int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
+	     
+	     //denominator
+	     //	       cout<<"Hei6 "<<0<<" "<<dtsegm4D_wheel->at(iseg)+2<<" "<<dtsegm4D_station->at(iseg)-1<<" "<<" "<<Lumibin<<" "<<PUbin<<endl;
+	     cout<<" "<<Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]<<std::endl;
+	     Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	     Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	     
+	     cout<<"Hei6.21 "<<dtsegm4D_station->at(iseg)<<"  "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<std::endl;
+	     if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
+	       cout<<"Hei6.3"<<endl;
+	       Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
+	       cout<<"Hei6.4"<<endl;
+	       Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+	     }
+	     else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
+	       cout<<"Hei7"<<endl;
+	       Den_phiMB4Bot[0][Lumibin]++;
+	       Den_phiMB4Bot[1][PUbin]++;
+	     }
+	     cout<<"Hei7.1"<<endl;
+	     cout<<"Hei7.1 "<<missingLayer[imiss][1]<<endl;
+	     if (missingLayer[imiss][1]) {
+	       cout<<"Hei8"<<endl;
+	       // numerator
+	       Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	       Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	       
+	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {	  cout<<"Hei8.1"<<endl;
                  Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
                  Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-		}
-                else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14))
-		  {	
-		    cout<<"Hei8.2"<<endl;
-		    Num_phiMB4Bot[0][Lumibin]++; 
-		    Num_phiMB4Bot[1][PUbin]++; 
-		  }
-		cout<<"Hei9"<<endl;
 	       }
-	       cout<<"Hei9.1"<<endl;
-	      }
-	      cout<<"Hei10"<<endl;
-	  }
-	  
-          else {
-	    cout<<"Hei11"<<endl;
-              for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
-
+	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14))
+		 {	
+		   cout<<"Hei8.2"<<endl;
+		   Num_phiMB4Bot[0][Lumibin]++; 
+		   Num_phiMB4Bot[1][PUbin]++; 
+		 }
+	       cout<<"Hei9"<<endl;
+	     }
+	     cout<<"Hei9.1"<<endl;
+	   }
+	   cout<<"Hei10"<<endl;
+	 }
+	 
+	 else {
+	   cout<<"Hei11"<<endl;
+	   for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
+	       
 	       //denominator
                Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
                Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-
+	       
                if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
                  Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
                  Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
@@ -656,27 +654,27 @@ void EfficiencyMonitor::Loop()
                  Den_phiMB4Bot[0][Lumibin]++;
                  Den_phiMB4Bot[1][PUbin]++;
 	       }
-
+	       
                bool missAss=false; bool missDigi=false;
                for (int imiss=0; imiss<nmissing; imiss++) {
                  if (missingLayer[imiss][0]==sl*4+lay+1) {
-                      missAss=true;
-		      if (!missingLayer[imiss][1]) missDigi=true;
+		   missAss=true;
+		   if (!missingLayer[imiss][1]) missDigi=true;
 		 }
 	       }
                if (!(missAss&&missDigi)) {
-		// numerator
-                Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-                Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-
-                if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-                 Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-                 Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
-		}
-                else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-                 Num_phiMB4Bot[0][Lumibin]++; 
-                 Num_phiMB4Bot[1][PUbin]++; 
-		}
+		 // numerator
+		 Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+		 Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+		 
+		 if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
+		   Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
+		   Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
+		 }
+		 else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
+		   Num_phiMB4Bot[0][Lumibin]++; 
+		   Num_phiMB4Bot[1][PUbin]++; 
+		 }
 	       }
                if (!(missAss)) {
 		 // numerator
@@ -692,41 +690,40 @@ void EfficiencyMonitor::Loop()
 		   NumA_phiMB4Bot[1][PUbin]++; 
 		 }
 	       }
-	       
-		}
-	  }
-	}
-	std::cout<<"Hei15"<<std::endl;
-      }
-      	std::cout<<"Hei16"<<std::endl;
-      // Then search for Zed segments
-
-       for (int iseg=0; iseg<Ndtsegments; iseg++) {
-
-      	std::cout<<"Hei16.1"<<std::endl;
-      	std::cout<<"Hei16.1 "<<dtsegm4D_hasZed->at(iseg)<<" "<< dtsegm4D_phinhits->at(iseg)<<std::endl;
-        //selection
-	 //if (!dtsegm4D_hasZed->at(iseg) || !dtsegm4D_hasPhi->at(iseg)) continue; 
-	 if (!dtsegm4D_hasZed->at(iseg) || dtsegm4D_phinhits->at(iseg)<nrequiredhit) continue; 
-         //10-01-17 capire perchè theta efficiency va giù con l ainst.luminosity: è il denominatore che sale?!
-      	std::cout<<"Hei16.2"<<std::endl;
-        int seg_znhits = dtsegm4D_znhits->at(iseg);
-
-        //if (fabs(dtsegm4D_y_dir_loc->at(iseg))>0.7) continue; // angle WARNING!!! try and disable this for theta layers!
-        if (seg_znhits < 3) continue; // piuttosto ovvio!!!  :-)
-
-        TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
-	//	expWire->Print();
-
-        // If a hit is missing, let us check that the extrapolation doesn't fall out of layer or cross a dead cell!
-        int NexpDead=0; bool OutOfLayer=false;
-
-      	std::cout<<"Hei16.3"<<std::endl;
-        if (seg_znhits < 4) {
+	     }
+	 }
+       }
+       std::cout<<"Hei15"<<std::endl;
+     }
+     std::cout<<"Hei16"<<std::endl;
+     // Then search for Zed segments
+     
+     for (int iseg=0; iseg<Ndtsegments; iseg++) {
+       
+       std::cout<<"Hei16.1"<<std::endl;
+       std::cout<<"Hei16.1 "<<dtsegm4D_hasZed->at(iseg)<<" "<< dtsegm4D_phinhits->at(iseg)<<std::endl;
+       //selection
+       //if (!dtsegm4D_hasZed->at(iseg) || !dtsegm4D_hasPhi->at(iseg)) continue; 
+       if (!dtsegm4D_hasZed->at(iseg) || dtsegm4D_phinhits->at(iseg)<nrequiredhit) continue; 
+       //10-01-17 capire perchè theta efficiency va giù con l ainst.luminosity: è il denominatore che sale?!
+       std::cout<<"Hei16.2"<<std::endl;
+       int seg_znhits = dtsegm4D_znhits->at(iseg);
+       
+       //if (fabs(dtsegm4D_y_dir_loc->at(iseg))>0.7) continue; // angle WARNING!!! try and disable this for theta layers!
+       if (seg_znhits < 3) continue; // piuttosto ovvio!!!  :-)
+       
+       TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
+       //	expWire->Print();
+       
+       // If a hit is missing, let us check that the extrapolation doesn't fall out of layer or cross a dead cell!
+       int NexpDead=0; bool OutOfLayer=false;
+       
+       std::cout<<"Hei16.3"<<std::endl;
+       if (seg_znhits < 4) {
          for (int iex=4; iex<8; iex++) {
 	   int expSL = 2;
            int expLay = iex-3;		
-
+	   
            Float_t expW = (*expWire)(iex);
            if (expW>58) {
 	     OutOfLayer=true;
@@ -734,180 +731,179 @@ void EfficiencyMonitor::Loop()
 	   }
 	   std::cout<<"Hei16.4"<<std::endl;
            for (int idead=0; idead<Ndead; idead++) {
-  	    if (dead[idead][0] != dtsegm4D_wheel->at(iseg)) continue;
-            if (dead[idead][1] != dtsegm4D_sector->at(iseg)) continue;
-            if (dead[idead][2] != dtsegm4D_station->at(iseg)) continue;
-            if (dead[idead][3] != expSL) continue;  
-            if (dead[idead][4] != expLay) continue;
-            if (dead[idead][5] != expW) continue; 
-            NexpDead++;
-            break;   
+	     if (dead[idead][0] != dtsegm4D_wheel->at(iseg)) continue;
+	     if (dead[idead][1] != dtsegm4D_sector->at(iseg)) continue;
+	     if (dead[idead][2] != dtsegm4D_station->at(iseg)) continue;
+	     if (dead[idead][3] != expSL) continue;  
+	     if (dead[idead][4] != expLay) continue;
+	     if (dead[idead][5] != expW) continue; 
+	     NexpDead++;
+	     break;   
 	   }
            if (OutOfLayer) break;
            if (NexpDead>MaxDead) break; 
 	 }
-      
+	 
          if (NexpDead>MaxDead) {
            continue;
-          // this segment crosses at least 1 dead cell: drop it!
+	   // this segment crosses at least 1 dead cell: drop it!
 	 }
-      	std::cout<<"Hei16.5"<<std::endl;
-	}
-
-        int NHits=0; int missingLayer=-1;
-
-        TVectorF *hitLayerZ = (TVectorF*)dtsegm4D_z_hitsLayer->At(iseg);
-        TVectorF *hitWireZ  = (TVectorF*)dtsegm4D_z_hitsWire->At(iseg);
-
-        for (int ilay=1; ilay<5; ilay++) {
-  	  // Search for associated hits
-          bool foundh = false;
-	  for (int kk=0; kk<seg_znhits; kk++) {
-
+	 std::cout<<"Hei16.5"<<std::endl;
+       }
+       
+       int NHits=0; int missingLayer=-1;
+       
+       TVectorF *hitLayerZ = (TVectorF*)dtsegm4D_z_hitsLayer->At(iseg);
+       TVectorF *hitWireZ  = (TVectorF*)dtsegm4D_z_hitsWire->At(iseg);
+       
+       for (int ilay=1; ilay<5; ilay++) {
+	 // Search for associated hits
+	 bool foundh = false;
+	 for (int kk=0; kk<seg_znhits; kk++) {
+	   
            int lay1 = (*hitLayerZ)(kk);
-
+	   
            if (lay1==ilay) {
 	     NHits++;
              foundh=true;
              break;
            }
-          }
-          if (!foundh) missingLayer=ilay;
-	}
-
-        if (NHits<3) continue;
-        else if (NHits==4) {
- 
-	  for (int lay=0; lay<4; lay++) {
-	    std::cout<<"Hei17"<<std::endl;
-	    //denominator
-            Den_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-            Den_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	    std::cout<<"Hei18"<<std::endl;
-	    // numerator
-            Num_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-            NumA_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-            Num_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-            NumA_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	  }
-	}
-        else if (NHits==3) {
-      	std::cout<<"Hei19"<<std::endl;
-	  //denominator
-          Den_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
-          Den_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-
-          int lay = missingLayer-1;
-
-	  // is there a digi within the expected tube?
-
-          float digiW=-1.;
-          float d =1000000;
-          int iex = missingLayer+3;
-          Float_t expW = (*expWire)(iex);
-
-          for (int idigi=0; idigi<Ndigis; idigi++) {
-
-            if (digi_time->at(idigi)<320 || digi_time->at(idigi)>700) continue;
-
-	    if (digi_wheel->at(idigi) != dtsegm4D_wheel->at(iseg)) continue;
-	    if (digi_sector->at(idigi) != dtsegm4D_sector->at(iseg)) continue;
-	    if (digi_station->at(idigi) != dtsegm4D_station->at(iseg)) continue;
-
-	    if (digi_sl->at(idigi) != 2) continue;
-	    if (digi_layer->at(idigi) != lay+1) continue;
-            
-            if (fabs(expW-digi_wire->at(idigi))<fabs(d)) {
-              digiW=digi_wire->at(idigi);
-	      d=expW-digiW;
-	    }
-	  }
-   
-          if ( fabs(d)< 1.1) {
-
+	 }
+	 if (!foundh) missingLayer=ilay;
+       }
+       
+       if (NHits<3) continue;
+       else if (NHits==4) {
+	 
+	 for (int lay=0; lay<4; lay++) {
+	   std::cout<<"Hei17"<<std::endl;
+	   //denominator
+	   Den_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	   Den_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	   std::cout<<"Hei18"<<std::endl;
+	   // numerator
+	   Num_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	   NumA_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	   Num_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	   NumA_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	 }
+       }
+       else if (NHits==3) {
+	 std::cout<<"Hei19"<<std::endl;
+	 //denominator
+	 Den_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
+	 Den_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
+	 
+	 int lay = missingLayer-1;
+	 
+	 // is there a digi within the expected tube?
+	 
+	 float digiW=-1.;
+	 float d =1000000;
+	 int iex = missingLayer+3;
+	 Float_t expW = (*expWire)(iex);
+	 
+	 for (int idigi=0; idigi<Ndigis; idigi++) {
+	   
+	   if (digi_time->at(idigi)<320 || digi_time->at(idigi)>700) continue;
+	   
+	   if (digi_wheel->at(idigi) != dtsegm4D_wheel->at(iseg)) continue;
+	   if (digi_sector->at(idigi) != dtsegm4D_sector->at(iseg)) continue;
+	   if (digi_station->at(idigi) != dtsegm4D_station->at(iseg)) continue;
+	   
+	   if (digi_sl->at(idigi) != 2) continue;
+	   if (digi_layer->at(idigi) != lay+1) continue;
+           
+	   if (fabs(expW-digi_wire->at(idigi))<fabs(d)) {
+	     digiW=digi_wire->at(idigi);
+	     d=expW-digiW;
+	   }
+	 }
+	 
+	 if ( fabs(d)< 1.1) {
+	   
 	   // numerator
            Num_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
            Num_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	  }
-	}
-        else {
-          cout<<" what do you want?? NHits (z) = "<<NHits<<endl;
-          return;
-	}
+	 }
        }
-      	std::cout<<"Hei20"<<std::endl;
+       else {
+	 cout<<" what do you want?? NHits (z) = "<<NHits<<endl;
+	 return;
+       }
+     }
+     std::cout<<"Hei20"<<std::endl;
    }
-
-
+   
+   
    // computing efficiencies
-
+   
    float effPhiMBWh[2][nLumiPoints][4][5]; float errPhiMBWh[2][nLumiPoints][4][5];
    float effTheMBWh[2][nLumiPoints][3][5]; float errTheMBWh[2][nLumiPoints][3][5];
    float effMB4Top[2][5][nLumiPoints];     float errMB4Top[2][5][nLumiPoints];
    float effMB4Bot[2][nLumiPoints];        float errMB4Bot[2][nLumiPoints];
-
-
+   
+   
    for (int ivar=0; ivar<2; ivar++) {
-       for (int iwh=0; iwh<5; iwh++){
-         for (int ist=0; ist<4; ist++){
-	   for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
-
-	     //	     std::cout<<ivar<<" "<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint])<<std::endl;
+     for (int iwh=0; iwh<5; iwh++){
+       for (int ist=0; ist<4; ist++){
+	 for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
+	   
+	   //	     std::cout<<ivar<<" "<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint])<<std::endl;
 	   if (Den_phiMBWh[ivar][iwh][ist][ipoint]>0.) {
-            effPhiMBWh[ivar][iwh][ist][ipoint]=
-             double(Num_phiMBWh[ivar][iwh][ist][ipoint])/double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
-            errPhiMBWh[ivar][iwh][ist][ipoint]=
-	      sqrt(  double(Num_phiMBWh[ivar][iwh][ist][ipoint])
-		     *(double(Den_phiMBWh[ivar][iwh][ist][ipoint])-double(Num_phiMBWh[ivar][iwh][ist][ipoint]))
-		     /double(Den_phiMBWh[ivar][iwh][ist][ipoint]))
-                     /double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
+	     effPhiMBWh[ivar][iwh][ist][ipoint]=
+	       double(Num_phiMBWh[ivar][iwh][ist][ipoint])/double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
+	     errPhiMBWh[ivar][iwh][ist][ipoint]=
+	       sqrt(  double(Num_phiMBWh[ivar][iwh][ist][ipoint])
+		      *(double(Den_phiMBWh[ivar][iwh][ist][ipoint])-double(Num_phiMBWh[ivar][iwh][ist][ipoint]))
+		      /double(Den_phiMBWh[ivar][iwh][ist][ipoint]))
+	       /double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
 	   }
            else {effPhiMBWh[ivar][iwh][ist][ipoint]=0.; errPhiMBWh[ivar][iwh][ist][ipoint]=0.;}
-
-           if (ist!=3){ continue;
-
-	   if (Den_theMBWh[ivar][iwh][ist][ipoint]>0.) {
-            effTheMBWh[ivar][iwh][ist][ipoint]=
-             double(Num_theMBWh[ivar][iwh][ist][ipoint])/double(Den_theMBWh[ivar][iwh][ist][ipoint]);
-            errTheMBWh[ivar][iwh][ist][ipoint]=
-	      sqrt(  double(Num_theMBWh[ivar][iwh][ist][ipoint])
-		     *(double(Den_theMBWh[ivar][iwh][ist][ipoint])-double(Num_theMBWh[ivar][iwh][ist][ipoint]))
-		     /double(Den_theMBWh[ivar][iwh][ist][ipoint]))
-	      /double(Den_theMBWh[ivar][iwh][ist][ipoint]);
-	   }
-	   }
-           else {effTheMBWh[ivar][iwh][ist][ipoint]=0.; errTheMBWh[ivar][iwh][ist][ipoint]=0.;}	 
+	   
+           if (ist!=3){
+	     if (Den_theMBWh[ivar][iwh][ist][ipoint]>0.) {
+	       effTheMBWh[ivar][iwh][ist][ipoint]=
+		 double(Num_theMBWh[ivar][iwh][ist][ipoint])/double(Den_theMBWh[ivar][iwh][ist][ipoint]);
+	       errTheMBWh[ivar][iwh][ist][ipoint]=
+		 sqrt(  double(Num_theMBWh[ivar][iwh][ist][ipoint])
+			*(double(Den_theMBWh[ivar][iwh][ist][ipoint])-double(Num_theMBWh[ivar][iwh][ist][ipoint]))
+			/double(Den_theMBWh[ivar][iwh][ist][ipoint]))
+		 /double(Den_theMBWh[ivar][iwh][ist][ipoint]);
+	     }
+	   
+	     else {effTheMBWh[ivar][iwh][ist][ipoint]=0.; errTheMBWh[ivar][iwh][ist][ipoint]=0.;}	 
 	   }
 	 }
-	 for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     
+       }
+       for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     
          if (Den_phiMB4Top[ivar][iwh][ipoint]>0.) {
-            effMB4Top[ivar][iwh][ipoint]=double(Num_phiMB4Top[ivar][iwh][ipoint])/double(Den_phiMB4Top[ivar][iwh][ipoint]);
-            errMB4Top[ivar][iwh][ipoint]=
-	        sqrt(  double(Num_phiMB4Top[ivar][iwh][ipoint])
-	 	       *(double(Den_phiMB4Top[ivar][iwh][ipoint])-double(Num_phiMB4Top[ivar][iwh][ipoint]))
-		       /double(Den_phiMB4Top[ivar][iwh][ipoint]))
-                       /double(Den_phiMB4Top[ivar][iwh][ipoint]);
+	   effMB4Top[ivar][iwh][ipoint]=double(Num_phiMB4Top[ivar][iwh][ipoint])/double(Den_phiMB4Top[ivar][iwh][ipoint]);
+	   errMB4Top[ivar][iwh][ipoint]=
+	     sqrt(  double(Num_phiMB4Top[ivar][iwh][ipoint])
+		    *(double(Den_phiMB4Top[ivar][iwh][ipoint])-double(Num_phiMB4Top[ivar][iwh][ipoint]))
+		    /double(Den_phiMB4Top[ivar][iwh][ipoint]))
+	     /double(Den_phiMB4Top[ivar][iwh][ipoint]);
          }
          else {effMB4Top[ivar][iwh][ipoint]=0.; errMB4Top[ivar][iwh][ipoint]=0.;}
          if (ivar==1) cout<<" MB4Top (PU="<<PUslice[ipoint]<<") "<<effMB4Top[ivar][iwh][ipoint]
                           <<" +- "<<errMB4Top[ivar][iwh][ipoint]<<endl;
-       }
-
-       }
-       for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     //hot
-
+       } 
+     }
+     for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     
+       
        if (Den_phiMB4Bot[ivar][ipoint]>0.) {
-          effMB4Bot[ivar][ipoint]=double(Num_phiMB4Bot[ivar][ipoint])/double(Den_phiMB4Bot[ivar][ipoint]);
-          errMB4Bot[ivar][ipoint]=
-	      sqrt(  double(Num_phiMB4Bot[ivar][ipoint])
-		     *(double(Den_phiMB4Bot[ivar][ipoint])-double(Num_phiMB4Bot[ivar][ipoint]))
-		     /double(Den_phiMB4Bot[ivar][ipoint]))
-                     /double(Den_phiMB4Bot[ivar][ipoint]);
+	 effMB4Bot[ivar][ipoint]=double(Num_phiMB4Bot[ivar][ipoint])/double(Den_phiMB4Bot[ivar][ipoint]);
+	 errMB4Bot[ivar][ipoint]=
+	   sqrt(  double(Num_phiMB4Bot[ivar][ipoint])
+		  *(double(Den_phiMB4Bot[ivar][ipoint])-double(Num_phiMB4Bot[ivar][ipoint]))
+		  /double(Den_phiMB4Bot[ivar][ipoint]))
+	   /double(Den_phiMB4Bot[ivar][ipoint]);
        }
        else {effMB4Bot[ivar][ipoint]=0.; errMB4Bot[ivar][ipoint]=0.;}
      }
    }
-
+   
    ofstream results;
    std::string resultname;
 
