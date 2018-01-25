@@ -212,22 +212,19 @@ void EfficiencyMonitor::Loop()
    
    for (int ivar=0; ivar<2; ivar++){
      v4.push_back( vector<vector<vector< int > > > () ) ;
-     std::cout<<"hei1"<<std::endl;
      Num_phiMBWh.push_back(  vector<vector<vector< int > > > () ) ;	  
      NumA_phiMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
      Den_phiMBWh.push_back(  vector<vector<vector< int > > > () ) ;	  
      Num_theMBWh.push_back(  vector<vector<vector< int > > > () ) ;	  
      NumA_theMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
      Den_theMBWh.push_back(  vector<vector<vector< int > > > () ) ; 	  
-     std::cout<<"hei2"<<std::endl;
      Num_phiMB4Top.push_back(  vector<vector<int> >());  
      Den_phiMB4Top.push_back(  vector<vector<int> >());  
      NumA_phiMB4Top.push_back( vector<vector<int> >()); 
-     std::cout<<"hei2.1"<<std::endl;     
      Num_phiMB4Bot.push_back(vector<int> ());  
      NumA_phiMB4Bot.push_back(vector<int> ()); 
      Den_phiMB4Bot.push_back(vector<int> ());  
-     std::cout<<"hei3"<<std::endl;
+
 
      if(ivar==0) nPoints = nLumiPoints;
      else if(ivar==1) nPoints = nPUpoints;
@@ -295,7 +292,7 @@ void EfficiencyMonitor::Loop()
    std::cout<<v4[0][0][0][0];
    
 
-   //   int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
+   // int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
    // int NumA_phiMB4Top[2][5][nLumiPoints];  int NumA_phiMB4Bot[2][nLumiPoints];    // 'A' stands for 'Associated'   
    // int Num_phiMB4Bot[2][nLumiPoints];      int Den_phiMB4Bot[2][nLumiPoints];     //  Lumi nLumiPoints punti
  
@@ -841,7 +838,7 @@ void EfficiencyMonitor::Loop()
       	std::cout<<"Hei20"<<std::endl;
    }
 
-      	std::cout<<"Hei21"<<std::endl;
+
    // computing efficiencies
 
    float effPhiMBWh[2][nLumiPoints][4][5]; float errPhiMBWh[2][nLumiPoints][4][5];
@@ -855,6 +852,7 @@ void EfficiencyMonitor::Loop()
          for (int ist=0; ist<4; ist++){
 	   for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
 
+	     //	     std::cout<<ivar<<" "<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint])<<std::endl;
 	   if (Den_phiMBWh[ivar][iwh][ist][ipoint]>0.) {
             effPhiMBWh[ivar][iwh][ist][ipoint]=
              double(Num_phiMBWh[ivar][iwh][ist][ipoint])/double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
@@ -913,8 +911,8 @@ void EfficiencyMonitor::Loop()
    ofstream results;
    std::string resultname;
 
-   resultname.append("Results_Run2016");
-   resultname = resultname + dataset + ".txt";;
+   resultname.append("Results_"+fileName+".txt");
+   //   resultname = resultname + dataset + ".txt";;
 
    cout<<resultname<<endl;
    results.open (resultname.c_str());
