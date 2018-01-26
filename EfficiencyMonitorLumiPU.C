@@ -231,7 +231,6 @@ void EfficiencyMonitor::Loop()
      
      for (int iwh=0; iwh<5; iwh++){
        
-       std::cout<<"hei4"<<std::endl;
        v4[ivar].push_back(vector<vector<int> >());
        Num_phiMBWh[ivar].push_back(vector<vector<int> >());	  
        NumA_phiMBWh[ivar].push_back(vector<vector<int> >());	  
@@ -240,14 +239,12 @@ void EfficiencyMonitor::Loop()
        NumA_theMBWh[ivar].push_back(vector<vector<int> >());	  
        Den_theMBWh[ivar].push_back(vector<vector<int> >()); 	  
        
-       std::cout<<"hei5"<<std::endl;	 
        Num_phiMB4Top[ivar].push_back(vector<int> ());  
        Den_phiMB4Top[ivar].push_back(vector<int> ());  
        NumA_phiMB4Top[ivar].push_back(vector<int> ()); 
        
        for (int ist=0; ist<4; ist++){
 	 
-	 std::cout<<"hei6"<<std::endl;
 	 v4[ivar][iwh].push_back(vector<int>());
 	 Num_phiMBWh[ivar][iwh].push_back(vector<int>());	  
 	 NumA_phiMBWh[ivar][iwh].push_back(vector<int>());	  
@@ -260,7 +257,7 @@ void EfficiencyMonitor::Loop()
 	 }
 	 
 	 for (int ipoint=0; ipoint<nPoints; ipoint++){
-	   std::cout<<"hei7 "<<ivar<<" "<<iwh<<" "<<ist<<" "<<ipoint<<std::endl;
+	   //	   std::cout<<"hei7 "<<ivar<<" "<<iwh<<" "<<ist<<" "<<ipoint<<std::endl;
 	   v4[ivar][iwh][ist].push_back(0);
 	   Num_phiMBWh[ivar][iwh][ist].push_back(0);
 	   Den_phiMBWh[ivar][iwh][ist].push_back(0);
@@ -273,17 +270,13 @@ void EfficiencyMonitor::Loop()
 	 }
        }
        for (int ipoint=0; ipoint<nPoints; ipoint++){
-	 std::cout<<"hei8"<<std::endl;
 	 Num_phiMB4Top[ivar][iwh].push_back(0);	      
-	 std::cout<<"hei8.1"<<std::endl;
 	 NumA_phiMB4Top[ivar][iwh].push_back(0);	      
 	 Den_phiMB4Top[ivar][iwh].push_back(0);	      
        }   
      }   
      for (int ipoint=0; ipoint<nPoints; ipoint++){
-       std::cout<<"hei9"<<std::endl;
        Num_phiMB4Bot[ivar].push_back(0);	      
-       std::cout<<"hei9.1"<<std::endl;
        NumA_phiMB4Bot[ivar].push_back(0);	      
        Den_phiMB4Bot[ivar].push_back(0);	      
      }    
@@ -396,12 +389,10 @@ void EfficiencyMonitor::Loop()
      // First search for Phi segments
      
      for (int iseg=0; iseg<Ndtsegments; iseg++) {
-       cout<<"Hei00"<<endl;
        //selection
        if (!dtsegm4D_hasPhi->at(iseg)) continue;
        // In chambers 1,2,3 select only segments with also Z (theta) contribution.
        if (dtsegm4D_station->at(iseg)!=4 && !dtsegm4D_hasZed->at(iseg)) continue;
-       cout<<"Hei01"<<endl;
        
        int seg_phinhits = dtsegm4D_phinhits->at(iseg);
        
@@ -410,13 +401,12 @@ void EfficiencyMonitor::Loop()
        TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
        //	expWire->Print(); //del
        
-       cout<<"Hei02"<<endl;
        // If a hit is missing, let us check that the extrapolation doesn't fall beyond layer or cross a dead cell!
        int NexpDead=0; bool OutOfLayer=false;
        
        if (seg_phinhits < 8 ) {
          for (int iex=0; iex<12; iex++) {
-	   cout<<"Hei02.1"<<endl;
+
 	   int expSL = 1;
            int expLay = iex+1;
 	   //associate layer with right super layer
@@ -428,7 +418,6 @@ void EfficiencyMonitor::Loop()
              if (iex > 3 && iex<8) continue;
              else if (iex > 7) {expSL=3; expLay-=8;}
 	   }
-	   cout<<"Hei02.2"<<endl;		
 	   int nwire=0;
 	   if (expSL==2){
 	     //chimney chambers
@@ -454,7 +443,6 @@ void EfficiencyMonitor::Loop()
              break;
 	   }
 	   
-	   cout<<"Hei03"<<endl;
            for (int idead=0; idead<Ndead; idead++) {
 	     if (dead[idead][0] != dtsegm4D_wheel->at(iseg))   continue;
 	     if (dead[idead][1] != dtsegm4D_sector->at(iseg))  continue;
@@ -478,7 +466,6 @@ void EfficiencyMonitor::Loop()
        TVectorF *hitSuperLayerPhi =(TVectorF*)dtsegm4D_phi_hitsSuperLayer->At(iseg);
        TVectorF *hitLayerPhi      =(TVectorF*)dtsegm4D_phi_hitsLayer->At(iseg);
        TVectorF *hitWirePhi       =(TVectorF*)dtsegm4D_phi_hitsWire->At(iseg);
-       cout<<"Hei04"<<endl;
        
        // std::cout<<"SuperLayerphi"<<std::endl;
        // hitSuperLayerPhi->Print();//del
@@ -502,13 +489,12 @@ void EfficiencyMonitor::Loop()
              break;
            }
 	 }
-	 cout<<"Hei06"<<endl;
+
 	 if (!foundh) {
-	   cout<<"Hei06.1"<<endl;
 	   if (nmissing<3) missingLayer[nmissing][0]=ilay;
 	   nmissing++;
 	 }
-	 cout<<"Hei07"<<endl;
+
        }
        cout<<"Hei08"<<endl;
        if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
@@ -596,8 +582,8 @@ void EfficiencyMonitor::Loop()
 	     int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
 	     
 	     //denominator
-	     //	       cout<<"Hei6 "<<0<<" "<<dtsegm4D_wheel->at(iseg)+2<<" "<<dtsegm4D_station->at(iseg)-1<<" "<<" "<<Lumibin<<" "<<PUbin<<endl;
-	     cout<<" "<<Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]<<std::endl;
+	   
+	     cout<<"hwi6 "<<Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]<<std::endl;
 	     Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	     Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
 	     
@@ -849,7 +835,7 @@ void EfficiencyMonitor::Loop()
        for (int ist=0; ist<4; ist++){
 	 for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
 	   
-	   //	     std::cout<<ivar<<" "<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint])<<std::endl;
+	   std::cout<<ivar<<" "<<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint]<<std::endl;
 	   if (Den_phiMBWh[ivar][iwh][ist][ipoint]>0.) {
 	     effPhiMBWh[ivar][iwh][ist][ipoint]=
 	       double(Num_phiMBWh[ivar][iwh][ist][ipoint])/double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
