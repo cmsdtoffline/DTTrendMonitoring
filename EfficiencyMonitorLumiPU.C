@@ -977,6 +977,8 @@ void EfficiencyMonitor::Loop()
    MB4TopYB2PU->SetMarkerStyle(20);
    MB4TopYB2PU->GetXaxis()->SetTitle("PU");
    MB4TopYB2PU->GetYaxis()->SetTitle("Eff.");
+   MB4TopYB2PU->SetMaximum(1.02);
+   MB4TopYB2PU->SetMinimum(0.89);
    MB4TopYB2PU->Draw("ap");
    c1->SaveAs(("plot/"+fileName+"/"+fileName+"MB4TopYB2PU.png").c_str());
    
@@ -985,6 +987,8 @@ void EfficiencyMonitor::Loop()
    MB4TopYB2Lumi->SetMarkerStyle(20);
    MB4TopYB2Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
    MB4TopYB2Lumi->GetYaxis()->SetTitle("Eff.");
+   MB4TopYB2Lumi->SetMaximum(1.02);
+   MB4TopYB2Lumi->SetMinimum(0.89);
    MB4TopYB2Lumi->Draw("ap");
    c2->SaveAs(("plot/"+fileName+"/"+fileName+"MB4TopYB2Lumi.png").c_str());
    
@@ -1010,6 +1014,8 @@ void EfficiencyMonitor::Loop()
    MB1Wh0PU->SetMarkerStyle(20);
    MB1Wh0PU->GetXaxis()->SetTitle("PU");
    MB1Wh0PU->GetYaxis()->SetTitle("Eff.");
+   MB1Wh0PU->SetMaximum(1.02);
+   MB1Wh0PU->SetMinimum(0.89);
    MB1Wh0PU->Draw("ap");
    c3->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh0PU.png").c_str());
    
@@ -1042,6 +1048,8 @@ void EfficiencyMonitor::Loop()
    MB1TheWh0Lumi->SetMarkerStyle(20);
    MB1TheWh0Lumi->GetYaxis()->SetTitle("Eff.");
    MB1TheWh0Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
+   MB1TheWh0Lumi->SetMaximum(1.02);
+   MB1TheWh0Lumi->SetMinimum(0.89);
    MB1TheWh0Lumi->Draw("ap");
    c7->SaveAs(("plot/"+fileName+"/"+fileName+"MB1TheWh0Lumi.png").c_str());
 
