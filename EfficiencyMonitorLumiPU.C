@@ -7,7 +7,8 @@
 #include <TStyle.h>
 #include <TCanvas.h>
 #include <TGraphErrors.h>
-
+#include <TGraphAsymmErrors.h>
+#include "StatUtils.h"
 int dead[10000][6];
 int Ndead=0;
 int nrequiredhit=7;
@@ -191,8 +192,6 @@ void EfficiencyMonitor::Loop()
    int nPoints = -1;
    std::cout<<"nPUpoints "<<nPUpoints<<" nLumiPoints "<<nLumiPoints<<std::endl;
 
-   vector<vector<vector<vector<int>>>> v4; 
-
    vector<vector<vector<vector<int> > > > Num_phiMBWh;
    vector<vector<vector<vector<int> > > > NumA_phiMBWh;
    vector<vector<vector<vector<int> > > > Den_phiMBWh;
@@ -211,7 +210,6 @@ void EfficiencyMonitor::Loop()
    //   vector<vector<vector<int> > >  NumA_phiMB4Bot;
    
    for (int ivar=0; ivar<2; ivar++){
-     v4.push_back( vector<vector<vector< int > > > () ) ;
      Num_phiMBWh.push_back(  vector<vector<vector< int > > > () ) ;	  
      NumA_phiMBWh.push_back( vector<vector<vector< int > > > () ) ;	  
      Den_phiMBWh.push_back(  vector<vector<vector< int > > > () ) ;	  
@@ -231,7 +229,6 @@ void EfficiencyMonitor::Loop()
      
      for (int iwh=0; iwh<5; iwh++){
        
-       v4[ivar].push_back(vector<vector<int> >());
        Num_phiMBWh[ivar].push_back(vector<vector<int> >());	  
        NumA_phiMBWh[ivar].push_back(vector<vector<int> >());	  
        Den_phiMBWh[ivar].push_back(vector<vector<int> >());	  
@@ -244,8 +241,6 @@ void EfficiencyMonitor::Loop()
        NumA_phiMB4Top[ivar].push_back(vector<int> ()); 
        
        for (int ist=0; ist<4; ist++){
-	 
-	 v4[ivar][iwh].push_back(vector<int>());
 	 Num_phiMBWh[ivar][iwh].push_back(vector<int>());	  
 	 NumA_phiMBWh[ivar][iwh].push_back(vector<int>());	  
 	 Den_phiMBWh[ivar][iwh].push_back(vector<int>());	  
@@ -257,8 +252,6 @@ void EfficiencyMonitor::Loop()
 	 }
 	 
 	 for (int ipoint=0; ipoint<nPoints; ipoint++){
-	   //	   std::cout<<"hei7 "<<ivar<<" "<<iwh<<" "<<ist<<" "<<ipoint<<std::endl;
-	   v4[ivar][iwh][ist].push_back(0);
 	   Num_phiMBWh[ivar][iwh][ist].push_back(0);
 	   Den_phiMBWh[ivar][iwh][ist].push_back(0);
 	   NumA_phiMBWh[ivar][iwh][ist].push_back(0);
@@ -282,41 +275,6 @@ void EfficiencyMonitor::Loop()
      }    
    }
    
-   std::cout<<v4[0][0][0][0];
-   
-   
-   // int Num_phiMB4Top[2][5][nLumiPoints];   int Den_phiMB4Top[2][5][nLumiPoints];  //  PU, nLumiPoints punti
-   // int NumA_phiMB4Top[2][5][nLumiPoints];  int NumA_phiMB4Bot[2][nLumiPoints];    // 'A' stands for 'Associated'   
-   // int Num_phiMB4Bot[2][nLumiPoints];      int Den_phiMB4Bot[2][nLumiPoints];     //  Lumi nLumiPoints punti
-   
-   
-   //   Den_phiMBWh
-   
-   // Set all to 0
-   // for (int ivar=0; ivar<2; ivar++){
-   //   for (int ipoint=0; ipoint<nLumiPoints; ipoint++){
-   //     for (int iwh=0; iwh<5; iwh++){
-   //      for (int ist=0; ist<4; ist++){
-   
-   // 	  Num_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
-   //        NumA_phiMBWh[ivar][ipoint][ist][iwh] = 0;
-   // 	  Den_phiMBWh[ivar][ipoint][ist][iwh]  = 0;
-   
-   //        if (ist==3) continue;
-   // 	  Num_theMBWh[ivar][ipoint][ist][iwh]  = 0;
-   //        NumA_theMBWh[ivar][ipoint][ist][iwh] = 0;
-   // 	  Den_theMBWh[ivar][ipoint][ist][iwh]  = 0;
-   //      }
-   //      Num_phiMB4Top[ivar][iwh][ipoint] = 0;
-   //      NumA_phiMB4Top[ivar][iwh][ipoint]= 0;
-   //      Den_phiMB4Top[ivar][iwh][ipoint] = 0;
-   
-   //     }
-   //     Num_phiMB4Bot[ivar][ipoint] = 0;
-   //     NumA_phiMB4Bot[ivar][ipoint]= 0;
-   //     Den_phiMB4Bot[ivar][ipoint] = 0;
-   //   }
-   // }
    
    
    // DEAD CHANNELS (to skip):
@@ -474,12 +432,10 @@ void EfficiencyMonitor::Loop()
        // std::cout<<"Wirephi"<<std::endl;
        // hitWirePhi->Print(); //del
        
-       cout<<"Hei05"<<endl;
        for (int ilay=1; ilay<9; ilay++) {
 	 // Search for associated hits
 	 bool foundh = false;
 	 for (int kk=0; kk<seg_phinhits; kk++) {
-	   cout<<"Hei05.1"<<endl;
            int sl1  = (*hitSuperLayerPhi)(kk);
            int lay1 = (sl1==1) ? (*hitLayerPhi)(kk) : (*hitLayerPhi)(kk)+4; // hit layer 1-8
 	   
@@ -496,14 +452,10 @@ void EfficiencyMonitor::Loop()
 	 }
 
        }
-       cout<<"Hei08"<<endl;
        if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
-       cout<<"Hei09"<<endl;
        if (NHits<nrequiredhit) continue;
        else if (NHits==8) {
-	 cout<<"Hei1"<<endl;
 	 for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
-	     cout<<"Hei1.1"<<endl;
 	     // 2 variabili (Lumi, PU), 22 punti, 4 stazioni, 5 ruote 
 	     Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	     NumA_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
@@ -515,7 +467,6 @@ void EfficiencyMonitor::Loop()
 	     
 	     // extra chamber of sector 4 (sector 13)
 	     if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-	       cout<<"Hei2"<<endl;
 	       // 2 variabili (Lumi, PU), 22 punti
 	       Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++;  
 	       NumA_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
@@ -527,7 +478,6 @@ void EfficiencyMonitor::Loop()
 	     
 	     // extra chamber of sector 10 (sector 14) 
 	     else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-	       cout<<"Hei3"<<endl;
 	       // 2 variabili (Lumi, PU), 22 punti
 	       Num_phiMB4Bot[0][Lumibin]++; 
 	       NumA_phiMB4Bot[0][Lumibin]++; 
@@ -539,9 +489,7 @@ void EfficiencyMonitor::Loop()
 	   }
        }
        else { // let's see how to treat missing layers
-	 cout<<"Hei3.1"<<endl;
 	 for (int imiss=0; imiss<nmissing; imiss++) {
-	   cout<<"Hei4"<<endl;
            int sl  = missingLayer[imiss][0] < 5 ? 0 : 1;
            int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
 	   
@@ -576,56 +524,44 @@ void EfficiencyMonitor::Loop()
 	 }
 	 
 	 if (NHits==nrequiredhit) {
-	   cout<<"Hei4.1"<<endl;
 	   for (int imiss=0; imiss<nmissing; imiss++) {
 	     int sl = missingLayer[imiss][0] < 5 ? 0 : 1;
 	     int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
 	     
 	     //denominator
 	   
-	     cout<<"hwi6 "<<Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]<<std::endl;
+	     //	     cout<<"hwi6 "<<Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]<<std::endl;
 	     Den_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	     Den_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
 	     
-	     cout<<"Hei6.21 "<<dtsegm4D_station->at(iseg)<<"  "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<std::endl;
 	     if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-	       cout<<"Hei6.3"<<endl;
 	       Den_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
-	       cout<<"Hei6.4"<<endl;
 	       Den_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
 	     }
 	     else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
-	       cout<<"Hei7"<<endl;
 	       Den_phiMB4Bot[0][Lumibin]++;
 	       Den_phiMB4Bot[1][PUbin]++;
 	     }
-	     cout<<"Hei7.1"<<endl;
-	     cout<<"Hei7.1 "<<missingLayer[imiss][1]<<endl;
 	     if (missingLayer[imiss][1]) {
-	       cout<<"Hei8"<<endl;
+
 	       // numerator
 	       Num_phiMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	       Num_phiMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
 	       
-	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {	  cout<<"Hei8.1"<<endl;
+	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
                  Num_phiMB4Top[0][dtsegm4D_wheel->at(iseg)+2][Lumibin]++; 
                  Num_phiMB4Top[1][dtsegm4D_wheel->at(iseg)+2][PUbin]++; 
 	       }
 	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14))
 		 {	
-		   cout<<"Hei8.2"<<endl;
 		   Num_phiMB4Bot[0][Lumibin]++; 
 		   Num_phiMB4Bot[1][PUbin]++; 
 		 }
-	       cout<<"Hei9"<<endl;
 	     }
-	     cout<<"Hei9.1"<<endl;
 	   }
-	   cout<<"Hei10"<<endl;
 	 }
 	 
 	 else {
-	   cout<<"Hei11"<<endl;
 	   for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
 	       
 	       //denominator
@@ -679,20 +615,17 @@ void EfficiencyMonitor::Loop()
 	     }
 	 }
        }
-       std::cout<<"Hei15"<<std::endl;
      }
-     std::cout<<"Hei16"<<std::endl;
      // Then search for Zed segments
      
      for (int iseg=0; iseg<Ndtsegments; iseg++) {
        
-       std::cout<<"Hei16.1"<<std::endl;
-       std::cout<<"Hei16.1 "<<dtsegm4D_hasZed->at(iseg)<<" "<< dtsegm4D_phinhits->at(iseg)<<std::endl;
+
        //selection
        //if (!dtsegm4D_hasZed->at(iseg) || !dtsegm4D_hasPhi->at(iseg)) continue; 
        if (!dtsegm4D_hasZed->at(iseg) || dtsegm4D_phinhits->at(iseg)<nrequiredhit) continue; 
        //10-01-17 capire perchè theta efficiency va giù con l ainst.luminosity: è il denominatore che sale?!
-       std::cout<<"Hei16.2"<<std::endl;
+
        int seg_znhits = dtsegm4D_znhits->at(iseg);
        
        //if (fabs(dtsegm4D_y_dir_loc->at(iseg))>0.7) continue; // angle WARNING!!! try and disable this for theta layers!
@@ -704,7 +637,6 @@ void EfficiencyMonitor::Loop()
        // If a hit is missing, let us check that the extrapolation doesn't fall out of layer or cross a dead cell!
        int NexpDead=0; bool OutOfLayer=false;
        
-       std::cout<<"Hei16.3"<<std::endl;
        if (seg_znhits < 4) {
          for (int iex=4; iex<8; iex++) {
 	   int expSL = 2;
@@ -715,7 +647,6 @@ void EfficiencyMonitor::Loop()
 	     OutOfLayer=true;
              break;
 	   }
-	   std::cout<<"Hei16.4"<<std::endl;
            for (int idead=0; idead<Ndead; idead++) {
 	     if (dead[idead][0] != dtsegm4D_wheel->at(iseg)) continue;
 	     if (dead[idead][1] != dtsegm4D_sector->at(iseg)) continue;
@@ -734,7 +665,6 @@ void EfficiencyMonitor::Loop()
            continue;
 	   // this segment crosses at least 1 dead cell: drop it!
 	 }
-	 std::cout<<"Hei16.5"<<std::endl;
        }
        
        int NHits=0; int missingLayer=-1;
@@ -762,11 +692,9 @@ void EfficiencyMonitor::Loop()
        else if (NHits==4) {
 	 
 	 for (int lay=0; lay<4; lay++) {
-	   std::cout<<"Hei17"<<std::endl;
 	   //denominator
 	   Den_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	   Den_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
-	   std::cout<<"Hei18"<<std::endl;
 	   // numerator
 	   Num_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	   NumA_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
@@ -775,7 +703,6 @@ void EfficiencyMonitor::Loop()
 	 }
        }
        else if (NHits==3) {
-	 std::cout<<"Hei19"<<std::endl;
 	 //denominator
 	 Den_theMBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][Lumibin]++;
 	 Den_theMBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1][PUbin]++;
@@ -818,16 +745,16 @@ void EfficiencyMonitor::Loop()
 	 return;
        }
      }
-     std::cout<<"Hei20"<<std::endl;
    }
    
    
    // computing efficiencies
    
-   float effPhiMBWh[2][5][4][nLumiPoints]; float errPhiMBWh[2][5][4][nLumiPoints];
-   float effTheMBWh[2][5][3][nLumiPoints]; float errTheMBWh[2][5][3][nLumiPoints];
-   float effMB4Top[2][5][nLumiPoints];     float errMB4Top[2][5][nLumiPoints];
-   float effMB4Bot[2][nLumiPoints];        float errMB4Bot[2][nLumiPoints];
+   float effPhiMBWh[2][5][4][nLumiPoints]; float errPhiMBWh[2][5][4][2][nLumiPoints];
+   float effTheMBWh[2][5][3][nLumiPoints]; float errTheMBWh[2][5][3][2][nLumiPoints];
+   float effMB4Top[2][5][nLumiPoints];     float errMB4Top[2][5][2][nLumiPoints];
+   float effMB4Bot[2][nLumiPoints];        float errMB4Bot[2][2][nLumiPoints];
+
    
    
    for (int ivar=0; ivar<2; ivar++) {
@@ -836,58 +763,49 @@ void EfficiencyMonitor::Loop()
 	 for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
 	   
 	   std::cout<<ivar<<" "<<iwh<<" "<<ist<<" "<<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint]<<std::endl;
-
 	   if (Den_phiMBWh[ivar][iwh][ist][ipoint]>0.) {
+
 	     effPhiMBWh[ivar][iwh][ist][ipoint]=
 	       double(Num_phiMBWh[ivar][iwh][ist][ipoint])/double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
-	     errPhiMBWh[ivar][iwh][ist][ipoint]=
-	       sqrt(  double(Num_phiMBWh[ivar][iwh][ist][ipoint])
-		      *(double(Den_phiMBWh[ivar][iwh][ist][ipoint])-double(Num_phiMBWh[ivar][iwh][ist][ipoint]))
-		      /double(Den_phiMBWh[ivar][iwh][ist][ipoint]))
-	       /double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
+
+	     errPhiMBWh[ivar][iwh][ist][0][ipoint]=GetError(double(Den_phiMBWh[ivar][iwh][ist][ipoint]),double(Num_phiMBWh[ivar][iwh][ist][ipoint]),0);
+	     errPhiMBWh[ivar][iwh][ist][1][ipoint]=GetError(double(Den_phiMBWh[ivar][iwh][ist][ipoint]),double(Num_phiMBWh[ivar][iwh][ist][ipoint]),1);
 	   }
-           else {effPhiMBWh[ivar][iwh][ist][ipoint]=0.; errPhiMBWh[ivar][iwh][ist][ipoint]=0.;}
+           else {effPhiMBWh[ivar][iwh][ist][ipoint]=0.; errPhiMBWh[ivar][iwh][ist][0][ipoint]=0.; errPhiMBWh[ivar][iwh][ist][1][ipoint]=0.;}
 	   
            if (ist!=3){
 	     if (Den_theMBWh[ivar][iwh][ist][ipoint]>0.) {
 	       effTheMBWh[ivar][iwh][ist][ipoint]=
 		 double(Num_theMBWh[ivar][iwh][ist][ipoint])/double(Den_theMBWh[ivar][iwh][ist][ipoint]);
-	       errTheMBWh[ivar][iwh][ist][ipoint]=
-		 sqrt(  double(Num_theMBWh[ivar][iwh][ist][ipoint])
-			*(double(Den_theMBWh[ivar][iwh][ist][ipoint])-double(Num_theMBWh[ivar][iwh][ist][ipoint]))
-			/double(Den_theMBWh[ivar][iwh][ist][ipoint]))
-		 /double(Den_theMBWh[ivar][iwh][ist][ipoint]);
+	       errTheMBWh[ivar][iwh][ist][0][ipoint]=GetError(double(Den_theMBWh[ivar][iwh][ist][ipoint]),double(Num_theMBWh[ivar][iwh][ist][ipoint]),0);
+	       errTheMBWh[ivar][iwh][ist][1][ipoint]=GetError(double(Den_theMBWh[ivar][iwh][ist][ipoint]),double(Num_theMBWh[ivar][iwh][ist][ipoint]),1);
 	     }
-	   
-	     else {effTheMBWh[ivar][iwh][ist][ipoint]=0.; errTheMBWh[ivar][iwh][ist][ipoint]=0.;}	 
+	     else {effTheMBWh[ivar][iwh][ist][ipoint]=0.; errTheMBWh[ivar][iwh][ist][0][ipoint]=0.; errTheMBWh[ivar][iwh][ist][1][ipoint]=0.;}  	 
 	   }
 	 }
        }
        for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     
          if (Den_phiMB4Top[ivar][iwh][ipoint]>0.) {
 	   effMB4Top[ivar][iwh][ipoint]=double(Num_phiMB4Top[ivar][iwh][ipoint])/double(Den_phiMB4Top[ivar][iwh][ipoint]);
-	   errMB4Top[ivar][iwh][ipoint]=
-	     sqrt(  double(Num_phiMB4Top[ivar][iwh][ipoint])
-		    *(double(Den_phiMB4Top[ivar][iwh][ipoint])-double(Num_phiMB4Top[ivar][iwh][ipoint]))
-		    /double(Den_phiMB4Top[ivar][iwh][ipoint]))
-	     /double(Den_phiMB4Top[ivar][iwh][ipoint]);
+	   errMB4Top[ivar][iwh][0][ipoint]=GetError(double(Den_phiMB4Top[ivar][iwh][ipoint]),double(Num_phiMB4Top[ivar][iwh][ipoint]),0);
+	   errMB4Top[ivar][iwh][1][ipoint]=GetError(double(Den_phiMB4Top[ivar][iwh][ipoint]),double(Num_phiMB4Top[ivar][iwh][ipoint]),1);
          }
-         else {effMB4Top[ivar][iwh][ipoint]=0.; errMB4Top[ivar][iwh][ipoint]=0.;}
+         else {effMB4Top[ivar][iwh][ipoint]=0.; errMB4Top[ivar][iwh][0][ipoint]=0.; errMB4Top[ivar][iwh][1][ipoint]=0.;}
          if (ivar==1) cout<<" MB4Top (PU="<<PUslice[ipoint]<<") "<<effMB4Top[ivar][iwh][ipoint]
-                          <<" +- "<<errMB4Top[ivar][iwh][ipoint]<<endl;
+                          <<" + "<<errMB4Top[ivar][iwh][1][ipoint]<<" - "<<errMB4Top[ivar][iwh][1][ipoint]<<endl;
        } 
      }
      for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {     
        
        if (Den_phiMB4Bot[ivar][ipoint]>0.) {
 	 effMB4Bot[ivar][ipoint]=double(Num_phiMB4Bot[ivar][ipoint])/double(Den_phiMB4Bot[ivar][ipoint]);
-	 errMB4Bot[ivar][ipoint]=
-	   sqrt(  double(Num_phiMB4Bot[ivar][ipoint])
-		  *(double(Den_phiMB4Bot[ivar][ipoint])-double(Num_phiMB4Bot[ivar][ipoint]))
-		  /double(Den_phiMB4Bot[ivar][ipoint]))
-	   /double(Den_phiMB4Bot[ivar][ipoint]);
+
+	 errMB4Bot[ivar][0][ipoint]=GetError(double(Den_phiMB4Bot[ivar][ipoint]),double(Num_phiMB4Bot[ivar][ipoint]),0);
+	 errMB4Bot[ivar][1][ipoint]=GetError(double(Den_phiMB4Bot[ivar][ipoint]),double(Num_phiMB4Bot[ivar][ipoint]),1);
+
+
        }
-       else {effMB4Bot[ivar][ipoint]=0.; errMB4Bot[ivar][ipoint]=0.;}
+       else {effMB4Bot[ivar][ipoint]=0.; errMB4Bot[ivar][0][ipoint]=0.;errMB4Bot[ivar][1][ipoint]=0.;}
      }
    }
    
@@ -937,30 +855,40 @@ void EfficiencyMonitor::Loop()
      }
    }
 
-   TGraphErrors* MB4TopYB2PU      = new TGraphErrors (nLumiPoints, &PUslice[0],  effMB4Top[1][4],&PUe[0],   errMB4Top[1][4]);
-   TGraphErrors* MB4TopYB2Lumi    = new TGraphErrors (nLumiPoints, &lumislice[0],effMB4Top[0][4],&Lumie[0], errMB4Top[0][4]);
-
-   TGraphErrors* MB4BotPU      = new TGraphErrors (nLumiPoints, &PUslice[0],  effMB4Bot[1],&PUe[0],   errMB4Bot[1]);
-   TGraphErrors* MB4BotLumi    = new TGraphErrors (nLumiPoints, &lumislice[0],effMB4Bot[0],&Lumie[0], errMB4Bot[0]);
 
 
+//   float eff[nLumiPoints], err[nLumiPoints];
 
-   float eff[nLumiPoints], err[nLumiPoints];
+   TGraphAsymmErrors* MB4BotPU       = new TGraphAsymmErrors(nLumiPoints, &PUslice[0]    ,  effMB4Bot[1]              ,  &PUe[0]   ,   &PUe[0]   ,  errMB4Bot[1][0]       ,  errMB4Bot[1][1]        );
+   TGraphAsymmErrors* MB4BotLumi     = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effMB4Bot[0]              ,  &Lumie[0] ,   &Lumie[0] ,  errMB4Bot[0][0]       ,  errMB4Bot[0][1]        );
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[1][4][0][i]; err[i]=errPhiMBWh[1][4][0][i];}
-   TGraphErrors* MB1Wh2PU   = new TGraphErrors (nLumiPoints,&PUslice[0],  eff,         &PUe[0],   err);
+   TGraphAsymmErrors* MB4TopYB2PU    = new TGraphAsymmErrors(nLumiPoints, &PUslice[0]    ,  effMB4Top[1][4]           ,  &PUe[0]   ,   &PUe[0]   ,  errMB4Top[1][4][0]    ,  errMB4Top[1][4][1]     );
+   TGraphAsymmErrors* MB4TopYB2Lumi  = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effMB4Top[0][4]           ,  &Lumie[0] ,   &Lumie[0] ,  errMB4Top[0][4][0]    ,  errMB4Top[0][4][1]     );
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[0][4][0][i]; err[i]=errPhiMBWh[0][4][0][i];}
-   TGraphErrors* MB1Wh2Lumi   = new TGraphErrors (nLumiPoints,&lumislice[0],  eff,         &Lumie[0],   err);
+   TGraphAsymmErrors* MB1WhM2Lumi    = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effPhiMBWh[0][0][0]       ,  &Lumie[0] ,   &Lumie[0] ,  errPhiMBWh[0][0][0][0],  errPhiMBWh[0][0][0][1] );
+   TGraphAsymmErrors* MB1WhM1Lumi    = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effPhiMBWh[0][1][0]       ,  &Lumie[0] ,   &Lumie[0] ,  errPhiMBWh[0][1][0][0],  errPhiMBWh[0][1][0][1] );
+   TGraphAsymmErrors* MB1Wh0Lumi     = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effPhiMBWh[0][2][0]       ,  &Lumie[0] ,   &Lumie[0] ,  errPhiMBWh[0][2][0][0],  errPhiMBWh[0][2][0][1] );
+   TGraphAsymmErrors* MB1WhP1Lumi    = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effPhiMBWh[0][3][0]       ,  &Lumie[0] ,   &Lumie[0] ,  errPhiMBWh[0][3][0][0],  errPhiMBWh[0][3][0][1] );
+   TGraphAsymmErrors* MB1WhP2Lumi    = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effPhiMBWh[0][4][0]       ,  &Lumie[0] ,   &Lumie[0] ,  errPhiMBWh[0][4][0][0],  errPhiMBWh[0][4][0][1] );
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[1][2][0][i]; err[i]=errPhiMBWh[1][2][0][i];}
-   TGraphErrors* MB1Wh0PU   = new TGraphErrors (nLumiPoints,&PUslice[0],  eff,         &PUe[0],   err);
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effPhiMBWh[0][2][0][i]; err[i]=errPhiMBWh[0][2][0][i];}
-   TGraphErrors* MB1Wh0Lumi   = new TGraphErrors (nLumiPoints,&lumislice[0],  eff,         &Lumie[0],   err);
+   TGraphAsymmErrors* MB1WhM2PU      = new TGraphAsymmErrors(nPUPoints, &lumislice[0]    ,  effPhiMBWh[0][0][0]       ,  &PUe[0    ,   &PUe[0]  ,  errPhiMBWh[0][0][0][0] ,  errPhiMBWh[0][0][0][1] );
+   TGraphAsymmErrors* MB1WhM1PU      = new TGraphAsymmErrors(nPUPoints, &lumislice[0]    ,  effPhiMBWh[0][1][0]       ,  &PUe[0    ,   &PUe[0]  ,  errPhiMBWh[0][1][0][0] ,  errPhiMBWh[0][1][0][1] );
+   TGraphAsymmErrors* MB1Wh0PU       = new TGraphAsymmErrors(nPUPoints, &lumislice[0]    ,  effPhiMBWh[0][2][0]       ,  &PUe[0    ,   &PUe[0]  ,  errPhiMBWh[0][2][0][0] ,  errPhiMBWh[0][2][0][1] );
+   TGraphAsymmErrors* MB1WhP1PU      = new TGraphAsymmErrors(nPUPoints, &lumislice[0]    ,  effPhiMBWh[0][3][0]       ,  &PUe[0    ,   &PUe[0]  ,  errPhiMBWh[0][3][0][0] ,  errPhiMBWh[0][3][0][1] );
+   TGraphAsymmErrors* MB1WhP2PU      = new TGraphAsymmErrors(nPUPoints, &lumislice[0]    ,  effPhiMBWh[0][4][0]       ,  &PUe[0    ,   &PUe[0]  ,  errPhiMBWh[0][4][0][0] ,  errPhiMBWh[0][4][0][1] );
 
-   for (int i=0; i<nLumiPoints; i++) {eff[i]=effTheMBWh[0][2][0][i]; err[i]=errTheMBWh[0][2][0][i];}
-   TGraphErrors* MB1TheWh0Lumi   = new TGraphErrors (nLumiPoints,&lumislice[0],  eff,         &Lumie[0],   err);
+
+   TGraphAsymmErrors* MB1TheWh0Lumi   = new TGraphAsymmErrors(nLumiPoints, &lumislice[0]  ,  effTheMBWh[0][2][0]       ,  &Lumie[0] ,   &Lumie[0] ,  errTheMBWh[0][2][0][0],  errTheMBWh[0][2][0][1] );
+
+   
+   //   TGraphAsymmErrors* MB1Wh0PU        = new TGraphAsymmErrors(nLumiPoints, &PUslice[0]    ,  effPhiMBWh[1][2][0]       ,  &PUe[0]   ,   &PUe[0]   ,  errPhiMBWh[1][2][0][0],  errPhiMBWh[1][2][0][1] );
+
+   
+
+
+   TGraphAsymmErrors* MB1Wh2PU       = new TGraphAsymmErrors(nLumiPoints, &PUslice[0]    ,  effPhiMBWh[1][4][0]       ,  &PUe[0]   ,   &PUe[0]   ,  errPhiMBWh[1][4][0][0],  errPhiMBWh[1][4][0][1] );
+   //   TGraphAsymmErrors* MB1Wh2PU       = new TGraphAsymmErrors (nLumiPoints,&PUslice[0]  ,  effPhiMBWh[1][4][0]   ,  &PUe[0]   ,  &PUe[0],   errPhiMBWh[1][4][0], errPhiMBWh[1][4][0]);
 
 
    //   TCanvas *cextra  = new TCanvas(); //del
@@ -970,6 +898,17 @@ void EfficiencyMonitor::Loop()
 
    system("mkdir plot/");
    system(("mkdir plot/"+fileName).c_str());
+
+
+
+   TCanvas *c5  = new TCanvas();
+   MB1Wh0Lumi->SetTitle("MB1Wh0Lumi");
+   MB1Wh0Lumi->SetMarkerStyle(20);
+   MB1Wh0Lumi->GetYaxis()->SetTitle("Eff.");
+   MB1Wh0Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
+   MB1Wh0Lumi->Draw("ap");
+   c5->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh0Lumi.png").c_str());
+
 
 
    TCanvas *c1  = new TCanvas();
@@ -1027,13 +966,7 @@ void EfficiencyMonitor::Loop()
    MB1Wh2PU->Draw("ap");
    c4->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh2PU.png").c_str());
    
-   TCanvas *c5  = new TCanvas();
-   MB1Wh0Lumi->SetTitle("MB1Wh0Lumi");
-   MB1Wh0Lumi->SetMarkerStyle(20);
-   MB1Wh0Lumi->GetYaxis()->SetTitle("Eff.");
-   MB1Wh0Lumi->GetXaxis()->SetTitle("Ins. Luminosity (cm^{-2}s^{-1}10^{30})");
-   MB1Wh0Lumi->Draw("ap");
-   c5->SaveAs(("plot/"+fileName+"/"+fileName+"MB1Wh0Lumi.png").c_str());
+
    
    TCanvas *c6  = new TCanvas();
    MB1Wh2Lumi->SetTitle("MB1Wh2Lumi");
