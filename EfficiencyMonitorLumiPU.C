@@ -824,8 +824,8 @@ void EfficiencyMonitor::Loop()
    
    // computing efficiencies
    
-   float effPhiMBWh[2][nLumiPoints][4][5]; float errPhiMBWh[2][nLumiPoints][4][5];
-   float effTheMBWh[2][nLumiPoints][3][5]; float errTheMBWh[2][nLumiPoints][3][5];
+   float effPhiMBWh[2][5][4][nLumiPoints]; float errPhiMBWh[2][5][4][nLumiPoints];
+   float effTheMBWh[2][5][3][nLumiPoints]; float errTheMBWh[2][5][3][nLumiPoints];
    float effMB4Top[2][5][nLumiPoints];     float errMB4Top[2][5][nLumiPoints];
    float effMB4Bot[2][nLumiPoints];        float errMB4Bot[2][nLumiPoints];
    
