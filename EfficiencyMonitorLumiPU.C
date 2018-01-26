@@ -835,7 +835,8 @@ void EfficiencyMonitor::Loop()
        for (int ist=0; ist<4; ist++){
 	 for (int ipoint=0; ipoint<nLumiPoints; ipoint++) {
 	   
-	   std::cout<<ivar<<" "<<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint]<<std::endl;
+	   std::cout<<ivar<<" "<<iwh<<" "<<ist<<" "<<ipoint<<" "<<Num_phiMBWh[ivar][iwh][ist][ipoint]<<" "<<Den_phiMBWh[ivar][iwh][ist][ipoint]<<std::endl;
+
 	   if (Den_phiMBWh[ivar][iwh][ist][ipoint]>0.) {
 	     effPhiMBWh[ivar][iwh][ist][ipoint]=
 	       double(Num_phiMBWh[ivar][iwh][ist][ipoint])/double(Den_phiMBWh[ivar][iwh][ist][ipoint]);
