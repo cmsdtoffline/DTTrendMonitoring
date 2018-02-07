@@ -299,9 +299,9 @@ void EfficiencyMonitor::Loop()
      }
      while (idead!=0);
    }
-   
+   //   cout<<"MAX "<<fChain->GetMaximum("lumiblock")<<std::endl;; //del
 
-   std::vector<Float_t>  varVal  = {0,0}; //hot
+   std::vector<Float_t>  varVal  = {0,0}; 
 
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
      
@@ -736,6 +736,14 @@ void EfficiencyMonitor::Loop()
    
    system(("mkdir "+WebFolder+"/"+fileName).c_str());
    system(("cp "+WebFolder+"/index.php " +WebFolder+"/"+fileName).c_str());
+
+   system(("mkdir "+WebFolder+"/"+fileName+"/Efficiency").c_str());
+   system(("cp "+WebFolder+"/index.php " +WebFolder+"/"+fileName+"/Efficiency").c_str());
+
+   system(("mkdir "+WebFolder+"/"+fileName+"/Background").c_str());
+   system(("cp "+WebFolder+"/index.php " +WebFolder+"/"+fileName+"/Background").c_str());
+
+
    //   cout<<"cp "+WebFolder+"/index.php " +WebFolder+"/"+fileName<<endl;
    for (int ivar=0; ivar<nVar; ivar++) {
      for (int iwh=0; iwh<5; iwh++){
@@ -806,11 +814,23 @@ void EfficiencyMonitor::Loop()
        //phi
        TCanvas *cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+varName[ivar]).c_str());
        
+       //       double xmin = TMath::MinElement(g->GetN(),g->GetX()); 
+
+       // int binmax =Eff_phiMBWh[ivar][0][ist]->GetTotalHistogram()->GetMaximumBin();
+       // double xMax = Eff_phiMBWh[ivar][0][ist]->GetTotalHistogram()->GetXaxis()->GetBinCenter(binmax);
+       // xMax+=xMax*0.1;
+
+       // int binmin =Eff_phiMBWh[ivar][0][ist]->GetTotalHistogram()->GetMinimumBin();
+       // double xMin = Eff_phiMBWh[ivar][0][ist]->GetTotalHistogram()->GetXaxis()->GetBinCenter(binmin);
+       // xMin+=xMin*0.1;
+
+       // cout<<"xmin "<<xMin<<" xmax "<<xMax<<endl;
        Eff_phiMBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" eff vs "+varTitle[ivar]).c_str());
        Eff_phiMBWh[ivar][0][ist]->Draw("ap");
        
        gPad->Update(); 
        auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph(); 
+       //       graph->GetXaxis()->SetRangeUser(xMin,xMax);
        graph->SetMinimum(0.89);
        graph->SetMaximum(1.02); 
        gPad->Update(); 
@@ -821,7 +841,7 @@ void EfficiencyMonitor::Loop()
 	 legPhiMB->AddEntry(Eff_phiMBWh[ivar][iwh][0],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
        }
        legPhiMB->Draw("same");
-       cPhiMB->SaveAs((WebFolder+"/"+fileName+"/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+varName[ivar]+".png").c_str());
+       cPhiMB->SaveAs((WebFolder+"/"+fileName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+varName[ivar]+".png").c_str());
        
        
        //theta
@@ -842,7 +862,7 @@ void EfficiencyMonitor::Loop()
 	 legTheMB->AddEntry(Eff_phiMBWh[ivar][iwh][0],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
        }
        legTheMB->Draw("same");
-       cTheMB->SaveAs((WebFolder+"/"+fileName+"/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+varName[ivar]+".png").c_str());
+       cTheMB->SaveAs((WebFolder+"/"+fileName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+varName[ivar]+".png").c_str());
        
      }
      
@@ -864,8 +884,7 @@ void EfficiencyMonitor::Loop()
        legPhiMB4Top->AddEntry(Eff_phiMB4Top[ivar][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
      }
      legPhiMB4Top->Draw("same");
-     cPhiMB4Top->SaveAs((WebFolder+"/"+fileName+"/"+"MB4TopPhiEffVs"+varName[ivar]+".png").c_str());
-     
+     cPhiMB4Top->SaveAs((WebFolder+"/"+fileName+"/Efficiency/"+"MB4TopPhiEffVs"+varName[ivar]+".png").c_str());
      
      
      //phi MB4 Top
@@ -880,7 +899,7 @@ void EfficiencyMonitor::Loop()
      graph->SetMaximum(1.02); 
      gPad->Update(); 
      
-     cPhiMB4Bot->SaveAs((WebFolder+"/"+fileName+"/"+"MB4BotPhiEffVs"+varName[ivar]+".png").c_str());
+     cPhiMB4Bot->SaveAs((WebFolder+"/"+fileName+"/Efficiency/"+"MB4BotPhiEffVs"+varName[ivar]+".png").c_str());
    }
    
    //Graph bkg
@@ -903,7 +922,7 @@ void EfficiencyMonitor::Loop()
 	 legMB->AddEntry(Gr_MBWh[ivar][iwh][0],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
        }
        legMB->Draw("same");
-       cMB->SaveAs((WebFolder+"/"+fileName+"/"+"MB"+(std::to_string(ist+1))+"BkgVs"+varName[ivar]+".png").c_str());
+       cMB->SaveAs((WebFolder+"/"+fileName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+varName[ivar]+".png").c_str());
        
      }
      // MB4 Top
@@ -918,7 +937,7 @@ void EfficiencyMonitor::Loop()
        legMB4Top->AddEntry(Gr_MB4Top[ivar][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
      }
      legMB4Top->Draw("same");
-     cMB4Top->SaveAs((WebFolder+"/"+fileName+"/"+"MB4TopBkgVs"+varName[ivar]+".png").c_str());
+     cMB4Top->SaveAs((WebFolder+"/"+fileName+"/Background/"+"MB4TopBkgVs"+varName[ivar]+".png").c_str());
      
      
      // MB4 Top
@@ -927,7 +946,7 @@ void EfficiencyMonitor::Loop()
      Gr_MB4Bot[ivar]->SetTitle(("MB4Bot bkg vs "+varTitle[ivar]).c_str());
      Gr_MB4Bot[ivar]->Draw("E1");
     
-     cMB4Bot->SaveAs((WebFolder+"/"+fileName+"/"+"MB4BotBkgVs"+varName[ivar]+".png").c_str());
+     cMB4Bot->SaveAs((WebFolder+"/"+fileName+"/Background/"+"MB4BotBkgVs"+varName[ivar]+".png").c_str());
    }      
      
 }
