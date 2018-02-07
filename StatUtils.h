@@ -12,10 +12,11 @@ Float_t GetError(int n, int k, bool isUp, float level=0.68540158589942957){
   if(k==n) xhigh = 1.;
   else  xhigh = ROOT::Math::beta_quantile(1. - alpha,k+1.,n-k);
   if(isUp){
-    std::cout<<"high err "<<xhigh<<std::endl;                                                                            return xhigh - k/float(n);
+    //std::cout<<"high err "<<xhigh<<std::endl;
+    return xhigh - k/float(n);
   }
   else{
-    std::cout<<"low err "<<xlow<<std::endl;
+    //    std::cout<<"low err "<<xlow<<std::endl;
     return k/float(n) - xlow;
   }
 }
