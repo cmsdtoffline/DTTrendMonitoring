@@ -108,6 +108,7 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   dataCont = extDataCont;
   fOut     = new TFile (("data/results/"+outFileName+".root").c_str(),"RECREATE"); //FIXME. RECREATWE->CREATE
 
+
   LumiFileName = "DT_"+LumiFileName_;
 
   for (int ivar=0; ivar<dataCont.nVar; ivar++){
@@ -777,7 +778,7 @@ TH2F * plotter::set2DHistoBin( TH2F *hIn, Float_t MaxErr){
   Cont.push_back(vector<Double_t>());
   for(int biny = 1; biny<=nYBins; biny++) Cont.back().push_back(0.);
 
-  TH2F * hNew = new TH2F((string(hIn->GetName())+"copy").c_str(),"",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
+  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
   for(uint binx = 1; binx<=xBins.size()-1; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->SetBinContent(binx,biny, Cont[binx-1][biny-1]);
@@ -884,6 +885,7 @@ TEfficiency * plotter::setEffRun( TEfficiency *eff1 ){
 
 
 void plotter::setAddBins(){
+
   for (int ivar=0; ivar<dataCont.nVar; ivar++) {
     if(dataCont.varName[ivar]=="Run"){
       for (int iwh=0; iwh<5; iwh++){
@@ -916,14 +918,14 @@ TH2F * plotter::add2DHistoBinRun( TH2F *hIn, int ivar){
   Int_t nYBins  = hIn->GetNbinsY();       
   
   const  TArrayD *arrY = hIn->GetYaxis()->GetXbins();
-  
+
   std::vector<Double_t> xBins;
   xBins  =  dataCont.slices[ivar];
 
   //  for(int bin = 1; bin<=nXBins; bin++)  
   //  xBins.push_back(bin);
   
-  TH2F * hNew = new TH2F((string(hIn->GetName())+"copy").c_str(),"",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
+  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->SetBinContent(binx,biny, hIn->GetBinContent(binx,biny));
@@ -1135,7 +1137,7 @@ TH2F * plotter::getIntLumiHisto( TH2F *hIn, Int_t ivar){
 
   TotLumi = 0; // reset total lumi
 
-  TH2F * hNew = new TH2F((string(hIn->GetName())+"copy").c_str(),"",30*xBins.size(),xBins.at(0)-xBins.at(0)/10.,xBins.back()+xBins.back()/10.,nYBins,arrY->GetArray());
+  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",30*xBins.size(),xBins.at(0)-xBins.at(0)/10.,xBins.back()+xBins.back()/10.,nYBins,arrY->GetArray());
 
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
@@ -1165,7 +1167,7 @@ TH2F * plotter::set2DHistoBinRun( TH2F *hIn, int ivar){
     xBins.push_back(arrX->GetArray()[bin-1]);
   }
 
-  TH2F * hNew = new TH2F((string(hIn->GetName())+"copy").c_str(),"",xBins.size(),xBins[0],xBins.back(),nYBins,arrY->GetArray());
+  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",xBins.size(),xBins[0],xBins.back(),nYBins,arrY->GetArray());
 
   for(uint binx = 1; binx<=xBins.size(); binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
