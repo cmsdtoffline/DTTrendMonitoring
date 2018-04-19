@@ -54,8 +54,8 @@ Dataset2017 = {"Run2017A": "/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/DT
 
 
 def getLumis(inputFile):
-    RunLumis = lu.RunLumis({})
 
+    RunLumis = lu.RunLumis({})
     vals = []
     vals.append(lu.getRunLumis(fname))
     allRunLumis = sum(vals, RunLumis)
@@ -63,8 +63,6 @@ def getLumis(inputFile):
 
 
 if __name__ == '__main__':
-
-    print "extFile",extFile
 
     if extFile=="":
         if   year=="2016": Dataset = Dataset2016
@@ -74,32 +72,31 @@ if __name__ == '__main__':
     else:  Dataset = {name:extFile}
 
     # print "#################################"
-    print "    Producing Lumi JSON starting from DT DQM TTree   "
+    print "   Producing Lumi JSON starting from DT DQM TTree   "
 
     jsonFilesList = []
     # dictionary are not ordered, so the loop is randomly distributed on the keys
     # for k, fname in Dataset2016.items():
     #
     # The following looping method guaranitee and ordered loop onto the keys
+
     for key in sorted(Dataset):
-        print "key",key
         fname = Dataset[key]
 
         # Class define in lumi_utils that handles Runs and Lumi Blocks
         datasetRunLumis = getLumis(fname)
 
         path = "data/"
-        # print allRunLumis
+
         outFileName = "DT_" + key + ".json"
         outFileCSV  = "DT_" + key + ".csv"
 
-        outFileName = path + "RunJson" + outFileName
-        outFileCSV  = path + "IntLumi" + outFileCSV
+        outFileName = path + "RunJson/" + outFileName
+        outFileCSV  = path + "IntLumi/" + outFileCSV
 
         jsonFilesList.append(outFileName)
         print "outFileName",outFileName
         datasetRunLumis.writeToFile(outFileName)
-        print "fname",fname
         print "\t SAVED!! - {:s}".format(fname)
     ### Run brilcalc
         subprocess.call(["brilcalc", "lumi", "-u/pb", "-o"+outFileCSV, "-i"+outFileName])
