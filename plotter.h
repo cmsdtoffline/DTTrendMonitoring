@@ -1028,13 +1028,17 @@ float plotter::getLumiRun(string run){
 	 if(pos!=string::npos){
 	   isFound =true;
 	   break;
-
 	 }
        }
      if(isFound) break;
      else intLumi=0;
   }
 
+  if(isFound){
+    cout<<"ERROR!!!  Run not found in integrated luminosity directory. Please run first createJSONs.py as written in the README"<<endl;
+    abort();
+  }
+  cout<<"run "<<run<<" "<<TotLumi<<" "<<intLumi<<endl;
   TotLumi+=intLumi;
   return TotLumi;  
 
@@ -1103,6 +1107,7 @@ TEfficiency * plotter::getIntLumiEff( TEfficiency *effIn, Int_t ivar){
   TH1F * hPass = new TH1F( (string(effIn->GetName())+"_Pass").c_str(),effIn->GetTitle(),30*xBins.size(),xBins.at(0),xBins.back()+xBins.back()/10.);
 
   for(int bin = 1; bin<=nBins; bin++){
+    //  cout<<bin<<" "<<hTot->FindBin(xBins[bin-1])<< " "<<hTot->GetBinCenter(bin-1)<<" "<<effIn->GetPassedHistogram()->GetBinContent(bin)/effIn->GetTotalHistogram()->GetBinContent(bin)<<endl;
     hTot->AddBinContent( hTot->FindBin(xBins[bin-1])  , effIn->GetTotalHistogram()->GetBinContent(bin));
     hPass->AddBinContent(hPass->FindBin(xBins[bin-1]) , effIn->GetPassedHistogram()->GetBinContent(bin));
   }
