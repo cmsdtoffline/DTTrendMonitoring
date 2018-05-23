@@ -6,7 +6,10 @@ More info about the code could be found in the pdf presentation stored in the `d
 
 [Wiki page](https://github.com/clacaputo/DTTrendMonitoring/wiki)
 
-If in AFS you can set up the environment with 
+
+An envoirment from cmssw is needed to have the right libraries. So you need to type cmsenv from a release > 8_0_X
+
+To set up brilcalc use:
 
 ```
 source Setup.sh
@@ -16,38 +19,38 @@ source Setup.sh
 
 
 ```
-python createJSONs.py -e fileName.root -n refName
+python createJSONs.py -e fileName.root -n refName -y year
 ```
 
 For example
 
 ```
-python createJSONs.py -e /eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/Express/DTTree_Run295463.root -n Run295463
+python createJSONs.py -e /eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/Express/DTTree_Run295463.root -n Run295463 -y 2017
 ```
 
 - refName must have the format Run[number] in order to be used in the next step.
 
-
+- year is needed to compute the integrated luminosity from the begining of the first run of that year.
 
 There are two type of run: 
 - As a function of variables such integrated luminosity or time where you add new bins in order to have a trending plot.
-  - The code is run_type1.C
+  - The code is run_IncreasingRange.C
 - As a function of variables such instantaneous luminosity or PU where the variable range is fixed and you can increase the statistic using new files. 
-  - The code is run_type2.C
+  - The code is run_FixedRange.C
 
 To run the code for the first option, please follow these steps:
 
 ```
 root 
 
-.L run_type1.C+
+.L run_IncreasingRange.C+
 
 ```
 
 Then to start from scratch with a new file
 
 ```
-run_type1("refName","storingName","","file.root")
+run_IncreasingRange("refName","storingName","","file.root")
 
 ```
 
@@ -58,15 +61,15 @@ The storage located in data/results . refName correspond also to the directory n
 As example:
 
 ```
-run_type1("Run295463","295463","","/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/Express/DTTree_Run295463.root")
+run_IncreasingRange("Run295463","295463","","/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/Express/DTTree_Run295463.root")
 
-run_type1("Run2016B","test","","/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016BZMu23Sep2016-v1.root")
+run_IncreasingRange("Run2016B","test","","/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016BZMu23Sep2016-v1.root")
 ```
 
 If there is already a stored file and you want to update the old plots with the new file please do:
 
 ```
-run_type1("refName","storingName","storedName","file.root")
+run_IncreasingRange("refName","storingName","storedName","file.root")
 
 ``` 
 
@@ -77,5 +80,5 @@ For the second option the procedure is identical.
 It is also possible to run more then one file at the same time:
 
 ```
-run_type1("refName","storingName","","file1.root","file2.root","file3.root")
+run_IncreasingRange("refName","storingName","","file1.root","file2.root","file3.root")
 ```
