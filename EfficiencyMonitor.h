@@ -21,6 +21,8 @@
 #include <vector>
 
 #include <iostream>
+#include "plotter.h"
+//#include "EfficiencyMonitorSetting.C"
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
 namespace container{
@@ -78,9 +80,16 @@ public :
 
    std::string dataset;
    std::string fileName;
+   std::string outName;
+   std::string legacyName;
+
+   context dataContext;
+
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
+
+   plotter         *plots;
 
    // Declaration of leaf types
    Int_t           runnumber;
@@ -187,6 +196,13 @@ public :
    vector<short>   *ltTwinMux_thHits;
    vector<short>   *Mu_isMuGlobal;
    vector<short>   *Mu_isMuTracker;
+
+
+   vector<short>   *Mu_isMuTrackerArb;
+   vector<short>   *Mu_isMuStandAlone;
+   vector<short>   *Mu_isMuRPC;
+   vector<int>     *Mu_nMatches;
+
    vector<int>     *Mu_numberOfChambers_sta;
    vector<int>     *Mu_numberOfMatches_sta;
    vector<int>     *Mu_numberOfHits_sta;
@@ -214,20 +230,23 @@ public :
    vector<float>   *Mu_z_mb2_mu;
    vector<float>   *Mu_phi_mb2_mu;
    vector<float>   *Mu_pseta_mb2_mu;
+   TClonesArray    *Mu_matches_Wh;
+   TClonesArray    *Mu_matches_Sec;
+   TClonesArray    *Mu_matches_St;
    vector<short>   *gmt_bx;
    vector<float>   *gmt_phi;
    vector<float>   *gmt_eta;
    vector<float>   *gmt_pt;
    vector<short>   *gmt_qual;
-   vector<short>   *gmt_detector;
-   vector<short>   *gmt_cands_fwd;
-   vector<short>   *gmt_cands_isRpc;
-   vector<short>   *gmt_cands_bx;
-   vector<float>   *gmt_cands_phi;
-   vector<float>   *gmt_cands_eta;
-   vector<float>   *gmt_cands_pt;
-   vector<short>   *gmt_cands_qual;
-   vector<short>   *gmt_cands_ismatched;
+   //   vector<short>   *gmt_detector;
+   /* vector<short>   *gmt_cands_fwd; */
+   /* vector<short>   *gmt_cands_isRpc; */
+   /* vector<short>   *gmt_cands_bx; */
+   /* vector<float>   *gmt_cands_phi; */
+   /* vector<float>   *gmt_cands_eta; */
+   /* vector<float>   *gmt_cands_pt; */
+   /* vector<short>   *gmt_cands_qual; */
+   /* vector<short>   *gmt_cands_ismatched; */
    vector<short>   *gt_algo_bit;
    vector<short>   *gt_algo_bx;
    vector<short>   *gt_tt_bit;
@@ -250,7 +269,7 @@ public :
    Short_t         NdtltTwinMuxIn;
    Short_t         Nmuons;
    Short_t         Ngmt;
-   Short_t         Ngmtcands;
+   //   Short_t         Ngmtcands;
    Short_t         Ngtalgo;
    Short_t         Ngttechtrig;
    Short_t         Nhlt;
@@ -361,6 +380,18 @@ public :
    TBranch        *b_ltTwinMux_thHits;   //!
    TBranch        *b_Mu_isMuGlobal;   //!
    TBranch        *b_Mu_isMuTracker;   //!
+
+   TBranch        *b_Mu_isMuTrackerArb;   //!
+   TBranch        *b_Mu_isMuStandAlone;   //!
+   TBranch        *b_Mu_isMuRPC;   //!
+   TBranch        *b_Mu_nMatches;   //!
+
+   TBranch        *b_Mu_matches_Wh;   //!
+   TBranch        *b_Mu_matches_Sec;   //!
+   TBranch        *b_Mu_matches_St;   //!
+
+
+
    TBranch        *b_Mu_numberOfChambers_sta;   //!
    TBranch        *b_Mu_numberOfMatches_sta;   //!
    TBranch        *b_Mu_numberOfHits_sta;   //!
@@ -393,15 +424,15 @@ public :
    TBranch        *b_gmt_eta;   //!
    TBranch        *b_gmt_pt;   //!
    TBranch        *b_gmt_qual;   //!
-   TBranch        *b_gmt_detector;   //!
-   TBranch        *b_gmt_cands_fwd;   //!
-   TBranch        *b_gmt_cands_isRpc;   //!
-   TBranch        *b_gmt_cands_bx;   //!
-   TBranch        *b_gmt_cands_phi;   //!
-   TBranch        *b_gmt_cands_eta;   //!
-   TBranch        *b_gmt_cands_pt;   //!
-   TBranch        *b_gmt_cands_qual;   //!
-   TBranch        *b_gmt_cands_ismatched;   //!
+   /* TBranch        *b_gmt_detector;   //! */
+   /* TBranch        *b_gmt_cands_fwd;   //! */
+   /* TBranch        *b_gmt_cands_isRpc;   //! */
+   /* TBranch        *b_gmt_cands_bx;   //! */
+   /* TBranch        *b_gmt_cands_phi;   //! */
+   /* TBranch        *b_gmt_cands_eta;   //! */
+   /* TBranch        *b_gmt_cands_pt;   //! */
+   /* TBranch        *b_gmt_cands_qual;   //! */
+   /* TBranch        *b_gmt_cands_ismatched;   //!g */
    TBranch        *b_gt_algo_bit;   //!
    TBranch        *b_gt_algo_bx;   //!
    TBranch        *b_gt_tt_bit;   //!
@@ -424,13 +455,14 @@ public :
    TBranch        *b_NdtltTwinMuxIn;   //!
    TBranch        *b_Nmuons;   //!
    TBranch        *b_Ngmt;   //!
-   TBranch        *b_Ngmtcands;   //!
+   //   TBranch        *b_Ngmtcands;   //!
    TBranch        *b_Ngtalgo;   //!
    TBranch        *b_Ngttt;   //!
    TBranch        *b_Nhlt;   //!
    TBranch        *b_NrpcRecHits;   //!
 
-   EfficiencyMonitor(TTree *tree=0,  std::string extFileName = "");
+   
+   EfficiencyMonitor(context extContext, TTree *tree=0, std::string extFileName = "", std::string extOutName = "", std::string extLegacy = "");
    virtual ~EfficiencyMonitor();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -438,29 +470,34 @@ public :
    virtual void     Init(TTree *tree);
    virtual void     PreLoop();
    virtual void     Loop();
-   virtual void     PostLoop();
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
-};
+   void write();
+   void plot();
+   void SetRunSlices(int iVar);
 
+   Float_t getBkgDigi(Int_t jentry, Int_t Wheel, Int_t Sector, Int_t Station);
+
+};
 #endif
 
 #ifdef EfficiencyMonitor_cxx
-EfficiencyMonitor::EfficiencyMonitor(TTree *tree , std::string extFileName) : fChain(0)
+
+EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::string extFileName, std::string extOutName, std::string extLegacyName) : fChain(0)
 {
 // if parameter tree is not specified (or zero), connect the file
 // used to generate this class and read the Tree
 
      dataset='G';
-
-   // if parameter tree is not specified (or zero), connect the file
-   // used to generate this class and read the Tree.
-      if (tree == 0) {
-
-        std::string datasetname;
-        datasetname.append("/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016");
-        //datasetname.append("/gpfs_data/local/cms/cavallo/BEAM2016/Run2016");
-        if (dataset=='H') datasetname = datasetname + dataset + "ZMuPromptReco-v2.root";
+     
+     // if parameter tree is not specified (or zero), connect the file
+     // used to generate this class and read the Tree.
+     if (tree == 0) {
+       
+       std::string datasetname;
+       datasetname.append("/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016");
+       //datasetname.append("/gpfs_data/local/cms/cavallo/BEAM2016/Run2016");
+       if (dataset=='H') datasetname = datasetname + dataset + "ZMuPromptReco-v2.root";
         else              datasetname = datasetname + dataset + "ZMu23Sep2016-v1.root";
         cout<<datasetname<<endl;
 
@@ -489,8 +526,13 @@ EfficiencyMonitor::EfficiencyMonitor(TTree *tree , std::string extFileName) : fC
       // f->GetObject("DTTree",tree);
 
    }
-      fileName = extFileName;
-   Init(tree);
+      fileName    = extFileName;
+      legacyName  = extLegacyName;
+      outName     = extOutName;
+      dataContext = extContext; 
+      Init(tree);
+      if(dataContext.name=="run") SetRunSlices(0); //fixme
+      plots = new plotter(dataContext,legacyName,outName,fileName);
 }
 
 EfficiencyMonitor::~EfficiencyMonitor()
@@ -613,6 +655,10 @@ void EfficiencyMonitor::Init(TTree *tree)
    ltTwinMux_thHits = 0;
    Mu_isMuGlobal = 0;
    Mu_isMuTracker = 0;
+   Mu_isMuTrackerArb = 0;
+   Mu_isMuStandAlone = 0;
+   Mu_isMuRPC = 0;
+   Mu_nMatches = 0;
    Mu_numberOfChambers_sta = 0;
    Mu_numberOfMatches_sta = 0;
    Mu_numberOfHits_sta = 0;
@@ -636,6 +682,9 @@ void EfficiencyMonitor::Init(TTree *tree)
    Mu_ntkIsoR03_glb = 0;
    Mu_emIsoR03_glb = 0;
    Mu_hadIsoR03_glb = 0;
+   Mu_matches_Wh = 0;
+   Mu_matches_Sec = 0;
+   Mu_matches_St = 0;
    STAMu_caloCompatibility = 0;
    Mu_z_mb2_mu = 0;
    Mu_phi_mb2_mu = 0;
@@ -645,15 +694,15 @@ void EfficiencyMonitor::Init(TTree *tree)
    gmt_eta = 0;
    gmt_pt = 0;
    gmt_qual = 0;
-   gmt_detector = 0;
-   gmt_cands_fwd = 0;
-   gmt_cands_isRpc = 0;
-   gmt_cands_bx = 0;
-   gmt_cands_phi = 0;
-   gmt_cands_eta = 0;
-   gmt_cands_pt = 0;
-   gmt_cands_qual = 0;
-   gmt_cands_ismatched = 0;
+   /* gmt_detector = 0; */
+   /* gmt_cands_fwd = 0; */
+   /* gmt_cands_isRpc = 0; */
+   /* gmt_cands_bx = 0; */
+   /* gmt_cands_phi = 0; */
+   /* gmt_cands_eta = 0; */
+   /* gmt_cands_pt = 0; */
+   /* gmt_cands_qual = 0; */
+   /* gmt_cands_ismatched = 0; */
    gt_algo_bit = 0;
    gt_algo_bx = 0;
    gt_tt_bit = 0;
@@ -778,6 +827,10 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("ltTwinMux_thHits", &ltTwinMux_thHits, &b_ltTwinMux_thHits);
    fChain->SetBranchAddress("Mu_isMuGlobal", &Mu_isMuGlobal, &b_Mu_isMuGlobal);
    fChain->SetBranchAddress("Mu_isMuTracker", &Mu_isMuTracker, &b_Mu_isMuTracker);
+   fChain->SetBranchAddress("Mu_isMuTrackerArb", &Mu_isMuTrackerArb, &b_Mu_isMuTrackerArb);
+   fChain->SetBranchAddress("Mu_isMuStandAlone", &Mu_isMuStandAlone, &b_Mu_isMuStandAlone);
+   fChain->SetBranchAddress("Mu_isMuRPC", &Mu_isMuRPC, &b_Mu_isMuRPC);
+   fChain->SetBranchAddress("Mu_nMatches", &Mu_nMatches, &b_Mu_nMatches);
    fChain->SetBranchAddress("Mu_numberOfChambers_sta", &Mu_numberOfChambers_sta, &b_Mu_numberOfChambers_sta);
    fChain->SetBranchAddress("Mu_numberOfMatches_sta", &Mu_numberOfMatches_sta, &b_Mu_numberOfMatches_sta);
    fChain->SetBranchAddress("Mu_numberOfHits_sta", &Mu_numberOfHits_sta, &b_Mu_numberOfHits_sta);
@@ -805,20 +858,23 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("Mu_z_mb2_mu", &Mu_z_mb2_mu, &b_Mu_z_mb2_mu);
    fChain->SetBranchAddress("Mu_phi_mb2_mu", &Mu_phi_mb2_mu, &b_Mu_phi_mb2_mu);
    fChain->SetBranchAddress("Mu_pseta_mb2_mu", &Mu_pseta_mb2_mu, &b_Mu_pseta_mb2_mu);
+   fChain->SetBranchAddress("Mu_matches_Wh", &Mu_matches_Wh, &b_Mu_matches_Wh);
+   fChain->SetBranchAddress("Mu_matches_Sec", &Mu_matches_Sec, &b_Mu_matches_Sec);
+   fChain->SetBranchAddress("Mu_matches_St", &Mu_matches_St, &b_Mu_matches_St);
    fChain->SetBranchAddress("gmt_bx", &gmt_bx, &b_gmt_bx);
    fChain->SetBranchAddress("gmt_phi", &gmt_phi, &b_gmt_phi);
    fChain->SetBranchAddress("gmt_eta", &gmt_eta, &b_gmt_eta);
    fChain->SetBranchAddress("gmt_pt", &gmt_pt, &b_gmt_pt);
    fChain->SetBranchAddress("gmt_qual", &gmt_qual, &b_gmt_qual);
-   fChain->SetBranchAddress("gmt_detector", &gmt_detector, &b_gmt_detector);
-   fChain->SetBranchAddress("gmt_cands_fwd", &gmt_cands_fwd, &b_gmt_cands_fwd);
-   fChain->SetBranchAddress("gmt_cands_isRpc", &gmt_cands_isRpc, &b_gmt_cands_isRpc);
-   fChain->SetBranchAddress("gmt_cands_bx", &gmt_cands_bx, &b_gmt_cands_bx);
-   fChain->SetBranchAddress("gmt_cands_phi", &gmt_cands_phi, &b_gmt_cands_phi);
-   fChain->SetBranchAddress("gmt_cands_eta", &gmt_cands_eta, &b_gmt_cands_eta);
-   fChain->SetBranchAddress("gmt_cands_pt", &gmt_cands_pt, &b_gmt_cands_pt);
-   fChain->SetBranchAddress("gmt_cands_qual", &gmt_cands_qual, &b_gmt_cands_qual);
-   fChain->SetBranchAddress("gmt_cands_ismatched", &gmt_cands_ismatched, &b_gmt_cands_ismatched);
+   /* fChain->SetBranchAddress("gmt_detector", &gmt_detector, &b_gmt_detector); */
+   /* fChain->SetBranchAddress("gmt_cands_fwd", &gmt_cands_fwd, &b_gmt_cands_fwd); */
+   /* fChain->SetBranchAddress("gmt_cands_isRpc", &gmt_cands_isRpc, &b_gmt_cands_isRpc); */
+   /* fChain->SetBranchAddress("gmt_cands_bx", &gmt_cands_bx, &b_gmt_cands_bx); */
+   /* fChain->SetBranchAddress("gmt_cands_phi", &gmt_cands_phi, &b_gmt_cands_phi); */
+   /* fChain->SetBranchAddress("gmt_cands_eta", &gmt_cands_eta, &b_gmt_cands_eta); */
+   /* fChain->SetBranchAddress("gmt_cands_pt", &gmt_cands_pt, &b_gmt_cands_pt); */
+   /* fChain->SetBranchAddress("gmt_cands_qual", &gmt_cands_qual, &b_gmt_cands_qual); */
+   /* fChain->SetBranchAddress("gmt_cands_ismatched", &gmt_cands_ismatched, &b_gmt_cands_ismatched); */
    fChain->SetBranchAddress("gt_algo_bit", &gt_algo_bit, &b_gt_algo_bit);
    fChain->SetBranchAddress("gt_algo_bx", &gt_algo_bx, &b_gt_algo_bx);
    fChain->SetBranchAddress("gt_tt_bit", &gt_tt_bit, &b_gt_tt_bit);
@@ -841,7 +897,7 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("NdtltTwinMuxIn", &NdtltTwinMuxIn, &b_NdtltTwinMuxIn);
    fChain->SetBranchAddress("Nmuons", &Nmuons, &b_Nmuons);
    fChain->SetBranchAddress("Ngmt", &Ngmt, &b_Ngmt);
-   fChain->SetBranchAddress("Ngmtcands", &Ngmtcands, &b_Ngmtcands);
+   //   fChain->SetBranchAddress("Ngmtcands", &Ngmtcands, &b_Ngmtcands);
    fChain->SetBranchAddress("Ngtalgo", &Ngtalgo, &b_Ngtalgo);
    fChain->SetBranchAddress("Ngttechtrig", &Ngttechtrig, &b_Ngttt);
    fChain->SetBranchAddress("Nhlt", &Nhlt, &b_Nhlt);
