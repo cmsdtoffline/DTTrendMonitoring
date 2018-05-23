@@ -1,11 +1,13 @@
-# *-* coding=utf-8 *-*
+#! /usr/bin/env python                                                                                                                                                                                                                       # *-* coding=utf-8 *-*
 
 # from ROOT import *
 # import datetime
 import sys
 import subprocess
+import json
 from optparse import OptionParser
-
+import collections
+import os
 
 parser = OptionParser(usage="usage: %prog [options]")
 
@@ -14,8 +16,8 @@ parser.add_option("-e", "--ext", dest="extFile",
 help="Use an externale file")
 
 parser.add_option("-y", "--year", dest="year",
-                  default="2016",
-help="change year, deafault is 2016")
+                  default="2017",
+help="change year, deafault is 2017")
 
 parser.add_option("-n", "--name", dest="name",
                   default="",
@@ -57,10 +59,11 @@ def getLumis(inputFile):
 
     RunLumis = lu.RunLumis({})
     vals = []
+   # print "lu",lu.getRunLumis(fname),type(lu.getRunLumis(fname))
     vals.append(lu.getRunLumis(fname))
     allRunLumis = sum(vals, RunLumis)
+    print "Vals",vals,type((vals.__getitem__(0)).__str__())
     return allRunLumis
-
 
 if __name__ == '__main__':
 
@@ -77,8 +80,13 @@ if __name__ == '__main__':
     jsonFilesList = []
     # dictionary are not ordered, so the loop is randomly distributed on the keys
     # for k, fname in Dataset2016.items():
-    #
     # The following looping method guaranitee and ordered loop onto the keys
+
+
+    if year=="2016":   firstRun = "271036"
+    elif year=="2017": firstRun = "294645"
+    elif year=="2018": firstRun = "314472" # precomissioning
+    else: sys.exit("Wrong year")
 
     for key in sorted(Dataset):
         fname = Dataset[key]
@@ -94,9 +102,44 @@ if __name__ == '__main__':
         outFileName = path + "RunJson/" + outFileName
         outFileCSV  = path + "IntLumi/" + outFileCSV
 
+        outFileTotal = path + 'IntLumi/Total'+year+'.json'
+
         jsonFilesList.append(outFileName)
         print "outFileName",outFileName
         datasetRunLumis.writeToFile(outFileName)
         print "\t SAVED!! - {:s}".format(fname)
-    ### Run brilcalc
+
+        ### Run brilcalc
         subprocess.call(["brilcalc", "lumi", "-u/pb", "-o"+outFileCSV, "-i"+outFileName])
+
+        for key, val in datasetRunLumis.getJson().items():
+
+            subprocess.call(["brilcalc", "lumi", "-u/pb", "-o","temp.csv", "--begin",firstRun,"--end",str(key)])
+
+            fileTemp  = open("temp.csv", "r")
+            runDic = {}
+            mode   = 'r+' if os.path.exists(outFileTotal) else 'w+'
+
+            with open(outFileTotal, mode ) as outjson:
+                line = subprocess.check_output(['tail', '-1', "temp.csv"])
+                try:
+                    runDic = json.load(outjson)
+                except ValueError:
+                    print "Creating new file"
+
+                if str(key) in runDic: 
+                    print "Run",key,"already in the file"
+                    continue
+
+                outjson.seek(0)  #should reset file position to the beginning.
+
+                runDic[key] = line.split(",")
+                runDic[key][0] = runDic[key][0].replace("#","") 
+                runDic[key][5] = runDic[key][5].replace("\n","") 
+
+#                json.dumps('"comments":["nfill","nrun","nls","ncms","totdelivered(/pb)","totrecorded(/pb)"]',outjson, indent=4) //fixme
+                json.dump(runDic,outjson, indent=4)
+
+                #outjson.truncate() 
+
+

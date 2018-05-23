@@ -22,6 +22,27 @@
 #include <boost/format.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include <boost/lexical_cast.hpp>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/json_parser.hpp>
+
+
+using boost::property_tree::ptree;
+using boost::property_tree::read_json;
+using boost::property_tree::write_json;
+
+
+namespace pt = boost::property_tree;
+
+template <typename T>
+std::vector<T> as_vector(ptree const& pt, ptree::key_type const& key)
+{
+  std::vector<T> r;
+  for (auto& item : pt.get_child(key))
+    r.push_back(item.second.get_value<T>());
+  return r;
+}
+
+
 struct context{
 
   Int_t nVar;
@@ -30,7 +51,6 @@ struct context{
   std::vector<std::string >  varTitle; 
   std::vector<std::string >  varName; 
   std::vector<std::string >  varLabel; 
-
   string webFolder;
   
 };
@@ -70,24 +90,27 @@ public :
   
   plotter(context extDataCont, std::string inFileName = "", std::string outFileName="", string LumiFileName_ = "");
 
-  void  write();  
-  void  plot(string dateName = "test");  
-  void  setPlots();
-  void  setAddBins();
-  int   getdir(string dir, vector<string> &files);   // Take a vector of list and pusch inside the files inside a directory. Used for lumi per run files.                 
+  void   write();  
+  void   plot(string dateName = "test");  
+  void   setPlots();
+  void   setAddBins();
+  int    getdir(string dir, vector<string> &files);   // Take a vector of list and pusch inside the files inside a directory. Used for lumi per run files.                 
+
+  float  getTotLumiRun(string run); // Get delivered integrated luminosity from the begining of run period. To Add option for deliverd and recorded.
+  float  getLumiRun(string Run);    // Get  integrated luminosity from the begining of the plot range. 
 
   TEfficiency * setEffBin(     TEfficiency *effIn, Float_t MaxErr = 0.1); // Change bin size to adjuste the uncertanty below MaxErr
   TEfficiency * addEff(        TEfficiency *eff1,  TEfficiency *eff2 );   // Concatenate two teff. Not used so far
   TEfficiency * setEffRun(     TEfficiency *eff1 );                       // From variable bin size to identical bin size. Used for run number.
   TEfficiency * addBins(       TEfficiency *effIn, int ivar);             // Method to add bins above range to a TEfficiency. Used to values variables such run number.
   TEfficiency * getIntLumiEff( TEfficiency *effIn, Int_t ivar);           // Get integrated lumi from run number. It updates the value from the ones stored.
+
   TH2F *        getIntLumiHisto(  TH2F *hIn, Int_t ivar);
   TH1F *        getPaintHisto(    TEfficiency *effIn, int ivar, bool doLumi);
   TH2F *        set2DHistoBin(    TH2F *hIn, Float_t MaxErr = 0.1);
   TH2F *        set2DHistoBinRun( TH2F *hIn, int ivar);
   TH2F *        add2DHistoBinRun( TH2F *hIn, int ivar);
 
-  float getLumiRun(string Run);
 
   //  TH1F * SetHistoLimits( const TH1 *hIn);
 
@@ -100,7 +123,7 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   
   if(inFileName!=""){
     fIn  = new TFile (("data/results/"+inFileName+".root").c_str());
-    if (!fIn){ cout<<"File In doesn't exist or can't be open"<<endl;    exit(1);}
+    if (!fIn){ cout<<"File In doesn't exist or can't be open"<<endl;    abort();}
     cout<<"Take objects from file "<<inFileName+".root"<<endl;
   }
   else  cout<<"Create new objects and new file "<<(outFileName+".root")<<endl;
@@ -136,7 +159,7 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
       
       Hist_MBWh[ivar].push_back(vector<TH2F*> ());         
       Gr_MBWh[ivar].push_back(vector<TProfile*> ());         
-      
+
       for (int ist=0; ist<4; ist++){
 	
 	if(inFileName==""){
@@ -151,12 +174,14 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 						  dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));	   
 	}
 	else{
+
 	  Eff_phiMBWh[ivar][iwh].push_back( (TEfficiency*) fIn->Get(("Eff"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 								     "St"+std::to_string(ist)).c_str()));	 	 
 	  EffA_phiMBWh[ivar][iwh].push_back( (TEfficiency*) fIn->Get(("EffA"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 								      "St"+std::to_string(ist)).c_str()));	 	 
 	  Hist_MBWh[ivar][iwh].push_back( (TH2F*) fIn->Get(("Hist"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 							    "St"+std::to_string(ist)).c_str()));	 	 
+
 	}
 
 	Gr_MBWh[ivar][iwh].push_back( new TProfile());
@@ -218,7 +243,6 @@ plotter::~plotter(){
 void plotter::write(){
 
    fOut->cd();
-
    for (int ivar=0; ivar<dataCont.nVar; ivar++) {
      for (int iwh=0; iwh<5; iwh++){
        for (int ist=0; ist<4; ist++){
@@ -234,7 +258,6 @@ void plotter::write(){
        EffA_phiMB4Top[ivar][iwh]->Write();
        Hist_MB4Top[ivar][iwh]->Write();
      }
-
      Eff_phiMB4Bot[ivar]->Write();
      EffA_phiMB4Bot[ivar]->Write();
      Hist_MB4Bot[ivar]->Write();
@@ -382,7 +405,6 @@ void plotter::plot(string dateName){
       
       
       if(dataCont.varName[ivar]=="Run"){
-
 	Eff_phiMBWh[ivar][0][ist] = getIntLumiEff(Eff_phiMBWh[ivar][0][ist],ivar);
 	Eff_phiMBWh[ivar][0][ist]->Draw("ap");
 	for (int iwh=1; iwh<5; iwh++){
@@ -803,7 +825,7 @@ void plotter::setPlots(){
 	   Eff_phiMBWh[ivar][iwh][ist]  = setEffBin(Eff_phiMBWh[ivar][iwh][ist]);
 	   EffA_phiMBWh[ivar][iwh][ist] = setEffBin(EffA_phiMBWh[ivar][iwh][ist]);
 	 }
-	 if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg") Hist_MBWh[ivar][iwh][ist]    = set2DHistoBin(Hist_MBWh[ivar][iwh][ist]);
+	  if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg") Hist_MBWh[ivar][iwh][ist]    = set2DHistoBin(Hist_MBWh[ivar][iwh][ist]); //decom
 	 
 	 if(ist!=3){
 	   if(dataCont.varName[ivar]=="Run"){
@@ -829,7 +851,7 @@ void plotter::setPlots(){
 	 Eff_phiMB4Top[ivar][iwh]  = setEffBin(Eff_phiMB4Top[ivar][iwh]);
 	 EffA_phiMB4Top[ivar][iwh] = setEffBin(EffA_phiMB4Top[ivar][iwh]);
        }
-       if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg")  Hist_MB4Top[ivar][iwh] = set2DHistoBin(Hist_MB4Top[ivar][iwh]);
+       if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg")  Hist_MB4Top[ivar][iwh] = set2DHistoBin(Hist_MB4Top[ivar][iwh]); //decom
      
      }
      if(dataCont.varName[ivar]=="Run"){
@@ -843,7 +865,7 @@ void plotter::setPlots(){
        Eff_phiMB4Bot[ivar]  = setEffBin(Eff_phiMB4Bot[ivar]);
        EffA_phiMB4Bot[ivar] = setEffBin(EffA_phiMB4Bot[ivar]);
      }
-     if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg")  Hist_MB4Bot[ivar] = set2DHistoBin(Hist_MB4Bot[ivar]);
+    if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg")  Hist_MB4Bot[ivar] = set2DHistoBin(Hist_MB4Bot[ivar]); //decom
    }
 }
 
@@ -892,7 +914,7 @@ void plotter::setAddBins(){
 	for (int ist=0; ist<4; ist++){
 	  Eff_phiMBWh[ivar][iwh][ist]  = addBins(Eff_phiMBWh[ivar][iwh][ist],ivar);
 	  EffA_phiMBWh[ivar][iwh][ist] = addBins(EffA_phiMBWh[ivar][iwh][ist],ivar);	  
-	  Hist_MBWh[ivar][iwh][ist] = add2DHistoBinRun(Hist_MBWh[ivar][iwh][ist],ivar);
+	  Hist_MBWh[ivar][iwh][ist]    = add2DHistoBinRun(Hist_MBWh[ivar][iwh][ist],ivar);
 
 	  if(ist!=3){
 	    Eff_theMBWh[ivar][iwh][ist]  = addBins(Eff_theMBWh[ivar][iwh][ist],ivar);
@@ -925,21 +947,26 @@ TH2F * plotter::add2DHistoBinRun( TH2F *hIn, int ivar){
   //  for(int bin = 1; bin<=nXBins; bin++)  
   //  xBins.push_back(bin);
   
-  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
+  TH2F * hNew = new TH2F("","",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
+  string hName = hIn->GetName();
+
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->SetBinContent(binx,biny, hIn->GetBinContent(binx,biny));
     }
   }
-  
+
+  hIn->Delete();
+
   for(int bin = 1; bin <= nXBins; bin++){
     hNew->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str()); 
   }  
+
+  hNew->SetName(hName.c_str());
   return hNew;
 }
 
 
-//hot
 TEfficiency * plotter::addBins( TEfficiency *effIn, int ivar){
 
   std::vector<Double_t> xBins = {};
@@ -970,13 +997,34 @@ TEfficiency * plotter::addBins( TEfficiency *effIn, int ivar){
     xBins  =  dataCont.slices[ivar];
   }
 
-  TEfficiency * effNew = new TEfficiency(effIn->GetName(),effIn->GetTitle(),xBins.size()-1,xBins.data());
-  
+  //  TEfficiency * effNew = new TEfficiency(effIn->GetName(),effIn->GetTitle(),xBins.size()-1,xBins.data());
+  TEfficiency * effNew = new TEfficiency("",effIn->GetTitle(),xBins.size()-1,xBins.data());
+  string effName = effIn->GetName();
+  effNew->SetName(effName.c_str());
+
   for(int bin = 1; bin<=nBins; bin++){
     effNew->SetTotalEvents( bin, effIn->GetTotalHistogram()->GetBinContent(bin));
     effNew->SetPassedEvents(bin, effIn->GetPassedHistogram()->GetBinContent(bin));
   }
+  effIn->Delete();
   return effNew;
+}
+
+
+float plotter::getTotLumiRun(string run){
+
+  string year = "2017";
+  string path = "data/IntLumi/";
+  string inFileTotal = path + "Total"+year+".json";
+
+  pt::ptree pTree;
+  pt::read_json(inFileTotal.c_str(), pTree);
+  vector<float> runInfos;
+  runInfos =  as_vector<float>(pTree,run.c_str());
+  cout.precision(100000);
+  //  cout<<runInfos.at(4)<<endl;
+  return runInfos.at(4);  
+
 }
 
 
@@ -989,14 +1037,17 @@ float plotter::getLumiRun(string run){
   getdir(dir,files);
 
   if(std::find(files.begin(), files.end(),("data/IntLumi/DT_Run"+run+".csv") ) != files.end()) {
-    //push in front of files the file with the name of the run to be fater in case it exist.
+    //push in front of files the file with the name of the run to be faster in case it exists.
     files.insert(files.begin(),"data/IntLumi/DT_Run"+run+".csv"); //check
   }
+
 
   Float_t intLumi = 0;
   bool isFound = false; 
 
   for (unsigned int i = 0;i < files.size();i++) {
+
+    cout<<files[i]<<" "<<endl;
 
      if(files[i].find("~")!=string::npos) continue; 
      else if(files[i].find(".csv")==string::npos) continue; 
@@ -1020,21 +1071,25 @@ float plotter::getLumiRun(string run){
 	 if(line[0]=='#' || line.empty()) continue;
 	 pos=line.find(run); // search
 	 boost::split(runLine,line,boost::is_any_of(","));
-
 	 string test = runLine[5];
 	 intLumi +=   stof(test);
 
 	 // string::npos is returned if string is not found 
 	 if(pos!=string::npos){
+	   cout<<"Found"<<endl;
 	   isFound =true;
 	   break;
 	 }
        }
-     if(isFound) break;
+     if(isFound){
+       cout<<"break "<<endl;
+       break;
+     }
      else intLumi=0;
   }
 
-  if(isFound){
+
+  if(!isFound){
     cout<<"ERROR!!!  Run not found in integrated luminosity directory. Please run first createJSONs.py as written in the README"<<endl;
     abort();
   }
@@ -1063,19 +1118,18 @@ int plotter::getdir(string dir, vector<string> &files){
 
 //Create histogram with equal bins to be used as graphic plot instead of tgraph.
 TH1F * plotter::getPaintHisto( TEfficiency *effIn, int ivar, bool doLumi){
+
   TH1F * hPaint = new TH1F();
   
   hPaint = (TH1F*)effIn->GetTotalHistogram()->Clone();
-
   hPaint->Reset();
   hPaint->SetTitle(effIn->GetTitle());
 
   Int_t nBins = hPaint->GetNbinsX();
   
-  
   if(doLumi){ 
     for(int bin = 1; bin <= nBins; bin++){
-      hPaint->GetXaxis()->SetBinLabel(bin, (boost::str(boost::format("%.2f") % getLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))))).c_str());
+      hPaint->GetXaxis()->SetBinLabel(bin, (boost::str(boost::format("%.2f") % getTotLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))))).c_str());
     }
     hPaint->GetXaxis()->SetTitle("Int.Lumi. pb^{-1}");
     TotLumi = 0; // reset total lumi
@@ -1095,20 +1149,19 @@ TEfficiency * plotter::getIntLumiEff( TEfficiency *effIn, Int_t ivar){
   std::vector<Double_t> xBins = {};
   Int_t nBins  = effIn->GetTotalHistogram()->GetNbinsX();
 
-  for(int bin = 1; bin <= nBins; bin++){
-    xBins.push_back(getLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
-  }
+  for(int bin = 1; bin <= nBins; bin++) xBins.push_back(getTotLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
+  
 
   TotLumi = 0; // reset total lumi
 
   //To be updated using SetTotalEvents TEfficiency method.
 
-  TH1F * hTot  = new TH1F( (string(effIn->GetName())+"_Tot").c_str(),effIn->GetTitle(),30*xBins.size(),xBins.at(0),xBins.back()+xBins.back()/10.);
-  TH1F * hPass = new TH1F( (string(effIn->GetName())+"_Pass").c_str(),effIn->GetTitle(),30*xBins.size(),xBins.at(0),xBins.back()+xBins.back()/10.);
+  TH1F * hTot  = new TH1F( (string(effIn->GetName())+"_Tot").c_str(),effIn->GetTitle(),300*xBins.size(),xBins.at(0),xBins.back()+xBins.back()/10.);
+  TH1F * hPass = new TH1F( (string(effIn->GetName())+"_Pass").c_str(),effIn->GetTitle(),300*xBins.size(),xBins.at(0),xBins.back()+xBins.back()/10.);
 
   for(int bin = 1; bin<=nBins; bin++){
     //  cout<<bin<<" "<<hTot->FindBin(xBins[bin-1])<< " "<<hTot->GetBinCenter(bin-1)<<" "<<effIn->GetPassedHistogram()->GetBinContent(bin)/effIn->GetTotalHistogram()->GetBinContent(bin)<<endl;
-    hTot->AddBinContent( hTot->FindBin(xBins[bin-1])  , effIn->GetTotalHistogram()->GetBinContent(bin));
+    hTot->AddBinContent(hTot->FindBin(xBins[bin-1])  , effIn->GetTotalHistogram()->GetBinContent(bin));
     hPass->AddBinContent(hPass->FindBin(xBins[bin-1]) , effIn->GetPassedHistogram()->GetBinContent(bin));
   }
 
@@ -1135,23 +1188,22 @@ TH2F * plotter::getIntLumiHisto( TH2F *hIn, Int_t ivar){
 
   std::vector<Double_t> xBins = {};
 
-
-  for(int bin = 1; bin <= nXBins+1; bin++){
-    xBins.push_back(getLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
-  }
+  for(int bin = 1; bin <= nXBins; bin++)
+    xBins.push_back(getTotLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
 
   TotLumi = 0; // reset total lumi
 
-  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",30*xBins.size(),xBins.at(0)-xBins.at(0)/10.,xBins.back()+xBins.back()/10.,nYBins,arrY->GetArray());
-
+  TH2F * hNew = new TH2F("","",30*xBins.size(),xBins.at(0)-xBins.at(0)/10.,xBins.back()+xBins.back()/10.,nYBins,arrY->GetArray());
+  string hName = string(hIn->GetName());
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->AddBinContent(hNew->FindBin(xBins[binx-1],biny), hIn->GetBinContent(binx,biny));
     }
   }
 
+  hIn->Delete();
   hNew->GetXaxis()->SetTitle("Int.Lumi. pb^{-1}");
-
+  hNew->SetName(hName.c_str());
   hNew->SetLineColor(hIn->GetLineColor());
   hNew->SetMarkerStyle(hIn->GetMarkerStyle());
   hNew->SetMarkerColor(hIn->GetMarkerColor());
