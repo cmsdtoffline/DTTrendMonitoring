@@ -12,6 +12,7 @@
 #include <TH2.h>
 #include <TProfile.h>
 #include <TStyle.h>
+#include <TGaxis.h>
 #include <TCanvas.h>
 #include <TGraphAsymmErrors.h>
 #include <TLegend.h>
@@ -30,7 +31,6 @@ using boost::property_tree::ptree;
 using boost::property_tree::read_json;
 using boost::property_tree::write_json;
 
-
 namespace pt = boost::property_tree;
 
 template <typename T>
@@ -48,9 +48,9 @@ struct context{
   Int_t nVar;
   std::string name;
   std::vector<vector<Double_t > >  slices;
-  std::vector<std::string >  varTitle; 
-  std::vector<std::string >  varName; 
-  std::vector<std::string >  varLabel; 
+  std::vector<std::string >  varTitle;
+  std::vector<std::string >  varName;
+  std::vector<std::string >  varLabel;
   string webFolder;
   
 };
@@ -64,10 +64,12 @@ public :
   TFile          *fOut;
 
   context dataCont; //struct with the setting
-  bool isSliceChanged = 0;
-  string LumiFileName;
+  bool    isSliceChanged = 0;
+  string  LumiFileName;
 
   Float_t TotLumi = 0;
+
+
   vector<vector<vector<TEfficiency* > > > Eff_phiMBWh;
   vector<vector<vector<TEfficiency* > > > EffA_phiMBWh;
   
@@ -80,24 +82,34 @@ public :
   vector<TEfficiency* >                   Eff_phiMB4Bot;
   vector<TEfficiency* >                   EffA_phiMB4Bot;
     
-  vector<vector<vector<TH2F* > > > Hist_MBWh;
-  vector<vector<TH2F* > >          Hist_MB4Top;
-  vector<TH2F* >                   Hist_MB4Bot;
-  
-  vector<vector<vector<TProfile* > > > Gr_MBWh;
-  vector<vector<TProfile* > >          Gr_MB4Top;
-  vector<TProfile* >                   Gr_MB4Bot;
+  vector<vector<vector<TH2F* > > >        Hist_MBWh;
+  vector<vector<vector<TH2F* > > >        Hist_SegMBWh;
+
+  vector<vector<TH2F* > >                 Hist_MB4Top;
+  vector<vector<TH2F* > >                 Hist_SegMB4Top;
+
+  vector<TH2F* >                          Hist_MB4Bot;
+  vector<TH2F* >                          Hist_SegMB4Bot;
+
+  vector<vector<vector<TProfile* > > >    Gr_MBWh;
+  vector<vector<vector<TProfile* > > >    Gr_SegMBWh;
+
+  vector<vector<TProfile* > >             Gr_MB4Top;
+  vector<vector<TProfile* > >             Gr_SegMB4Top;
+
+  vector<TProfile* >                      Gr_MB4Bot;
+  vector<TProfile* >                      Gr_SegMB4Bot;
   
   plotter(context extDataCont, std::string inFileName = "", std::string outFileName="", string LumiFileName_ = "");
 
-  void   write();  
-  void   plot(string dateName = "test");  
+  void   write();
+  void   plot(string dateName = "test");
   void   setPlots();
   void   setAddBins();
-  int    getdir(string dir, vector<string> &files);   // Take a vector of list and pusch inside the files inside a directory. Used for lumi per run files.                 
+  int    getdir(string dir, vector<string> &files);   // Take a vector of list and push inside the files inside a directory. Used for lumi per run files.
 
   float  getTotLumiRun(string run); // Get delivered integrated luminosity from the begining of run period. To Add option for deliverd and recorded.
-  float  getLumiRun(string Run);    // Get  integrated luminosity from the begining of the plot range. 
+  float  getLumiRun(string Run);    // Get  integrated luminosity from the begining of the plot range.
 
   TEfficiency * setEffBin(     TEfficiency *effIn, Float_t MaxErr = 0.1); // Change bin size to adjuste the uncertanty below MaxErr
   TEfficiency * addEff(        TEfficiency *eff1,  TEfficiency *eff2 );   // Concatenate two teff. Not used so far
@@ -111,10 +123,7 @@ public :
   TH2F *        set2DHistoBinRun( TH2F *hIn, int ivar);
   TH2F *        add2DHistoBinRun( TH2F *hIn, int ivar);
 
-
-  //  TH1F * SetHistoLimits( const TH1 *hIn);
-
-  ~plotter();  
+  ~plotter();
 };
 
 
@@ -135,110 +144,140 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   LumiFileName = "DT_"+LumiFileName_;
 
   for (int ivar=0; ivar<dataCont.nVar; ivar++){
-    
-    Eff_phiMBWh.push_back(    vector<vector<TEfficiency*> > ());  
-    EffA_phiMBWh.push_back(   vector<vector<TEfficiency*> > ());  
-    Eff_theMBWh.push_back(    vector<vector<TEfficiency*> > ());  
-    EffA_theMBWh.push_back(   vector<vector<TEfficiency*> > ());  
-    Eff_phiMB4Top.push_back(  vector<TEfficiency*>  ());  
-    EffA_phiMB4Top.push_back( vector<TEfficiency*>  ());  
-    Hist_MBWh.push_back(      vector<vector<TH2F*> > ());  
-    Hist_MB4Top.push_back(    vector<TH2F*>  ());  
-    Gr_MBWh.push_back(        vector<vector<TProfile*> > ());  
-    Gr_MB4Top.push_back(      vector<TProfile*>  ());  
 
+
+    Eff_phiMBWh.push_back(    vector<vector<TEfficiency*> > ());
+    EffA_phiMBWh.push_back(   vector<vector<TEfficiency*> > ());
+    Eff_theMBWh.push_back(    vector<vector<TEfficiency*> > ());
+    EffA_theMBWh.push_back(   vector<vector<TEfficiency*> > ());
+    Eff_phiMB4Top.push_back(  vector<TEfficiency*>  ());
+    EffA_phiMB4Top.push_back( vector<TEfficiency*>  ());
+
+    Hist_MBWh.push_back(      vector<vector<TH2F*> > ());
+    Hist_SegMBWh.push_back(   vector<vector<TH2F*> > ());
+
+    Hist_MB4Top.push_back(    vector<TH2F*>  ());
+    Hist_SegMB4Top.push_back( vector<TH2F*>  ());
+
+    Gr_MBWh.push_back(        vector<vector<TProfile*> > ());
+    Gr_SegMBWh.push_back(     vector<vector<TProfile*> > ());
+
+    Gr_MB4Top.push_back(      vector<TProfile*>  ());
+    Gr_SegMB4Top.push_back(   vector<TProfile*>  ());
+
+    
     int nPoints = dataCont.slices[ivar].size();
-   
     for (int iwh=0; iwh<5; iwh++){
-          
-      Eff_phiMBWh[ivar].push_back(vector<TEfficiency*> ());  
-      EffA_phiMBWh[ivar].push_back(vector<TEfficiency*> ());  
+
+      Eff_phiMBWh[ivar].push_back(vector<TEfficiency*> ());
+      EffA_phiMBWh[ivar].push_back(vector<TEfficiency*> ());
       
-      Eff_theMBWh[ivar].push_back(vector<TEfficiency*> ());         
-      EffA_theMBWh[ivar].push_back(vector<TEfficiency*> ());         
+      Eff_theMBWh[ivar].push_back(vector<TEfficiency*> ());
+      EffA_theMBWh[ivar].push_back(vector<TEfficiency*> ());
       
-      Hist_MBWh[ivar].push_back(vector<TH2F*> ());         
-      Gr_MBWh[ivar].push_back(vector<TProfile*> ());         
+      Hist_MBWh[ivar].push_back(vector<TH2F*> ());
+      Gr_MBWh[ivar].push_back(vector<TProfile*> ());
+
+      Hist_SegMBWh[ivar].push_back(vector<TH2F*> ());
+      Gr_SegMBWh[ivar].push_back(vector<TProfile*> ());
+
 
       for (int ist=0; ist<4; ist++){
-	
 	if(inFileName==""){
 	  Eff_phiMBWh[ivar][iwh].push_back( new TEfficiency(("Eff"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 							     "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.slices[ivar].data()));
-
 	  EffA_phiMBWh[ivar][iwh].push_back( new TEfficiency(("EffA"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 							      "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.slices[ivar].data()));
 
 	  Hist_MBWh[ivar][iwh].push_back(new TH2F(("Hist"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 						   "St"+std::to_string(ist)).c_str(),"",dataCont.slices[ivar].size()-1,
-						  dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));	   
+						  dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));
+	  Hist_SegMBWh[ivar][iwh].push_back(new TH2F(("HistSeg"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
+						      "St"+std::to_string(ist)).c_str(),"",dataCont.slices[ivar].size()-1,
+						     dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));
 	}
 	else{
 
 	  Eff_phiMBWh[ivar][iwh].push_back( (TEfficiency*) fIn->Get(("Eff"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
-								     "St"+std::to_string(ist)).c_str()));	 	 
+								     "St"+std::to_string(ist)).c_str()));
 	  EffA_phiMBWh[ivar][iwh].push_back( (TEfficiency*) fIn->Get(("EffA"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
-								      "St"+std::to_string(ist)).c_str()));	 	 
+								      "St"+std::to_string(ist)).c_str()));
 	  Hist_MBWh[ivar][iwh].push_back( (TH2F*) fIn->Get(("Hist"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
-							    "St"+std::to_string(ist)).c_str()));	 	 
-
+							    "St"+std::to_string(ist)).c_str()));
+	  Hist_SegMBWh[ivar][iwh].push_back( (TH2F*) fIn->Get(("HistSeg"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
+							    "St"+std::to_string(ist)).c_str()));	  
 	}
 
 	Gr_MBWh[ivar][iwh].push_back( new TProfile());
+	Gr_SegMBWh[ivar][iwh].push_back( new TProfile());
+
 	if (ist!=3){
-	  if(inFileName==""){ 
+	  if(inFileName==""){
 	    Eff_theMBWh[ivar][iwh].push_back( new TEfficiency(("EffThe"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
-							       "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.slices[ivar].data()));	 
+							       "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.slices[ivar].data()));
 	    EffA_theMBWh[ivar][iwh].push_back( new TEfficiency(("EffAThe"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
-								"St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.slices[ivar].data()));	 
+								"St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.slices[ivar].data()));
 	  }
 	  else{
 	    Eff_theMBWh[ivar][iwh].push_back(  (TEfficiency*) fIn->Get(("EffThe"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
-									"St"+std::to_string(ist)).c_str()));	 
+									"St"+std::to_string(ist)).c_str()));
 	    EffA_theMBWh[ivar][iwh].push_back(  (TEfficiency*) fIn->Get(("EffAThe"+dataCont.varName[ivar]+"_MBWh"+std::to_string(iwh-2)+
 									 "St"+std::to_string(ist)).c_str()));
 	  }
 	}
       }
       if(inFileName==""){
+
 	Eff_phiMB4Top[ivar].push_back( new TEfficiency(("Eff"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
-						       "",nPoints-1,dataCont.slices[ivar].data()));	          
+						       "",nPoints-1,dataCont.slices[ivar].data()));
 	EffA_phiMB4Top[ivar].push_back( new TEfficiency(("EffA"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
-							"",nPoints-1,dataCont.slices[ivar].data()));	          
+							"",nPoints-1,dataCont.slices[ivar].data()));
 	Hist_MB4Top[ivar].push_back( new TH2F(("Hist"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 					      "",dataCont.slices[ivar].size()-1,dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));
-      }
+
+	Hist_SegMB4Top[ivar].push_back( new TH2F(("HistSeg"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+						 "",dataCont.slices[ivar].size()-1,dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));   
+   }
       
       else{
 	Eff_phiMB4Top[ivar].push_back(  (TEfficiency*) fIn->Get(("Eff"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
 	EffA_phiMB4Top[ivar].push_back(  (TEfficiency*) fIn->Get(("EffA"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+
 	Hist_MB4Top[ivar].push_back( (TH2F*) fIn->Get(("Hist"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	Hist_SegMB4Top[ivar].push_back( (TH2F*) fIn->Get(("HistSeg"+dataCont.varName[ivar]+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
       }
       Gr_MB4Top[ivar].push_back( new TProfile());
+      Gr_SegMB4Top[ivar].push_back( new TProfile());
     }
     
     if(inFileName==""){
-      Eff_phiMB4Bot.push_back( new TEfficiency(("Eff"+dataCont.varName[ivar]+"_MBBot").c_str(),"",nPoints-1,dataCont.slices[ivar].data()));	      
-      EffA_phiMB4Bot.push_back( new TEfficiency(("EffA"+dataCont.varName[ivar]+"_MBBot").c_str(),"",nPoints-1,dataCont.slices[ivar].data()));	      
+      Eff_phiMB4Bot.push_back( new TEfficiency(("Eff"+dataCont.varName[ivar]+"_MBBot").c_str(),"",nPoints-1,dataCont.slices[ivar].data()));
+      EffA_phiMB4Bot.push_back( new TEfficiency(("EffA"+dataCont.varName[ivar]+"_MBBot").c_str(),"",nPoints-1,dataCont.slices[ivar].data()));
       Hist_MB4Bot.push_back( new TH2F(("Hist"+dataCont.varName[ivar]+"_MBBot").c_str(),"",dataCont.slices[ivar].size()-1,
-				      dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));	      
+				      dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));
+
+      Hist_SegMB4Bot.push_back( new TH2F(("HistSeg"+dataCont.varName[ivar]+"_MBBot").c_str(),"",dataCont.slices[ivar].size()-1,
+				      dataCont.slices[ivar].data(),dataCont.slices[2].size()-1,dataCont.slices[2].data()));
     }
     else{
-      Eff_phiMB4Bot.push_back(  (TEfficiency*) fIn->Get(("Eff"+dataCont.varName[ivar]+"_MBBot").c_str()));	      
-      EffA_phiMB4Bot.push_back(  (TEfficiency*) fIn->Get(("EffA"+dataCont.varName[ivar]+"_MBBot").c_str()));	      
+      Eff_phiMB4Bot.push_back(  (TEfficiency*) fIn->Get(("Eff"+dataCont.varName[ivar]+"_MBBot").c_str()));
+      EffA_phiMB4Bot.push_back(  (TEfficiency*) fIn->Get(("EffA"+dataCont.varName[ivar]+"_MBBot").c_str()));
+    
       Hist_MB4Bot.push_back( (TH2F*) fIn->Get(("Hist"+dataCont.varName[ivar]+"_MBBot").c_str()));
+      Hist_SegMB4Bot.push_back( (TH2F*) fIn->Get(("HistSeg"+dataCont.varName[ivar]+"_MBBot").c_str()));
     }
-    Gr_MB4Bot.push_back( new TProfile());       
-  } 
+    Gr_MB4Bot.push_back( new TProfile());
+    Gr_SegMB4Bot.push_back( new TProfile());
+  }
 
   if(inFileName!=""){
     setAddBins();
-  }  
+  }
 }
 
 plotter::~plotter(){
 
-}  
+}
 
 void plotter::write(){
 
@@ -249,6 +288,8 @@ void plotter::write(){
 	 Eff_phiMBWh[ivar][iwh][ist]->Write();
 	 EffA_phiMBWh[ivar][iwh][ist]->Write();
 	 Hist_MBWh[ivar][iwh][ist]->Write();
+	 Hist_SegMBWh[ivar][iwh][ist]->Write();
+
 	 if(ist!=3){
 	   Eff_theMBWh[ivar][iwh][ist]->Write();
 	   EffA_theMBWh[ivar][iwh][ist]->Write();
@@ -257,10 +298,12 @@ void plotter::write(){
        Eff_phiMB4Top[ivar][iwh]->Write();
        EffA_phiMB4Top[ivar][iwh]->Write();
        Hist_MB4Top[ivar][iwh]->Write();
+       Hist_SegMB4Top[ivar][iwh]->Write();
      }
      Eff_phiMB4Bot[ivar]->Write();
      EffA_phiMB4Bot[ivar]->Write();
      Hist_MB4Bot[ivar]->Write();
+     Hist_SegMB4Bot[ivar]->Write();
    }
 }
 
@@ -268,12 +311,13 @@ void plotter::plot(string dateName){
   
   setPlots();
   gStyle->SetOptStat(0);
+  TGaxis::SetMaxDigits(4);
 
   if(stat("plot/",&st) != 0)  system("mkdir plot/");
   if(stat(("plot/"+dateName).c_str(),&st) != 0)   system(("mkdir plot/"+dateName).c_str());
 
-  //To check the metod stat works with final dir. It doesn't work with ~ .To be deleted 
-  /* cout<<"stat((dataCont.webFolder+'/'+dateName+'/').c_str(),&st)"<<stat((dataCont.webFolder+"/"+dateName+"/").c_str(),&st)<<endl; */ 
+  //To check the metod stat works with final dir. It doesn't work with ~ .To be deleted
+  /* cout<<"stat((dataCont.webFolder+'/'+dateName+'/').c_str(),&st)"<<stat((dataCont.webFolder+"/"+dateName+"/").c_str(),&st)<<endl; */
   /* cout<<"stat((dataCont.webFolder'/'+dateName).c_str(),&st)"<<stat((dataCont.webFolder+"/"+dateName).c_str(),&st)<<endl; */
   /* cout<<"stat(('/'+dataCont.webFolder'/'+dateName).c_str(),&st)"<<stat(("/"+dataCont.webFolder+"/"+dateName).c_str(),&st)<<endl; */
 
@@ -304,39 +348,56 @@ void plotter::plot(string dateName){
 
 	  Hist_MBWh[ivar][iwh][ist]->SetLineColor(iwh+1);
 	  Hist_MBWh[ivar][iwh][ist]->SetMarkerColor(iwh+1);
-	  
+
+	  Hist_SegMBWh[ivar][iwh][ist]->SetLineColor(iwh+1);
+	  Hist_SegMBWh[ivar][iwh][ist]->SetMarkerColor(iwh+1);
+
+	 
 	  if(ist!=3){
 	    Eff_theMBWh[ivar][iwh][ist]->SetLineColor(iwh+1);
 	    Eff_theMBWh[ivar][iwh][ist]->SetMarkerColor(iwh+1);
 	  }
 	}
-	else{ 
+	else{
 	  Eff_phiMBWh[ivar][iwh][ist]->SetLineColor(6);
 	  Eff_phiMBWh[ivar][iwh][ist]->SetMarkerColor(6);
 	  
 	  Hist_MBWh[ivar][iwh][ist]->SetLineColor(6);
 	  Hist_MBWh[ivar][iwh][ist]->SetMarkerColor(6);
+
+	  Hist_SegMBWh[ivar][iwh][ist]->SetLineColor(6);
+	  Hist_SegMBWh[ivar][iwh][ist]->SetMarkerColor(6);
 	  
 	  if(ist!=3){
 	    Eff_theMBWh[ivar][iwh][ist]->SetLineColor(6);
 	    Eff_theMBWh[ivar][iwh][ist]->SetMarkerColor(6);
 	  }
 	}
+
 	Eff_phiMBWh[ivar][iwh][ist]->SetMarkerStyle(20);
 	Hist_MBWh[ivar][iwh][ist]->SetMarkerStyle(20);
+	Hist_SegMBWh[ivar][iwh][ist]->SetMarkerStyle(20);
 	//profile of 2D histograms
-	Gr_MBWh[ivar][iwh][ist] = Hist_MBWh[ivar][iwh][ist]->ProfileX();
 
-	//	for(int bin = 1; bin <=Hist_MBWh[ivar][iwh][ist]->GetNbinsX(); bin++)  Gr_MBWh[ivar][iwh][ist]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str());  //To add run number labels
+	Gr_MBWh[ivar][iwh][ist]    = Hist_MBWh[ivar][iwh][ist]->ProfileX();
+	Gr_SegMBWh[ivar][iwh][ist] = Hist_SegMBWh[ivar][iwh][ist]->ProfileX();
+
+
+/* 	for(int bin = 1; bin <=Hist_MBWh[ivar][iwh][ist]->GetNbinsX(); bin++){ */
+/* 	  Gr_MBWh[ivar][iwh][ist]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str()) */
+
+/* str());  //To add run number labels */
+/* 	  Gr_SegMBWh[ivar][iwh][ist]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str());  //To add run number labels */
+/* 	} */ //hot
   
 	
 	if(ist!=3){
-	  Eff_theMBWh[ivar][iwh][ist]->SetMarkerStyle(20);
-	  
+	  Eff_theMBWh[ivar][iwh][ist]->SetMarkerStyle(20);	  
 	}
       }
       Eff_phiMB4Top[ivar][iwh]->SetMarkerStyle(20);
       Hist_MB4Top[ivar][iwh]->SetMarkerStyle(20);
+      Hist_SegMB4Top[ivar][iwh]->SetMarkerStyle(20);
       
       if(iwh!=4){
 
@@ -344,6 +405,10 @@ void plotter::plot(string dateName){
 	Eff_phiMB4Top[ivar][iwh]->SetMarkerColor(iwh+1);
 	Hist_MB4Top[ivar][iwh]->SetLineColor(iwh+1);
 	Hist_MB4Top[ivar][iwh]->SetMarkerColor(iwh+1);
+
+	Hist_SegMB4Top[ivar][iwh]->SetLineColor(iwh+1);
+	Hist_SegMB4Top[ivar][iwh]->SetMarkerColor(iwh+1);
+
       }
       else {
 	Eff_phiMB4Top[ivar][iwh]->SetLineColor(6);
@@ -351,19 +416,38 @@ void plotter::plot(string dateName){
 	
 	Hist_MB4Top[ivar][iwh]->SetLineColor(6);
 	Hist_MB4Top[ivar][iwh]->SetMarkerColor(6);
+
+	Hist_SegMB4Top[ivar][iwh]->SetLineColor(6);
+	Hist_SegMB4Top[ivar][iwh]->SetMarkerColor(6);
       }
       Gr_MB4Top[ivar][iwh] = Hist_MB4Top[ivar][iwh]->ProfileX();
-      //      for(int bin = 1; bin <=Hist_MB4Top[ivar][iwh]->GetNbinsX(); bin++)  Gr_MB4Top[ivar][iwh]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str()); 
+      Gr_SegMB4Top[ivar][iwh] = Hist_SegMB4Top[ivar][iwh]->ProfileX();
+
+      /* for(int bin = 1; bin <=Hist_MB4Top[ivar][iwh]->GetNbinsX(); bin++){ */
+      /* 	Gr_MB4Top[ivar][iwh]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str());  */
+      /* 	Gr_SegMB4Top[ivar][iwh]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str());  */
+      /* } */
     }
+
     Eff_phiMB4Bot[ivar]->SetMarkerStyle(20);
     Eff_phiMB4Bot[ivar]->SetLineColor(1);
     Eff_phiMB4Bot[ivar]->SetMarkerColor(1);
+
     Hist_MB4Bot[ivar]->SetMarkerStyle(20);
     Hist_MB4Bot[ivar]->SetLineColor(1);
     Hist_MB4Bot[ivar]->SetMarkerColor(1);
+   
+    Hist_SegMB4Bot[ivar]->SetMarkerStyle(20);
+    Hist_SegMB4Bot[ivar]->SetLineColor(1);
+    Hist_SegMB4Bot[ivar]->SetMarkerColor(1);
     
     Gr_MB4Bot[ivar] = Hist_MB4Bot[ivar]->ProfileX();
-    // for(int bin = 1; bin <=Hist_MB4Bot[ivar]->GetNbinsX(); bin++)  Gr_MB4Bot[ivar]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str()); 
+    Gr_SegMB4Bot[ivar] = Hist_SegMB4Bot[ivar]->ProfileX();
+
+    /* for(int bin = 1; bin <=Hist_MB4Bot[ivar]->GetNbinsX(); bin++){ */
+    /*   Gr_MB4Bot[ivar]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str());  */
+    /*   Gr_SegMB4Bot[ivar]->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str());  */
+    /* } */
   }
   
 
@@ -381,14 +465,14 @@ void plotter::plot(string dateName){
       if(dataCont.varName[ivar]=="Run"){
 	hPaint  =  getPaintHisto(Eff_phiMBWh[ivar][0][ist], ivar, false);
 	hPaint->SetMinimum(0.89);
-	hPaint->SetMaximum(1.02); 
+	hPaint->SetMaximum(1.02);
 	hPaint->Draw();
 	Eff_phiMBWh[ivar][0][ist]->Draw("samep");
       }
       else Eff_phiMBWh[ivar][0][ist]->Draw("ap");
       
-      gPad->Update(); 
-      auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph(); 
+      gPad->Update();
+      auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph();
       
       cPhiMB->Update();
       graph->SetMinimum(0.89);
@@ -412,20 +496,17 @@ void plotter::plot(string dateName){
 	  Eff_phiMBWh[ivar][iwh][ist]->Draw("samep");
 	}
 
-	gPad->Update(); 
-	auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph(); 
+	gPad->Update();
+	auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
        
 	legPhiMB->Draw("same");
-	cPhiMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+dataCont.varName[ivar]+"_var.png").c_str());
+	cPhiMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+dataCont.varName[ivar]+"_intLum.png").c_str());
       }
 
-
-
       if(dataCont.varName[ivar]=="Run"){
-
 
       }
 
@@ -433,7 +514,7 @@ void plotter::plot(string dateName){
       
       //theta
       
-      if(ist!=3){ 
+      if(ist!=3){
 	TCanvas *cTheMB = new TCanvas(("cTheMB"+(std::to_string(ist+1))+dataCont.varName[ivar]).c_str());
 	
 	
@@ -444,20 +525,20 @@ void plotter::plot(string dateName){
 	if(dataCont.varName[ivar]=="Run"){
 	  hPaint  =  getPaintHisto(Eff_theMBWh[ivar][0][ist], ivar, false);
 	  hPaint->SetMinimum(0.89);
-	  hPaint->SetMaximum(1.02); 
+	  hPaint->SetMaximum(1.02);
 	  hPaint->Draw();
 	  Eff_theMBWh[ivar][0][ist]->Draw("samep");
 	}
 	else{
 	  Eff_theMBWh[ivar][0][ist]->Draw("ap");
 	}
-	///	
-	gPad->Update(); 
-	auto graph = Eff_theMBWh[ivar][0][ist]->GetPaintedGraph(); 
+	///
+	gPad->Update();
+	auto graph = Eff_theMBWh[ivar][0][ist]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
-	graph->SetMaximum(1.02); 
-	gPad->Update(); 
+	graph->SetMaximum(1.02);
+	gPad->Update();
 	
 	
 	TLegend * legTheMB = new TLegend(0.75,0.75,0.9,0.9);
@@ -469,7 +550,7 @@ void plotter::plot(string dateName){
 	cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+dataCont.varName[ivar]+".png").c_str());
 	
 	
-	
+       
 	if(dataCont.varName[ivar]=="Run"){
 	  
 	  Eff_theMBWh[ivar][0][ist] = getIntLumiEff(Eff_theMBWh[ivar][0][ist],ivar);
@@ -479,14 +560,14 @@ void plotter::plot(string dateName){
 	    Eff_theMBWh[ivar][iwh][ist]->Draw("samep");
 	  }
 	  
-	  gPad->Update(); 
-	  auto graph = Eff_theMBWh[ivar][0][ist]->GetPaintedGraph(); 
+	  gPad->Update();
+	  auto graph = Eff_theMBWh[ivar][0][ist]->GetPaintedGraph();
 	  
 	  graph->SetMinimum(0.89);
 	  graph->SetMaximum(1.02);
 	  
 	  legTheMB->Draw("same");
-	  cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+dataCont.varName[ivar]+"_var.png").c_str());
+	  cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+dataCont.varName[ivar]+"_intLum.png").c_str());
 	}
 	delete 	cTheMB;
       }
@@ -496,26 +577,26 @@ void plotter::plot(string dateName){
     
     TCanvas *cPhiMB4Top = new TCanvas(("cPhiMB4Top"+dataCont.varName[ivar]).c_str());
     
-    TH1F * hPaint = new TH1F();    
+    TH1F * hPaint = new TH1F();
     Eff_phiMB4Top[ivar][0]->SetTitle(("MB4Top eff vs "+dataCont.varTitle[ivar]+" eff vs "+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";Eff").c_str());
     
     if(dataCont.varName[ivar]=="Run"){
       hPaint  =  getPaintHisto(Eff_phiMB4Top[ivar][0], ivar, false);
       hPaint->SetMinimum(0.89);
-      hPaint->SetMaximum(1.02); 
+      hPaint->SetMaximum(1.02);
       hPaint->Draw();
       Eff_phiMB4Top[ivar][0]->Draw("samep");
     }
     else{
       Eff_phiMB4Top[ivar][0]->Draw("ap");
     }
-    gPad->Update(); 
+    gPad->Update();
     
-    auto graph = Eff_phiMB4Top[ivar][0]->GetPaintedGraph(); 
+    auto graph = Eff_phiMB4Top[ivar][0]->GetPaintedGraph();
     graph->SetMinimum(0.89);
-    graph->SetMaximum(1.02); 
+    graph->SetMaximum(1.02);
     
-    gPad->Update(); 
+    gPad->Update();
     
     TLegend * legPhiMB4Top = new TLegend(0.75,0.75,0.9,0.9);
     for (int iwh=0; iwh<5; iwh++){
@@ -535,14 +616,14 @@ void plotter::plot(string dateName){
 	  Eff_phiMB4Top[ivar][iwh]->Draw("samep");
 	}
 
-	gPad->Update(); 
-	auto graph = Eff_phiMB4Top[ivar][0]->GetPaintedGraph(); 
+	gPad->Update();
+	auto graph = Eff_phiMB4Top[ivar][0]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
        
 	legPhiMB4Top->Draw("same");
-	cPhiMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4TopPhiEffVs"+dataCont.varName[ivar]+"_var.png").c_str());
+	cPhiMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4TopPhiEffVs"+dataCont.varName[ivar]+"_intLum.png").c_str());
       }
       
     delete   cPhiMB4Top ;
@@ -555,18 +636,18 @@ void plotter::plot(string dateName){
     if(dataCont.varName[ivar]=="Run"){
       hPaint  =  getPaintHisto(Eff_phiMB4Bot[ivar], ivar, false);
       hPaint->SetMinimum(0.89);
-      hPaint->SetMaximum(1.02); 
+      hPaint->SetMaximum(1.02);
       hPaint->Draw();
       Eff_phiMB4Bot[ivar]->Draw("samep");
     }
-    else  Eff_phiMB4Bot[ivar]->Draw("ap"); 
+    else  Eff_phiMB4Bot[ivar]->Draw("ap");
     
-    gPad->Update(); 
-    graph = Eff_phiMB4Bot[ivar]->GetPaintedGraph(); 
+    gPad->Update();
+    graph = Eff_phiMB4Bot[ivar]->GetPaintedGraph();
     graph->SetMinimum(0.89);
-    graph->SetMaximum(1.02); 
+    graph->SetMaximum(1.02);
     
-    gPad->Update(); 
+    gPad->Update();
     
     cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+dataCont.varName[ivar]+".png").c_str());
     
@@ -576,15 +657,15 @@ void plotter::plot(string dateName){
 	Eff_phiMB4Bot[ivar] = getIntLumiEff(Eff_phiMB4Bot[ivar],ivar);
 	Eff_phiMB4Bot[ivar]->Draw("ap");
 
-	gPad->Update(); 
-	auto graph = Eff_phiMB4Bot[ivar]->GetPaintedGraph(); 
+	gPad->Update();
+	auto graph = Eff_phiMB4Bot[ivar]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
        
-	cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+dataCont.varName[ivar]+"_var.png").c_str());
+	cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+dataCont.varName[ivar]+"_intLum.png").c_str());
       }
-    delete cPhiMB4Bot ;  
+    delete cPhiMB4Bot ;
 
   }
   
@@ -592,10 +673,19 @@ void plotter::plot(string dateName){
   
   for (int ivar=0; ivar<2; ivar++){
     for (int ist=0; ist<4; ist++){
+
+      //find maximum
+      float_t Max = 0;
+      for (int iwh=0; iwh<5; iwh++){
+      	if(Gr_MBWh[ivar][iwh][ist]->GetMaximum() > Max) Max = Gr_MBWh[ivar][iwh][ist]->GetMaximum();
+      }
+
+
       //phi
       TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+dataCont.varName[ivar]).c_str());
-      Gr_MBWh[ivar][0][ist]->SetMaximum(35);
-      Gr_MBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" bkg vs "+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";bkg").c_str());
+      Gr_MBWh[ivar][0][ist]->SetMaximum(Max*1.3);
+      Gr_MBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" bkg vs "+dataCont.varTitle[ivar]+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+      
       Gr_MBWh[ivar][0][ist]->Draw("E1");
       
 
@@ -606,14 +696,49 @@ void plotter::plot(string dateName){
       }
       legMB->Draw("same");
       cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+dataCont.varName[ivar]+".png").c_str());
+   
+      delete  cMB ;
+    }//end stations
+
+    //segment
+    for (int ist=0; ist<4; ist++){
+
+      //find maximum
+      float_t Max = 0;
+      for (int iwh=0; iwh<5; iwh++){
+      	if(Gr_SegMBWh[ivar][iwh][ist]->GetMaximum() > Max) Max = Gr_SegMBWh[ivar][iwh][ist]->GetMaximum();
+      }
+
+      //phi
+      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+dataCont.varName[ivar]).c_str());
+      Gr_SegMBWh[ivar][0][ist]->SetMaximum(Max*1.3);
+      Gr_SegMBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+dataCont.varTitle[ivar]+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+      //      Gr_SegMBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";Rate(Hz/cm^{-2})").c_str());
+      Gr_SegMBWh[ivar][0][ist]->Draw("E1");
+      
+
+      TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
+      for (int iwh=0; iwh<5; iwh++){
+	Gr_SegMBWh[ivar][iwh][ist]->Draw("sameE1");
+	legMB->AddEntry(Gr_SegMBWh[ivar][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      }
+      legMB->Draw("same");
+      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"SegBkgVs"+dataCont.varName[ivar]+".png").c_str());
       delete  cMB ;
      }
 
 
+
     // MB4 Top
+
+    //find maximum
+    float_t Max = 0;
+    for (int iwh=0; iwh<5; iwh++) if(Gr_MB4Top[ivar][iwh]->GetMaximum() > Max) Max = Gr_MB4Top[ivar][iwh]->GetMaximum();
+    
     TCanvas *cMB4Top = new TCanvas(("cMB4Top"+dataCont.varName[ivar]).c_str());
-    Gr_MB4Top[ivar][0]->SetMaximum(35);
-    Gr_MB4Top[ivar][0]->SetTitle(("MB4Top bkg vs "+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";bkg").c_str());
+    Gr_MB4Top[ivar][0]->SetMaximum(Max*1.15);
+    Gr_MB4Top[ivar][0]->SetTitle(("MB4Top bkg vs "+dataCont.varTitle[ivar]+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    //    Gr_MB4Top[ivar][0]->SetTitle(("MB4Top bkg vs "+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";Rate(Hz/cm^{-2})").c_str());
     Gr_MB4Top[ivar][0]->Draw("E1");
     
     TLegend * legMB4Top = new TLegend(0.75,0.75,0.9,0.9);
@@ -625,22 +750,59 @@ void plotter::plot(string dateName){
     cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+dataCont.varName[ivar]+".png").c_str());
     delete cMB4Top ;
     
+
+
+    //segment
+
+    //find maximum
+    Max = 0;
+    for (int iwh=0; iwh<5; iwh++) if(Gr_SegMB4Top[ivar][iwh]->GetMaximum() > Max) Max = Gr_SegMB4Top[ivar][iwh]->GetMaximum();
+    
+    TCanvas *cSegMB4Top = new TCanvas(("cSegMB4Top"+dataCont.varName[ivar]).c_str());
+    Gr_SegMB4Top[ivar][0]->SetMaximum(Max*1.15);
+    // Gr_SegMB4Top[ivar][0]->SetTitle(("MB4Top segment bkg vs "+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";Rate(Hz/cm^{-2})").c_str());
+    Gr_SegMB4Top[ivar][0]->SetTitle(("MB4Top segment bkg vs "+dataCont.varTitle[ivar]+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    Gr_SegMB4Top[ivar][0]->Draw("E1");
+    
+    TLegend * legSegMB4Top = new TLegend(0.75,0.75,0.9,0.9);
+    for (int iwh=0; iwh<5; iwh++){
+      Gr_SegMB4Top[ivar][iwh]->Draw("sameE1");
+      legSegMB4Top->AddEntry(Gr_SegMB4Top[ivar][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+    }
+    legSegMB4Top->Draw("same");
+    cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+dataCont.varName[ivar]+".png").c_str());
+    delete cSegMB4Top ;
+    
+
     // MB4 Bot
     TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+dataCont.varName[ivar]).c_str());
     
-    Gr_MB4Bot[ivar]->SetTitle(("MB4Bot bkg vs "+dataCont.varTitle[ivar]+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";bkg").c_str());
+    //    Gr_MB4Bot[ivar]->SetTitle(("MB4Bot bkg vs "+dataCont.varTitle[ivar]+dataCont.varTitle[ivar]+";"+dataCont.varLabel[ivar]+";Rate(Hz/cm^{-2})").c_str());
+    Gr_MB4Bot[ivar]->SetTitle(("MB4Bot bkg vs "+dataCont.varTitle[ivar]+dataCont.varTitle[ivar]+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
     Gr_MB4Bot[ivar]->Draw("E1");
     
     cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+dataCont.varName[ivar]+".png").c_str());
-    delete cMB4Bot; 
-  }      
+    delete cMB4Bot;
+
+
+    // MB4 Bot segment
+    TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+dataCont.varName[ivar]).c_str());
+    
+    Gr_SegMB4Bot[ivar]->SetTitle(("MB4Bot segment bkg vs "+dataCont.varTitle[ivar]+dataCont.varTitle[ivar]+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    Gr_SegMB4Bot[ivar]->Draw("E1");
+    
+    cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+dataCont.varName[ivar]+".png").c_str());
+    delete cSegMB4Bot;
+
+
+  }
 }
 
 // Reorganize bins on order to have a un uncertainty per bin less than MaxErr. To be improved in order to check merged bins uncertainties.
 TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
 
   Int_t nBins  = effIn->GetTotalHistogram()->GetNbinsX();
-  const  TArrayD *arr = effIn->GetTotalHistogram()->GetXaxis()->GetXbins(); 
+  const  TArrayD *arr = effIn->GetTotalHistogram()->GetXaxis()->GetXbins();
 
   std::vector<Double_t> xBins;
   std::vector<Double_t> totCont;
@@ -664,12 +826,12 @@ TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
 
   for(int bin = 1; bin<=maxBin; bin++){
     if(isEmpty){
-      if(effIn->GetTotalHistogram()->GetBinContent(bin)) isEmpty = false; 
+      if(effIn->GetTotalHistogram()->GetBinContent(bin)) isEmpty = false;
       else continue;
     }
     if(isFirst || ( (effIn->GetTotalHistogram()->GetBinError(bin)/effIn->GetTotalHistogram()->GetBinContent(bin) < MaxErr) || bin ==maxBin)){
-      isFirst = false;     
-      xBins.push_back(arr->GetArray()[bin-1]); 
+      isFirst = false;
+      xBins.push_back(arr->GetArray()[bin-1]);
       totCont.push_back( effIn->GetTotalHistogram()->GetBinContent(bin));
       passCont.push_back(effIn->GetPassedHistogram()->GetBinContent(bin));
     }
@@ -681,7 +843,7 @@ TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
   }
 
 
-  //  xBins.insert(xBins.begin(),arrX->GetArray()[firstBin-1]);
+  // xBins.insert(xBins.begin(),arrX->GetArray()[firstBin-1]);
   //Cont.insert(Cont.begin(),0);
 
   //insert last  value to have the right edge of the last  bin
@@ -693,7 +855,11 @@ TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
   totCont.push_back(0.);
   passCont.push_back(0.);
   
-  TEfficiency * effNew = new TEfficiency(effIn->GetName(),effIn->GetTitle(),xBins.size()-1,xBins.data());
+  string hName = effIn->GetName();
+  string hTitle = effIn->GetTitle();
+  effIn->Delete();
+
+  TEfficiency * effNew = new TEfficiency(hName.c_str(),hTitle.c_str(),xBins.size()-1,xBins.data());
 
   for(uint bin = 1; bin<xBins.size(); bin++){
     effNew->SetTotalEvents(bin, totCont[bin-1]);
@@ -703,39 +869,11 @@ TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
 }
 
 
-/* TH1F *  plotter::SetHistoLimits( const TH1 *hIn){ */
-  
-/*   Int_t nBins  = hIn->GetNbinsX(); */
-  
-/*   static bool foundMin; */
-/*   static bool foundMax; */
-  
-/*   Int_t minBin = 0; */
-/*   Int_t maxBin = -1; */
-  
-/*   TH1F * hNew = (TH1F*)hIn->Clone(); */
-
-/*   for(int bin = 1; bin<=nBins; bin++){ */
-/*     if (!foundMin && hIn->GetBinContent(bin)>0. ){ */
-/*       minBin = bin; */
-/*       foundMin = true; */
-/*     } */
-    
-/*     if(!foundMax && hIn->GetBinContent(nBins - bin)>0.){ */
-/*       maxBin = nBins - bin; */
-/*       foundMax = true; */
-/*     } */
-/*   } */
-/*   hNew->GetXaxis()->SetRange(minBin,maxBin); */
-/*   return hNew; */
-/* } */
-
-
 // Reorganize bins on order to have a un uncertainty per bin less than MaxErr. To be improved in order to check merged bins uncertainties.
 TH2F * plotter::set2DHistoBin( TH2F *hIn, Float_t MaxErr){
   
-  Int_t nXBins  = hIn->GetNbinsX();       
-  Int_t nYBins  = hIn->GetNbinsY();       
+  Int_t nXBins  = hIn->GetNbinsX();
+  Int_t nYBins  = hIn->GetNbinsY();
 
   const  TArrayD *arrX = hIn->GetXaxis()->GetXbins();
   const  TArrayD *arrY = hIn->GetYaxis()->GetXbins();
@@ -755,36 +893,36 @@ TH2F * plotter::set2DHistoBin( TH2F *hIn, Float_t MaxErr){
   bool  isFirst  = true;
 
   for(int bin = 1; bin<=nXBins; bin++){
-    //loop backward to find last non empty column 
+    //loop backward to find last non empty column
     if(!foundMax && hIn->Integral((nXBins - bin),(nXBins - bin),0,-1 ) >0.){
       maxBin = nXBins - bin;
       foundMax = true;
       break;
     }
   }
-  //the array has a one item more then the number of bins. 
 
-  for(int bin = 1; bin<=maxBin; bin++){  
+  //the array has a one item more then the number of bins.
+
+  for(int bin = 1; bin<=maxBin; bin++){
 
     IntX = hIn->IntegralAndError(bin,bin,0,-1,Err);
     if(isEmpty){
-      if(IntX) {
-	isEmpty =false;
+      if(IntX){
+	isEmpty = false;
 	firstBin = (bin==1) ? 1 : bin - 1;
-	}
+      }
       else continue;
-    }    
-
-    if(isFirst ||( (Err/IntX < MaxErr) || (bin == maxBin) ) ){ 
+    }
+    if(isFirst ||( (Err/IntX < MaxErr) || (bin == maxBin) ) ){
 	isFirst = false;
 	Cont.push_back(vector<Double_t>());
 	xBins.push_back(arrX->GetArray()[bin-1]);
-	for(int biny = 1; biny<=nYBins; biny++){  
+	for(int biny = 1; biny<=nYBins; biny++){
 	  Cont.back().push_back(hIn->GetBinContent(bin,biny));
 	}
     }
     else{
-      for(int biny = 1; biny<=nYBins; biny++){  
+      for(int biny = 1; biny<=nYBins; biny++){
 	(Cont.back())[biny-1]+=hIn->GetBinContent(bin,biny);
       }
     }
@@ -793,6 +931,7 @@ TH2F * plotter::set2DHistoBin( TH2F *hIn, Float_t MaxErr){
   xBins.insert(xBins.begin(),arrX->GetArray()[firstBin-1]);
   Cont.insert(Cont.begin(),vector<Double_t>());
 
+
   for(int biny = 1; biny<=nYBins; biny++) Cont[0].push_back(0.);
   
   xBins.push_back(arrX->GetArray()[maxBin]);
@@ -800,9 +939,15 @@ TH2F * plotter::set2DHistoBin( TH2F *hIn, Float_t MaxErr){
   Cont.push_back(vector<Double_t>());
   for(int biny = 1; biny<=nYBins; biny++) Cont.back().push_back(0.);
 
-  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
-  for(uint binx = 1; binx<=xBins.size()-1; binx++){  
-    for(int biny = 1; biny<=nYBins; biny++){  
+  string  hName =  hIn->GetName();
+
+  TH2F * hNew = new TH2F("","",xBins.size()-1,xBins.data(),nYBins,arrY->GetArray());
+  hIn->Delete();
+
+  hNew->SetName(hName.c_str());
+
+  for(uint binx = 1; binx<=xBins.size()-1; binx++){
+    for(int biny = 1; biny<=nYBins; biny++){
       hNew->SetBinContent(binx,biny, Cont[binx-1][biny-1]);
     }
   }
@@ -820,18 +965,21 @@ void plotter::setPlots(){
 	   EffA_phiMBWh[ivar][iwh][ist] = setEffRun(EffA_phiMBWh[ivar][iwh][ist]);
 	   //	   Hist_MBWh[ivar][iwh][ist]    = set2DHistoBinRun(Hist_MBWh[ivar][iwh][ist], ivar);
 	   Hist_MBWh[ivar][iwh][ist]    = getIntLumiHisto(Hist_MBWh[ivar][iwh][ist], ivar);
+	   Hist_SegMBWh[ivar][iwh][ist] = getIntLumiHisto(Hist_SegMBWh[ivar][iwh][ist], ivar);
 	 }
 	 else{
 	   Eff_phiMBWh[ivar][iwh][ist]  = setEffBin(Eff_phiMBWh[ivar][iwh][ist]);
 	   EffA_phiMBWh[ivar][iwh][ist] = setEffBin(EffA_phiMBWh[ivar][iwh][ist]);
 	 }
-	  if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg") Hist_MBWh[ivar][iwh][ist]    = set2DHistoBin(Hist_MBWh[ivar][iwh][ist]); //decom
-	 
+	 if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg"){
+	   Hist_MBWh[ivar][iwh][ist]       = set2DHistoBin(Hist_MBWh[ivar][iwh][ist]); //decom
+	   Hist_SegMBWh[ivar][iwh][ist]    = set2DHistoBin(Hist_SegMBWh[ivar][iwh][ist]); //decom
+	
+	 }
 	 if(ist!=3){
 	   if(dataCont.varName[ivar]=="Run"){
 	     Eff_theMBWh[ivar][iwh][ist]  = setEffRun(Eff_theMBWh[ivar][iwh][ist]);
-	     EffA_theMBWh[ivar][iwh][ist] = setEffRun(EffA_theMBWh[ivar][iwh][ist]);
-	     
+	     EffA_theMBWh[ivar][iwh][ist] = setEffRun(EffA_theMBWh[ivar][iwh][ist]);	     
 	     //Hist_theMBWh[ivar][iwh][ist] = getIntLumiHisto(Hist_theMBWh[ivar][iwh][ist], ivar); //theta hist don't exit yet
 	     //Hist_theMBWh[ivar][iwh][ist] = set2DHistoBinRun(Hist_theMBWh[ivar][iwh][ist], ivar);
 	   }
@@ -845,14 +993,18 @@ void plotter::setPlots(){
 	 Eff_phiMB4Top[ivar][iwh]  = setEffRun(Eff_phiMB4Top[ivar][iwh]);
 	 EffA_phiMB4Top[ivar][iwh] = setEffRun(EffA_phiMB4Top[ivar][iwh]);
 	 //Hist_MB4Top[ivar][iwh]    = set2DHistoBinRun(Hist_MB4Top[ivar][iwh], ivar);
-	 Hist_MB4Top[ivar][iwh]    = getIntLumiHisto(Hist_MB4Top[ivar][iwh], ivar);
+	 Hist_MB4Top[ivar][iwh]     = getIntLumiHisto(Hist_MB4Top[ivar][iwh], ivar);
+	 Hist_SegMB4Top[ivar][iwh]  = getIntLumiHisto(Hist_SegMB4Top[ivar][iwh], ivar);
+
        }
        else{
 	 Eff_phiMB4Top[ivar][iwh]  = setEffBin(Eff_phiMB4Top[ivar][iwh]);
 	 EffA_phiMB4Top[ivar][iwh] = setEffBin(EffA_phiMB4Top[ivar][iwh]);
        }
-       if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg")  Hist_MB4Top[ivar][iwh] = set2DHistoBin(Hist_MB4Top[ivar][iwh]); //decom
-     
+       if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg"){
+	 Hist_MB4Top[ivar][iwh]    = set2DHistoBin(Hist_MB4Top[ivar][iwh]); //decom
+	 Hist_SegMB4Top[ivar][iwh] = set2DHistoBin(Hist_SegMB4Top[ivar][iwh]); //decom
+       }
      }
      if(dataCont.varName[ivar]=="Run"){
 
@@ -860,16 +1012,20 @@ void plotter::setPlots(){
        EffA_phiMB4Bot[ivar] = setEffRun(EffA_phiMB4Bot[ivar]);
        //Hist_MB4Bot[ivar]    = set2DHistoBinRun(Hist_MB4Bot[ivar], ivar);
        Hist_MB4Bot[ivar]    = getIntLumiHisto(Hist_MB4Bot[ivar], ivar);
+       Hist_SegMB4Bot[ivar] = getIntLumiHisto(Hist_SegMB4Bot[ivar], ivar);
      }
      else{
        Eff_phiMB4Bot[ivar]  = setEffBin(Eff_phiMB4Bot[ivar]);
        EffA_phiMB4Bot[ivar] = setEffBin(EffA_phiMB4Bot[ivar]);
      }
-    if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg")  Hist_MB4Bot[ivar] = set2DHistoBin(Hist_MB4Bot[ivar]); //decom
+     if(dataCont.varName[ivar] != "Run" &&  dataCont.varName[ivar] != "bkg"){
+       Hist_MB4Bot[ivar] = set2DHistoBin(Hist_MB4Bot[ivar]); //decom
+       Hist_SegMB4Bot[ivar] = set2DHistoBin(Hist_SegMB4Bot[ivar]); //decom
+     }
    }
 }
 
-//not used so farg
+//not used so far
 TEfficiency * plotter::addEff( TEfficiency *eff1, TEfficiency *eff2 ){
 
   Int_t nbins1 = eff1->GetTotalHistogram()->GetNbinsX();
@@ -896,12 +1052,12 @@ TEfficiency * plotter::setEffRun( TEfficiency *eff1 ){
   Int_t nbins = eff1->GetTotalHistogram()->GetNbinsX();
   TEfficiency * effNew = new TEfficiency(eff1->GetName(),eff1->GetTitle(),nbins,0,nbins);
   
-  auto graph = effNew->GetPaintedGraph(); 
+  auto graph = effNew->GetPaintedGraph();
   
   for(int bin = 1; bin<=nbins; bin++){
     effNew->SetTotalEvents(bin,  eff1->GetTotalHistogram()->GetBinContent(bin));
     effNew->SetPassedEvents(bin, eff1->GetPassedHistogram()->GetBinContent(bin));
-  }    
+  }
   return effNew;
 }
 
@@ -915,6 +1071,7 @@ void plotter::setAddBins(){
 	  Eff_phiMBWh[ivar][iwh][ist]  = addBins(Eff_phiMBWh[ivar][iwh][ist],ivar);
 	  EffA_phiMBWh[ivar][iwh][ist] = addBins(EffA_phiMBWh[ivar][iwh][ist],ivar);	  
 	  Hist_MBWh[ivar][iwh][ist]    = add2DHistoBinRun(Hist_MBWh[ivar][iwh][ist],ivar);
+	  Hist_SegMBWh[ivar][iwh][ist] = add2DHistoBinRun(Hist_SegMBWh[ivar][iwh][ist],ivar);
 
 	  if(ist!=3){
 	    Eff_theMBWh[ivar][iwh][ist]  = addBins(Eff_theMBWh[ivar][iwh][ist],ivar);
@@ -924,10 +1081,12 @@ void plotter::setAddBins(){
 	  Eff_phiMB4Top[ivar][iwh]  = addBins(Eff_phiMB4Top[ivar][iwh],ivar);
 	  EffA_phiMB4Top[ivar][iwh] = addBins(EffA_phiMB4Top[ivar][iwh],ivar);
 	  Hist_MB4Top[ivar][iwh]    = add2DHistoBinRun(Hist_MB4Top[ivar][iwh],ivar);	
+	  Hist_SegMB4Top[ivar][iwh]    = add2DHistoBinRun(Hist_SegMB4Top[ivar][iwh],ivar);	
 }
 	Eff_phiMB4Bot[ivar]  = addBins(Eff_phiMB4Bot[ivar],ivar);
 	EffA_phiMB4Bot[ivar] = addBins(EffA_phiMB4Bot[ivar],ivar);
 	Hist_MB4Bot[ivar]    = add2DHistoBinRun(Hist_MB4Bot[ivar],ivar);	
+	Hist_SegMB4Bot[ivar]    = add2DHistoBinRun(Hist_SegMB4Bot[ivar],ivar);	
       }    
     }
   } 
@@ -1047,7 +1206,7 @@ float plotter::getLumiRun(string run){
 
   for (unsigned int i = 0;i < files.size();i++) {
 
-    cout<<files[i]<<" "<<endl;
+    //    cout<<files[i]<<" "<<endl;
 
      if(files[i].find("~")!=string::npos) continue; 
      else if(files[i].find(".csv")==string::npos) continue; 
@@ -1076,24 +1235,18 @@ float plotter::getLumiRun(string run){
 
 	 // string::npos is returned if string is not found 
 	 if(pos!=string::npos){
-	   cout<<"Found"<<endl;
 	   isFound =true;
 	   break;
 	 }
        }
-     if(isFound){
-       cout<<"break "<<endl;
-       break;
-     }
+     if(isFound)  break;     
      else intLumi=0;
   }
-
 
   if(!isFound){
     cout<<"ERROR!!!  Run not found in integrated luminosity directory. Please run first createJSONs.py as written in the README"<<endl;
     abort();
   }
-  cout<<"run "<<run<<" "<<TotLumi<<" "<<intLumi<<endl;
   TotLumi+=intLumi;
   return TotLumi;  
 
@@ -1151,7 +1304,6 @@ TEfficiency * plotter::getIntLumiEff( TEfficiency *effIn, Int_t ivar){
 
   for(int bin = 1; bin <= nBins; bin++) xBins.push_back(getTotLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
   
-
   TotLumi = 0; // reset total lumi
 
   //To be updated using SetTotalEvents TEfficiency method.
@@ -1188,25 +1340,29 @@ TH2F * plotter::getIntLumiHisto( TH2F *hIn, Int_t ivar){
 
   std::vector<Double_t> xBins = {};
 
-  for(int bin = 1; bin <= nXBins; bin++)
-    xBins.push_back(getTotLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
+  for(int bin = 1; bin <= nXBins; bin++)  xBins.push_back(getTotLumiRun(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))));
 
-  TotLumi = 0; // reset total lumi
+  TotLumi = 0; // reset total lumi //del
 
-  TH2F * hNew = new TH2F("","",30*xBins.size(),xBins.at(0)-xBins.at(0)/10.,xBins.back()+xBins.back()/10.,nYBins,arrY->GetArray());
+  TH2F * hNew = new TH2F("","",100*xBins.size(), xBins.at(0)*(1+1/15.) - xBins.back()/15. ,  xBins.back()*(1+1/12.) - xBins.at(0)/12. ,nYBins,arrY->GetArray());
+  
   string hName = string(hIn->GetName());
+
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->AddBinContent(hNew->FindBin(xBins[binx-1],biny), hIn->GetBinContent(binx,biny));
     }
   }
 
-  hIn->Delete();
+ 
   hNew->GetXaxis()->SetTitle("Int.Lumi. pb^{-1}");
+  hNew->GetYaxis()->SetTitle("Rate(Hz/cm^{-2})");
   hNew->SetName(hName.c_str());
   hNew->SetLineColor(hIn->GetLineColor());
   hNew->SetMarkerStyle(hIn->GetMarkerStyle());
   hNew->SetMarkerColor(hIn->GetMarkerColor());
+
+  hIn->Delete();
   return hNew;
 }
 
@@ -1223,9 +1379,10 @@ TH2F * plotter::set2DHistoBinRun( TH2F *hIn, int ivar){
   for(int bin = 1; bin<=nXBins; bin++){  
     xBins.push_back(arrX->GetArray()[bin-1]);
   }
-
-  TH2F * hNew = new TH2F((string(hIn->GetName())).c_str(),"",xBins.size(),xBins[0],xBins.back(),nYBins,arrY->GetArray());
-
+  
+  string hName = hIn->GetName(); 
+  TH2F * hNew = new TH2F("","",xBins.size(),xBins[0],xBins.back(),nYBins,arrY->GetArray());
+  
   for(uint binx = 1; binx<=xBins.size(); binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->SetBinContent(binx,biny, hIn->GetBinContent(binx,biny));
@@ -1235,6 +1392,9 @@ TH2F * plotter::set2DHistoBinRun( TH2F *hIn, int ivar){
   for(int bin = 1; bin <=nXBins; bin++){
     hNew->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.slices[ivar][bin-1]))).c_str()); //del
     }
+  
+  hIn->Delete();
+  hNew->SetName(hName.c_str());
 
   return hNew;
 }

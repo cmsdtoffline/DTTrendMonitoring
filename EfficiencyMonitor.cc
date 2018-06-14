@@ -29,8 +29,7 @@ If MaxDead > 0, dead wires will have efficiency zero while alive wires in the sa
 int lessentries=1000000;
 
 
-void EfficiencyMonitor::PreLoop()
-{
+void EfficiencyMonitor::PreLoop(){
 
    if (fChain == 0) return;
 
@@ -55,8 +54,6 @@ void EfficiencyMonitor::PreLoop()
    char go;
    char hname[50];
    TH1F* occupancy[5][14][4][3][4];
-
-
    for (int iwh=0; iwh<5; iwh++) {
      for (int ise=0; ise<14; ise++) {
        for (int ist=0; ist<4; ist++) {
@@ -73,21 +70,21 @@ void EfficiencyMonitor::PreLoop()
    }
 
    for (Long64_t jentry=2; jentry<nentries;jentry++) {
+
       Long64_t ientry = LoadTree(jentry);
       if (ientry < 0) break;
       nb = fChain->GetEntry(jentry);   nbytes += nb;
       // if (Cut(ientry) < 0) continue;
 
-      if (jentry%100000 == 0) cout<<setprecision (2)<<" Pre-Loop event "<<jentry<<" "<<jentry/float(nRealEntries)*100.<<"%"<<endl;
+      if (jentry%50000 == 0) cout<<setprecision (2)<<" Pre-Loop event "<<jentry<<" "<<jentry/float(nRealEntries)*100.<<"%"<<endl;
       for (int idigi=0; idigi<Ndigis; idigi++) {
    
 	occupancy[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]
 	         [digi_sl->at(idigi)-1][digi_layer->at(idigi)-1]->Fill(float(digi_wire->at(idigi)));
       }
    }
-    
    // analyze occupancy histos and fill dead channel table
-
+   
    int nwire=0; int NwireTot=0;
    for (int iw=0; iw<5000; iw++) for (int geo=0; geo<6; geo++) dead[iw][geo]=0;
    for (int iwh=0; iwh<5; iwh++) {
@@ -114,10 +111,9 @@ void EfficiencyMonitor::PreLoop()
 	   }
 
            NwireTot+=(nwire*4);
-
            for (int ilay=0; ilay<4; ilay++) {
              for (int iw=1; iw<nwire+1; iw++) {
-               if (occupancy[iwh][ise][ist][isl][ilay]->GetBinContent(iw)==0){
+	     if (occupancy[iwh][ise][ist][isl][ilay]->GetBinContent(iw)==0){
 		 dead[Ndead][0]=iwh-2;
 		 dead[Ndead][1]=ise+1;
  		 dead[Ndead][2]=ist+1;
@@ -128,6 +124,7 @@ void EfficiencyMonitor::PreLoop()
                  for (int ip=0; ip<6; ip++) DeadList<< dead[Ndead][ip]<<" "; DeadList<<endl;
                  Ndead++; 
 	       } 
+	       //occupancy[iwh][ise][ist][isl][ilay]->Delete(); //check. delete or find solution. 
 	     }
 	   }
 	 }
@@ -135,8 +132,8 @@ void EfficiencyMonitor::PreLoop()
      }
    }
 
-   cout<<Ndead<<" dead wires out of "<<NwireTot<<endl;
 
+   cout<<Ndead<<" dead wires out of "<<NwireTot<<endl;
    DeadList<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "
           <<endl<<Ndead<<" dead wires of out "<<NwireTot<<endl;
 
@@ -201,8 +198,6 @@ if (Ndead==0) {
      while (idead!=0);
    }
 
- std::vector<Float_t>  varVal  = {0.,0.}; 
-
    Int_t currentRun = 0;
 
    cout<<"Reading tree"<<endl;
@@ -210,13 +205,14 @@ if (Ndead==0) {
 
      Long64_t ientry = LoadTree(jentry);
      
-     if (jentry%100000 == 0) cout<<"Event "<<jentry<<" "<<setprecision (2)<<((jentry/float(nRealEntries))*100)<<" %  "<<endl;
+     if (jentry%50000 == 0) cout<<"Event "<<jentry<<" "<<setprecision (2)<<((jentry/float(nRealEntries))*100)<<" %  "<<endl;
      if (ientry < 0) break;
      
+
      nb = fChain->GetEntry(jentry);   nbytes += nb;
      // if (Cut(ientry) < 0) continue;
   
-     if(dataContext.name=="inst"){  
+     if(dataContext.name=="Fixed"){  
        varVal[0] = lumiperblock;
        varVal[1] = PV_Nvtx;
      }
@@ -224,21 +220,17 @@ if (Ndead==0) {
        varVal[0] = (float)runnumber; 
        varVal[1] = bunchXing; 
      }
+
+     getBkgDigi(jentry);     
      
-
-     //ctime (&rawtime)
-     //     cout<<"time "<<setprecision(40)<<timestamp<<" "<<timestamp/((1000000.)*(31536000.))+1970<<" "<<timestamp/((1000000.)*(60*60*24*365))<<endl;
-
-     //   if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
-     //  if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } //fix
+     // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
+     // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } //fix
      
      // First search for Phi segments
      
      //cout<<"Ndtsegments "<<Ndtsegments<<std::endl;     
-     Float_t bkg = 0;
      
      for (int iseg=0; iseg<Ndtsegments; iseg++) {
-       bkg=0;
        //selection
        if (!dtsegm4D_hasPhi->at(iseg)) continue;
        // In chambers 1,2,3 select only segments with also Z (theta) contribution.
@@ -344,31 +336,8 @@ if (Ndead==0) {
 	 }
        }
        if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
+       if(dataContext.name=="Fixed") varVal[2] = bkgCounts.DigiBckWhMB[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)]; //Fixme
 
-       // Naive method to estimate background. To be replaced. 
-
-       for (int idigi=0; idigi<Ndigis; idigi++) {                                                                    
-	 if ((digi_time->at(idigi)>320 || digi_time->at(idigi)<700) &&
-	     (digi_wheel->at(idigi)   == dtsegm4D_wheel->at(iseg)) &&
-	     (digi_sector->at(idigi)  == dtsegm4D_sector->at(iseg)) &&
-	     (digi_station->at(idigi) == dtsegm4D_station->at(iseg))) bkg++;
-	     }
-       
-       if(dataContext.name=="inst") varVal[2] = bkg;
-
-       //       cout<<"hei "<<varVal[0]<<" "<<endl;
-       plots->Hist_MBWh[0][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(varVal[0],bkg); 
-       plots->Hist_MBWh[1][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(varVal[1],bkg); 
-       
-       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-	 plots->Hist_MB4Top[0][dtsegm4D_wheel->at(iseg)+2]->Fill(varVal[0],bkg); 
-	 plots->Hist_MB4Top[1][dtsegm4D_wheel->at(iseg)+2]->Fill(varVal[1],bkg);        }
-	     
-       // extra chamber of sector 10 (sector 14) 
-       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-	 plots->Hist_MB4Bot[0]->Fill(varVal[0],bkg); 
-	 plots->Hist_MB4Bot[1]->Fill(varVal[1],bkg); 
-       }
 
        if (NHits<nrequiredhit) continue;
        else if (NHits==8) {
@@ -400,7 +369,6 @@ if (Ndead==0) {
 	   
 	   // is there a digi within the expected tube?
 
-	   
            float digiW  = -1.;
            float d      = 1000000; //just a very big number
            int iex      = missingLayer[imiss][0] < 5 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]+3;
@@ -463,7 +431,6 @@ if (Ndead==0) {
 		 if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
 		   plots->Eff_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss&&missDigi),varVal[ivar]); 
 		   plots->EffA_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss),varVal[ivar]); 
-		   
 		 }
 		 else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
 		   plots->Eff_phiMB4Bot[ivar]->Fill(!(missAss&&missDigi),varVal[ivar]);
@@ -672,7 +639,7 @@ void EfficiencyMonitor::SetRunSlices(int iVar)
     fChain->GetEntry(jentry);
     
     if (ientry < 0)  break;  
-    if (jentry%100000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;    
+    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;    
 
     b_runnumber->GetEntry(jentry);
     runNumber_Set.insert(runnumber);
@@ -683,9 +650,252 @@ void EfficiencyMonitor::SetRunSlices(int iVar)
 				       			
   dataContext.slices[iVar].push_back( dataContext.slices[iVar].back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
 
-  cout<<"end slices "<<endl;
   // uncoment to check the run list
-  for(uint i =0; i<dataContext.slices[iVar].size(); i++)
-    cout<<dataContext.slices[iVar].at(i)<<endl;
+  // cout<<"end slices "<<endl;
+  // for(uint i =0; i<dataContext.slices[iVar].size(); i++)
+  //   cout<<setprecision(6)<<dataContext.slices[iVar].at(i)<<endl;
   
+}
+
+
+void EfficiencyMonitor::getBkgDigi(Int_t jentry){
+
+  //to moved in .h
+
+  // double timewindowdigi = MC? 400 : 1275;
+  // double timewindowseg  = MC? 400 : 800;
+ 
+  double timewindowdigi =  1275;
+  double timewindowseg  =  800;
+ 
+ float MBarea[3]; float MB4area[14];
+
+ // MBarea[0] = 49 * 4.2;* 58 * 4.2;  //n wires phi X cell size X n wires theta.
+ // MBarea[1] = 60 * 4.2;* 58 * 4.2;
+ // MBarea[2] = 72 * 4.2;* 58 * 4.2;
+
+ // float MBareaTh = 58*4.2;
+
+ MBarea[0] = 49 * 4.2 * 58 * 4.2;  //n wires phi X cell size X n wires theta.
+ MBarea[1] = 60 * 4.2 * 58 * 4.2;
+ MBarea[2] = 72 * 4.2 * 58 * 4.2;
+ 
+ MB4area[1-1]  = 96 * 4.2 * 58 * 4.2;
+ MB4area[2-1]  = MB4area[1-1];
+ MB4area[3-1]  = MB4area[1-1];
+ MB4area[4-1]  = 72 * 4.2 * 58 * 4.2;
+ MB4area[5-1]  = MB4area[1-1];
+ MB4area[6-1]  = MB4area[1-1];
+ MB4area[7-1]  = MB4area[1-1];
+ MB4area[8-1]  = 92 * 4.2 * 58 * 4.2;
+ MB4area[9-1]  = 49 * 4.2 * 58 * 4.2;
+ MB4area[10-1] = 60 * 4.2 * 58 * 4.2;
+ MB4area[11-1] = MB4area[9-1];
+ MB4area[12-1] = MB4area[8-1];
+ MB4area[13-1] = MB4area[4-1];
+ MB4area[14-1] = MB4area[10-1];
+
+  //
+
+  Long64_t nentries     = fChain->GetEntriesFast();  
+
+   int NdigiSig[5][12][4];        int NdigiBck[5][12][4]; //wheel sector stations
+   int NsegmSig[5][12][4];        int NsegmBck[5][12][4]; 
+   
+   //intilize to 0 the elements
+   for (int iwh=0; iwh<5; iwh++) for (int ise=0; ise<12; ise++) for (int ist=0; ist<4;ist++) {
+	 
+	 NdigiSig[iwh][ise][ist]=0;    NdigiBck[iwh][ise][ist]=0;
+	 NsegmSig[iwh][ise][ist]=0;    NsegmBck[iwh][ise][ist]=0;
+       }
+   
+   int ChambCross[100][3];
+   for (int i=0; i<100; i++) for (int geo=0; geo<3; geo++) ChambCross[i][geo]=-999;
+   
+   int NChambCross=0;
+
+   //   cout<<"Nmuons "<<Nmuons<<endl;   
+   for (int imu=0; imu<Nmuons; imu++) {
+     
+     int Ncross = Mu_nMatches->at(imu); 
+
+     //     if (Mu_isMuGlobal->at(imu) || Mu_isMuTracker->at(imu)) check->Fill(Mu_eta->at(imu),float(Ncross));                  
+     TVectorF *Mu_cross_Wh=(TVectorF*)Mu_matches_Wh->At(imu);
+     TVectorF *Mu_cross_Se=(TVectorF*)Mu_matches_Sec->At(imu);
+     TVectorF *Mu_cross_St=(TVectorF*)Mu_matches_St->At(imu);
+     
+
+     for (int ich=0; ich<Ncross; ich++) {
+       
+       int wheel    = (*Mu_cross_Wh)(ich);
+       int sector   = (*Mu_cross_Se)(ich);
+       int station  = (*Mu_cross_St)(ich);
+       
+       ChambCross[NChambCross][0] = wheel;
+       ChambCross[NChambCross][1] = sector;
+       ChambCross[NChambCross][2] = station;
+       
+       if (NChambCross<99) NChambCross++;
+       else {
+	 cout<<" warning event "<<jentry<<" "<<Nmuons<<" muons, more than 100 chamber crossed! "<<endl;
+	 break;
+       }
+     }
+
+     // add search for associated segments (standalone muons may not have matches)
+     
+     //if (Ncross>0) continue;
+     
+     int word = Mu_segmentIndex_sta->at(imu);
+     int count=0;
+       
+     while (word>1) {
+       while (word % 2 == 0) {
+	 count++;
+	 word=word>>1;
+       }
+
+       ChambCross[NChambCross][0] = dtsegm4D_wheel->at(count);
+       ChambCross[NChambCross][1] = dtsegm4D_sector->at(count);
+       ChambCross[NChambCross][2] = dtsegm4D_station->at(count);
+       
+       if (Mu_isMuGlobal->at(imu) || Mu_isMuTracker->at(imu)) {
+	 float qual = dtsegm4D_phinhits->at(count) > 0 ?  dtsegm4D_phinhits->at(count) : 0.;
+	 qual += dtsegm4D_znhits->at(count) > 0 ?  dtsegm4D_znhits->at(count) : 0.;
+	 // qualsig->Fill(qual); check
+	 // if (qual>5) t0sig->Fill(dtsegm4D_t0->at(count));
+       }
+       if (NChambCross<99) NChambCross++;
+       else {
+	 cout<<" warning event "<<jentry<<" "<<Nmuons<<" muons, more than 100 chamber crossed! "<<endl;
+	 break;
+       }
+       count++; word=word>>1;
+     }
+   } // leave muon loop: now I have all chambers crossed + associated segments!
+   
+   for (int idigi=0; idigi<Ndigis; idigi++) {
+     
+     bool digibck = true; 
+       
+     for (int icross=0; icross<NChambCross; icross++) {
+       
+       if (digi_wheel->at(idigi)   == ChambCross[icross][0] &&
+	   digi_sector->at(idigi)  == ChambCross[icross][1] &&
+	   digi_station->at(idigi) == ChambCross[icross][2] ) {
+	 digibck=false;
+	 
+	 //	 timesig->Fill(digi_time->at(idigi));
+	 if (digi_sector->at(idigi)<13)        NdigiSig[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]++;
+	 else  if (digi_sector->at(idigi)==13) NdigiSig[digi_wheel->at(idigi)+2][4-1][digi_station->at(idigi)-1]++;
+	 else  if (digi_sector->at(idigi)==14) NdigiSig[digi_wheel->at(idigi)+2][10-1][digi_station->at(idigi)-1]++;
+	 
+	 break;
+       }
+     }
+     
+     if (digibck) {
+       //       timebck->Fill(digi_time->at(idigi));
+       if (digi_sector->at(idigi)<13)        NdigiBck[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]++;
+       else if (digi_sector->at(idigi)==13)  NdigiBck[digi_wheel->at(idigi)+2][4-1][digi_station->at(idigi)-1]++;
+       else if (digi_sector->at(idigi)==14)  NdigiBck[digi_wheel->at(idigi)+2][10-1][digi_station->at(idigi)-1]++;
+     }
+   } // loop sui digi
+   
+   for (int iseg=0; iseg<Ndtsegments; iseg++) {
+     
+     bool segmbck = true; 
+     
+     float qual = dtsegm4D_phinhits->at(iseg) > 0 ?  dtsegm4D_phinhits->at(iseg) : 0.;
+     qual += dtsegm4D_znhits->at(iseg) > 0 ?  dtsegm4D_znhits->at(iseg) : 0.;
+     
+     for (int icross=0; icross<NChambCross; icross++) {
+       
+       if (dtsegm4D_wheel->at(iseg)   == ChambCross[icross][0] &&
+	   dtsegm4D_sector->at(iseg)  == ChambCross[icross][1] &&
+	   dtsegm4D_station->at(iseg) == ChambCross[icross][2] ) {
+	 segmbck=false;
+	 
+	 if(dtsegm4D_sector->at(iseg)<13)       NsegmSig[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_sector->at(iseg)-1][dtsegm4D_station->at(iseg)-1]++;
+	 else if(dtsegm4D_sector->at(iseg)==13) NsegmSig[dtsegm4D_wheel->at(iseg)+2][4-1][dtsegm4D_station->at(iseg)-1]++;
+	 else if(dtsegm4D_sector->at(iseg)==14) NsegmSig[dtsegm4D_wheel->at(iseg)+2][10-1][dtsegm4D_station->at(iseg)-1]++;
+	 
+	 break;
+       }
+     }
+     
+     if (segmbck) {
+       //       qualbck->Fill(qual);
+       //       if (qual>5) t0bck->Fill(dtsegm4D_t0->at(iseg));
+       
+       if(dtsegm4D_sector->at(iseg)<13)       {
+	 NsegmBck[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_sector->at(iseg)-1][dtsegm4D_station->at(iseg)-1]++;
+       }
+       else if(dtsegm4D_sector->at(iseg)==13) {
+	 NsegmBck[dtsegm4D_wheel->at(iseg)+2][4-1][dtsegm4D_station->at(iseg)-1]++;
+       }
+       else if(dtsegm4D_sector->at(iseg)==14) {
+	 NsegmBck[dtsegm4D_wheel->at(iseg)+2][10-1][dtsegm4D_station->at(iseg)-1]++;
+       }
+     }
+   }
+
+
+   for (int iwh=0; iwh<5; iwh++) {
+     for (int ise=0; ise<12; ise++) {
+       for (int ist=0; ist<4; ist++) {
+	 double normdigi;  double normseg;
+	 
+	 if (ist+1 < 4) {
+	   normdigi = MBarea[ist] * 12; // 12 layers
+	   normseg  = MBarea[ist] * 12; // 12 layers //check
+
+	   //	   normdigi = MBarea[ist] * 8 + (4 * MBareaTh); // 12 layers
+	   // normseg  = MBarea[ist] * 8 + (4 * MBareaTh); // 12 layers; // 12 layers 
+	 }
+	 
+	 else {
+	   normdigi = MB4area[ise] * 8; // 8 layers
+	   normseg  = MB4area[ise] * 8; // 8 layers   //check ise->ist
+	 }
+	 
+	 if (ist+1 ==4 && (ise+1 == 4 ||  ise+1 == 10) ) {normdigi *=2; normseg *=2;}
+	 normdigi *= timewindowdigi/1e9; //* nentries; //1e9 = conversion from ns to s
+	 normseg  *= timewindowseg/1e9;  //* nentries;
+	 
+	 bkgCounts.DigiSigWhMB[iwh][ist]  = float(NdigiSig[iwh][ise][ist]) /normdigi/12; // we are integrating on 12 sectors
+	 bkgCounts.DigiBckWhMB[iwh][ist]  = float(NdigiBck[iwh][ise][ist]) /normdigi/12;
+	 bkgCounts.DigiSigSecMB[ise][ist] = float(NdigiSig[iwh][ise][ist]) /normdigi/5;  // we are integrating on 5 wheels
+	 bkgCounts.DigiBckSecMB[ise][ist] = float(NdigiBck[iwh][ise][ist]) /normdigi/5;
+	 
+	 bkgCounts.SegmSigWhMB[iwh][ist]  = float(NsegmSig[iwh][ise][ist]) /normseg/12;  // we are integrating on 12 sectors
+	 bkgCounts.SegmBckWhMB[iwh][ist]  = float(NsegmBck[iwh][ise][ist]) /normseg/12;
+	 bkgCounts.SegmSigSecMB[ise][ist] = float(NsegmSig[iwh][ise][ist]) /normseg/5;  // we are integrating on 5 wheels
+	 bkgCounts.SegmBckSecMB[ise][ist] = float(NsegmBck[iwh][ise][ist]) /normseg/5;
+
+  	 //cout<<" bkgCounts.DigiBckWhMB[iwh][ist]" << bkgCounts.DigiBckWhMB[iwh][ist]<<endl;
+	
+	 plots->Hist_MBWh[0][iwh][ist]->Fill(varVal[0],bkgCounts.DigiBckWhMB[iwh][ist]); 
+	 plots->Hist_MBWh[1][iwh][ist]->Fill(varVal[1],bkgCounts.DigiBckWhMB[iwh][ist]); 
+
+	 plots->Hist_SegMBWh[0][iwh][ist]->Fill(varVal[0],bkgCounts.SegmBckWhMB[iwh][ist]); 
+	 plots->Hist_SegMBWh[1][iwh][ist]->Fill(varVal[1],bkgCounts.SegmBckWhMB[iwh][ist]); 
+
+	 if (ist+1==4 && (ise+1==4 || ise+1 ==13)) {
+      
+	   plots->Hist_MB4Top[0][iwh]->Fill(varVal[0],bkgCounts.DigiBckWhMB[iwh][ist]); 
+	   plots->Hist_MB4Top[1][iwh]->Fill(varVal[1],bkgCounts.DigiBckWhMB[iwh][ist]);      
+	   plots->Hist_SegMB4Top[0][iwh]->Fill(varVal[0],bkgCounts.SegmBckWhMB[iwh][ist]); 
+	   plots->Hist_SegMB4Top[1][iwh]->Fill(varVal[1],bkgCounts.SegmBckWhMB[iwh][ist]);      
+	 }
+
+	 else if (ist+1==4 && (ise+1==10 || ise+1==14)) {
+	   plots->Hist_MB4Bot[0]->Fill(varVal[0],bkgCounts.DigiBckWhMB[iwh][ist]);
+	   plots->Hist_MB4Bot[1]->Fill(varVal[1],bkgCounts.DigiBckWhMB[iwh][ist]);     
+	   plots->Hist_SegMB4Bot[0]->Fill(varVal[0],bkgCounts.SegmBckWhMB[iwh][ist]);
+	   plots->Hist_SegMB4Bot[1]->Fill(varVal[1],bkgCounts.SegmBckWhMB[iwh][ist]);     
+	 }
+       } // End stations
+     } // End sector 
+   } // End wheel
 }

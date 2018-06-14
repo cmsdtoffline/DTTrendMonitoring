@@ -25,54 +25,41 @@
 //#include "EfficiencyMonitorSetting.C"
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
-namespace container{
-  struct RunID {
+namespace bkg {
+  struct Bkg {
 
-    Int_t runNumber;
-    int Num_phiMBWh[4][5];  int Den_phiMBWh[4][5]; // 2 variabili (run, time), 22 punti, 4 stazioni, 5 ruote
-    int Num_theMBWh[3][5];  int Den_theMBWh[3][5]; // 2 variabili (run, time), 22 punti, 3 stazioni, 5 ruote
-    int NumA_phiMBWh[4][5]; int NumA_theMBWh[3][5];// 'A' stands for 'Associated'
-
-    RunID (Int_t _runNumber):
-      runNumber(_runNumber) {
-        for ( int k = 0; k<5; k++){
-          for ( int i = 0; i<4; i++){
-            Num_phiMBWh[i][k]  = 0;
-            Den_phiMBWh[i][k]  = 0;
-            NumA_phiMBWh[i][k] = 0;
-          }
-
-          for ( int j = 0; j<3; j++){
-            Num_theMBWh[j][k]  = 0;
-            Den_theMBWh[j][k]  = 0;
-            NumA_theMBWh[j][k] = 0;
-          }
-        }
+    float DigiSigWhMB[5][4];  // we are integrating on 12 sectors
+    float DigiBckWhMB[5][4]; 
+    
+    float DigiSigSecMB[14][4];
+    float DigiBckSecMB[14][4];
+    
+    float SegmSigWhMB[5][4];   // we are integrating on 12 sectors
+    float SegmBckWhMB[5][4];
+    
+    float SegmSigSecMB[14][4]; // we are integrating on 5 wheels
+    float SegmBckSecMB[14][4];
+    
+    Bkg(){
+      for ( int w = 0; w<5; w++){
+	for ( int st = 0; st<4; st++){
+	  DigiSigWhMB[w][st] = 0;
+	  DigiBckWhMB[w][st] = 0;
+	  SegmSigWhMB[w][st] = 0;
+	  SegmBckWhMB[w][st] = 0;
+	}
       }
-
-      RunID (){
-        runNumber = 0;
-        for ( int k = 0; k<5; k++){
-          for ( int i = 0; i<4; i++){
-            Num_phiMBWh[i][k]  = 0;
-            Den_phiMBWh[i][k]  = 0;
-            NumA_phiMBWh[i][k] = 0;
-          }
-
-          for ( int j = 0; j<3; j++){
-            Num_theMBWh[j][k]  = 0;
-            Den_theMBWh[j][k]  = 0;
-            NumA_theMBWh[j][k] = 0;
-          }
+      
+      for ( int sc = 0; sc<14; sc++){
+	for ( int st = 0; st<4; st++){
+	  DigiSigSecMB[sc][st] = 0;
+	  DigiBckSecMB[sc][st] = 0;
+	  SegmSigSecMB[sc][st] = 0;
+	  SegmBckSecMB[sc][st] = 0;
+	}
       }
-    }
-
-    // int Num_phiMB4Top[5];  int Den_phiMB4Top[5]; // 2 variabili (run, rime), 22 punti
-    // int Num_phiMB4Bot;     int Den_phiMB4Bot;    // 2 variabili (run, time), 22 punti
-    // int NumA_phiMB4Top[5]; int NumA_phiMB4Bot;
-
+    }   
   };
-
 }
 
 class EfficiencyMonitor {
@@ -85,11 +72,14 @@ public :
 
    context dataContext;
 
+   bkg::Bkg bkgCounts;
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
 
    plotter         *plots;
+
+   std::vector<Float_t>  varVal;
 
    // Declaration of leaf types
    Int_t           runnumber;
@@ -391,7 +381,6 @@ public :
    TBranch        *b_Mu_matches_St;   //!
 
 
-
    TBranch        *b_Mu_numberOfChambers_sta;   //!
    TBranch        *b_Mu_numberOfMatches_sta;   //!
    TBranch        *b_Mu_numberOfHits_sta;   //!
@@ -476,7 +465,7 @@ public :
    void plot();
    void SetRunSlices(int iVar);
 
-   Float_t getBkgDigi(Int_t jentry, Int_t Wheel, Int_t Sector, Int_t Station);
+   void  getBkgDigi(Int_t jentry);
 
 };
 #endif
@@ -531,8 +520,11 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
       outName     = extOutName;
       dataContext = extContext; 
       Init(tree);
-      if(dataContext.name=="run") SetRunSlices(0); //fixme
+      if(dataContext.name=="Incr") SetRunSlices(0); //fixme
       plots = new plotter(dataContext,legacyName,outName,fileName);
+
+      varVal.push_back(0);
+      varVal.push_back(0); //fixme
 }
 
 EfficiencyMonitor::~EfficiencyMonitor()
