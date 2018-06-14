@@ -167,8 +167,7 @@ def makeBrilcalcMap():
 def getChunks(v,n=3): return [ v[i:i+n] for i in range(0, len(v), n) ]
 
 def getRunLumis(fnames, treename="Events"):
-    print "fnames", fnames
-    # returns dict where keys are runs and values are sets of lumi sections
+    # Returns dict where keys are runs and values are sets of lumi sections
     #print type(fnames)
     if type(fnames) == list:
         fname = fnames[0]
@@ -176,8 +175,13 @@ def getRunLumis(fnames, treename="Events"):
         fname = fnames
 
     f1 = r.TFile(fname)
+
     treenames = [obj.GetName() for obj in f1.GetListOfKeys()]
-    treename = treenames[0]
+    treename = treenames[-1]
+    
+
+# treename = "DTTree" #FIXME
+
     if len(treenames) > 1 and "Events" in treenames:
         treename = "Events"
 
