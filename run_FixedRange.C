@@ -35,19 +35,19 @@ int run_FixedRange(string refName ="", string storingName ="", string storedName
   
   else {cout<<"Problems with files "<<endl;    exit(1);}
 
-  context InstLumiCont;
+  context FixedCont;
   
-  InstLumiCont.name = "inst";
-  InstLumiCont.nVar=3;
-  InstLumiCont.slices.push_back(lumislice);
-  InstLumiCont.slices.push_back(PUslice);
-  InstLumiCont.slices.push_back(bkgslice);
-  InstLumiCont.varTitle  = varTitle_inst;
-  InstLumiCont.varName   = varName_inst;
-  InstLumiCont.varLabel  = varLabel_inst;
-  InstLumiCont.webFolder = WebFolder;
+  FixedCont.name = "Fixed";
+  FixedCont.nVar=3;
+  FixedCont.slices.push_back(lumislice);
+  FixedCont.slices.push_back(PUslice);
+  FixedCont.slices.push_back(bkgslice);
+  FixedCont.varTitle  = varTitle_inst;
+  FixedCont.varName   = varName_inst;
+  FixedCont.varLabel  = varLabel_inst;
+  FixedCont.webFolder = WebFolder;
   
-  EfficiencyMonitor *eff = new EfficiencyMonitor(InstLumiCont,chain,refName.c_str(),storingName,storedName);
+  EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName);
 
   if(stat(("data/DeadList/DeadList_"+refName).c_str(),&st) != 0) { 
    cout<<"dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;

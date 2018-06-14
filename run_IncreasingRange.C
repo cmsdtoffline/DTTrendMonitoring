@@ -38,7 +38,7 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
  
   context runCont;
  
-  runCont.name = "run";
+  runCont.name = "Incr"; //Stand for increasing;
   runCont.nVar=2;
 
   runCont.varTitle  = varTitle_run;
