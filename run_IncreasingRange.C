@@ -7,6 +7,7 @@
 
 int run_IncreasingRange(string refName ="", string storingName ="", string storedName = "", string run0 = "", string run1 = "", string run2 = "", string run3 ="", string run4 ="", string run5 ="", string run6 ="") {
 
+  gROOT->LoadMacro("Hist.cxx++");
   gROOT->LoadMacro("EfficiencyMonitor.cc++");
 
   TChain * chain = new TChain("DTTree");
