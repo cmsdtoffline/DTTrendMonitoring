@@ -22,6 +22,7 @@
 
 #include <iostream>
 #include "plotter.h"
+#include "Types.h"
 //#include "EfficiencyMonitorSetting.C"
 
 // Fixed size dimensions of array or collections stored in the TTree if any.
@@ -65,7 +66,6 @@ namespace bkg {
 class EfficiencyMonitor {
 public :
 
-   std::string dataset;
    std::string fileName;
    std::string outName;
    std::string legacyName;
@@ -474,46 +474,9 @@ public :
 
 EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::string extFileName, std::string extOutName, std::string extLegacyName) : fChain(0)
 {
-// if parameter tree is not specified (or zero), connect the file
-// used to generate this class and read the Tree
-
-     dataset='G';
-     
-     // if parameter tree is not specified (or zero), connect the file
-     // used to generate this class and read the Tree.
      if (tree == 0) {
-       
-       std::string datasetname;
-       datasetname.append("/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016");
-       //datasetname.append("/gpfs_data/local/cms/cavallo/BEAM2016/Run2016");
-       if (dataset=='H') datasetname = datasetname + dataset + "ZMuPromptReco-v2.root";
-        else              datasetname = datasetname + dataset + "ZMu23Sep2016-v1.root";
-        cout<<datasetname<<endl;
-
-        // TFile *f = new TFile ("/gpfs_data/local/cms/cavallo/BEAM2016/Run2016CZMu23Sep2016-v1.root");
-        TFile *f = new TFile (datasetname.c_str());
-
-        if (!f || !f->IsOpen()) { cout <<" input file not found !!"<<endl; return;}
-
-         f->GetObject("DTTree",tree);
-
-        /*
-           TChain * chain = new TChain("DTTree","");
-
-           chain->Add("/gpfs_data/local/cms/cavallo/BEAM2016/DTTree_Run276525.root");
-           chain->Add("/gpfs_data/local/cms/cavallo/BEAM2016/DTTree_Run277992.root");
-           chain->Add("/gpfs_data/local/cms/cavallo/BEAM2016/DTTree_Run282735.root");
-           chain->Add("/gpfs_data/local/cms/cavallo/BEAM2016/DTTree_Run283478.root");
-
-           tree = chain;
-
-        */
-      // TFile *f = (TFile*)gROOT->GetListOfFiles()->FindObject("/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016HZMuPromptReco-v2.root");
-      // if (!f || !f->IsOpen()) {
-      //    f = new TFile("/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2016/Run2016HZMuPromptReco-v2.root");
-      // }
-      // f->GetObject("DTTree",tree);
-
+       cout<<"ERROR, the tree is Null"<<endl;   
+       abort();
    }
       fileName    = extFileName;
       legacyName  = extLegacyName;
@@ -858,7 +821,7 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("gmt_eta", &gmt_eta, &b_gmt_eta);
    fChain->SetBranchAddress("gmt_pt", &gmt_pt, &b_gmt_pt);
    fChain->SetBranchAddress("gmt_qual", &gmt_qual, &b_gmt_qual);
-   /* fChain->SetBranchAddress("gmt_detector", &gmt_detector, &b_gmt_detector); */
+   /* fChain->SetBranchAdress("gmt_detector", &gmt_detector, &b_gmt_detector); */
    /* fChain->SetBranchAddress("gmt_cands_fwd", &gmt_cands_fwd, &b_gmt_cands_fwd); */
    /* fChain->SetBranchAddress("gmt_cands_isRpc", &gmt_cands_isRpc, &b_gmt_cands_isRpc); */
    /* fChain->SetBranchAddress("gmt_cands_bx", &gmt_cands_bx, &b_gmt_cands_bx); */
@@ -867,6 +830,7 @@ void EfficiencyMonitor::Init(TTree *tree)
    /* fChain->SetBranchAddress("gmt_cands_pt", &gmt_cands_pt, &b_gmt_cands_pt); */
    /* fChain->SetBranchAddress("gmt_cands_qual", &gmt_cands_qual, &b_gmt_cands_qual); */
    /* fChain->SetBranchAddress("gmt_cands_ismatched", &gmt_cands_ismatched, &b_gmt_cands_ismatched); */
+
    fChain->SetBranchAddress("gt_algo_bit", &gt_algo_bit, &b_gt_algo_bit);
    fChain->SetBranchAddress("gt_algo_bx", &gt_algo_bx, &b_gt_algo_bx);
    fChain->SetBranchAddress("gt_tt_bit", &gt_tt_bit, &b_gt_tt_bit);

@@ -4,7 +4,7 @@
 
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/json_parser.hpp>
-
+#include "Types.h"
 
 using boost::property_tree::ptree;
 using boost::property_tree::read_json;
@@ -41,6 +41,26 @@ namespace lumi{
     
   }
 }
+
+
+namespace variables{
+  
+  bool initVar(Var & var, string varname, string filename){    
+
+    pt::ptree pTree;
+    pt::read_json(filename.c_str(), pTree);
+    
+    var.name  =  pTree.get<std::string>( (varname+".name").c_str());
+    var.Title =  pTree.get<std::string>( (varname+".Title").c_str()); 
+    var.Label =  pTree.get<std::string>( (varname+".Label").c_str()); 
+    var.slice =  as_vector<double>(pTree,(varname+".slice").c_str());
+
+
+    return 1;
+    
+  }
+}
+
 
 #endif
 

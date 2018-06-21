@@ -1,10 +1,9 @@
-//#include <stdio>
 #include "TH1F.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "EfficiencyMonitor.h"
-#include "DataSetting.h"
-#include "Hist.h"
+#include "Utilities.h"
+#include "Types.h"
 
 int run_FixedRange(string refName ="", string storingName ="", string storedName = "", string run0 = "", string run1 = "", string run2 = "", string run3 ="", string run4 ="", string run5 ="", string run6 ="") {
   
@@ -40,14 +39,18 @@ int run_FixedRange(string refName ="", string storingName ="", string storedName
   context FixedCont;
   
   FixedCont.name = "Fixed";
-  FixedCont.nVar=3;
-  FixedCont.slices.push_back(lumislice);
-  FixedCont.slices.push_back(PUslice);
-  FixedCont.slices.push_back(bkgslice);
-  FixedCont.varTitle  = varTitle_inst;
-  FixedCont.varName   = varName_inst;
-  FixedCont.varLabel  = varLabel_inst;
-  FixedCont.webFolder = WebFolder;
+
+  Var InsLumi;
+  Var Pileup;
+  Var BckGr;
+
+  variables::initVar(InsLumi,"InsLumi","variablesSetting.json");
+  variables::initVar(Pileup,"Pileup","variablesSetting.json");
+  variables::initVar(BckGr,"Bck","variablesSetting.json");
+
+  FixedCont.var   = {InsLumi,Pileup,BckGr};
+  FixedCont.nVar = FixedCont.var.size();
+  FixedCont.webFolder = "~/www/DT";
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName);
 

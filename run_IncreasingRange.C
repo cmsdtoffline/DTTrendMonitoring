@@ -1,9 +1,9 @@
-//#include <stdio>
 #include "TH1F.h"
 #include "TTree.h"
 #include "TChain.h"
 #include "EfficiencyMonitor.h"
-#include "DataSetting.h"
+#include "Utilities.h"
+#include "Types.h"
 
 int run_IncreasingRange(string refName ="", string storingName ="", string storedName = "", string run0 = "", string run1 = "", string run2 = "", string run3 ="", string run4 ="", string run5 ="", string run6 ="") {
 
@@ -37,21 +37,23 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
  
   else {cout<<"Problems with files "<<endl;    exit(1);}
  
-  context runCont;
+  context incrCont;
  
-  runCont.name = "Incr"; //Stand for increasing;
-  runCont.nVar=2;
+  Var IntLumi;
+  Var BunchX;
+  Var BckGr;
 
-  runCont.varTitle  = varTitle_run;
-  runCont.varName   = varName_run;
-  runCont.varLabel  = varLabel_run;
-  runCont.webFolder = WebFolder;
+  //initialize variable struct
+  variables::initVar(IntLumi,"IntLumi","variablesSetting.json");
+  variables::initVar(BunchX,"bunchX","variablesSetting.json");
+  variables::initVar(BckGr,"Bck","variablesSetting.json");
 
-  runCont.slices.push_back(runslice);
-  runCont.slices.push_back(bunchXingslice);
-  runCont.slices.push_back(bkgslice);
+  incrCont.name      = "Incr";
+  incrCont.var       = {IntLumi,BunchX,BckGr};
+  incrCont.nVar      = 2 ; //Fixme; incrCont.var.size();
+  incrCont.webFolder = "~/www/DT";
 
-  EfficiencyMonitor *eff = new EfficiencyMonitor(runCont,chain,refName.c_str(),storingName,storedName);
+  EfficiencyMonitor *eff = new EfficiencyMonitor(incrCont,chain,refName.c_str(),storingName,storedName);
 
   if(stat(("data/DeadList/DeadList_"+refName).c_str(),&st) != 0) { 
    cout<<"dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;

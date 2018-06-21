@@ -12,13 +12,12 @@
 #include <TLegend.h>
 #include "StatUtils.h"
 #include "TEfficiency.h"
-//#include "DataSetting.h"
 #include "plotter.h"
 
 int dead[10000][6];
 int Ndead=0;
 int nrequiredhit=7;
-int MaxDead=0;
+gint MaxDead=0;
 
 /* 
 note: MaxDead = maximum number of dead channels crossed by a selected segment
@@ -345,7 +344,6 @@ if (Ndead==0) {
 	     //variables, points, stations, wheels 
 
 	     for (int ivar=0; ivar<dataContext.nVar; ivar++) { 
-
 	       plots->Eff_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,varVal[ivar]); 
 	       plots->EffA_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,varVal[ivar]); 
 	       // extra chamber of sector 4 (sector 13)
@@ -353,7 +351,7 @@ if (Ndead==0) {
 		 plots->Eff_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(1,varVal[ivar]); 
 		 plots->EffA_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(1,varVal[ivar]); 
 	       }
-	       
+  
 	       // extra chamber of sector 10 (sector 14) 
 	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
 		 plots->Eff_phiMB4Bot[ivar]->Fill(1,varVal[ivar]); 
@@ -561,24 +559,22 @@ if (Ndead==0) {
    std::string resultname;
    
    resultname.append("Results_"+fileName+".txt");
-   //   resultname = resultname + dataset + ".txt";;
-
    results.open (resultname.c_str());
    
    for (int ivar=0; ivar<dataContext.nVar; ivar++) {
-     int nPoints = dataContext.slices[ivar].size();	 
+     int nPoints = dataContext.var[ivar].slice.size();	 
      for (int iwh=0; iwh<5; iwh++){
        for (int ist=0; ist<4; ist++){
 	 for (int ipoint=0; ipoint<nPoints; ipoint++) {
 	   
-	   results<<dataContext.slices[ivar][ipoint];
+	   results<<dataContext.var[ivar].slice[ipoint];
 	   results <<" "<<ist+1<<" "<<iwh-2
 		   <<" "<<plots->Eff_phiMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
 	     plots->Eff_phiMBWh[ivar][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
 		   <<" "<<plots->EffA_phiMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
 	   
 	   if(ist<3){	 
-	     results<<dataContext.slices[ivar][ipoint];
+	     results<<dataContext.var[ivar].slice[ipoint];
 	     results <<" "<<ist+1<<" "<<iwh-2
 		     <<" "<<plots->Eff_theMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
 	       plots->Eff_theMBWh[ivar][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
@@ -587,7 +583,7 @@ if (Ndead==0) {
 	 }
        }      
        for (int ipoint=0; ipoint<nPoints; ipoint++) {
-	 results<<dataContext.slices[ivar][ipoint];      
+	 results<<dataContext.var[ivar].slice[ipoint];      
 	 results <<" 4T"<<" "<<iwh-2
 		 <<" "<<plots->Eff_phiMB4Top[ivar][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
 	   plots->Eff_phiMB4Top[ivar][iwh]->GetPassedHistogram()->GetBinContent(ipoint+1)
@@ -597,7 +593,7 @@ if (Ndead==0) {
      
      for (int ipoint=0; ipoint<nPoints; ipoint++) {
        
-       results<<dataContext.slices[ivar][ipoint];  
+       results<<dataContext.var[ivar].slice[ipoint];  
        results <<" 4B "
 	       <<" "<<plots->Eff_phiMB4Bot[ivar]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
 	 plots->Eff_phiMB4Bot[ivar]->GetPassedHistogram()->GetBinContent(ipoint+1)
@@ -646,15 +642,14 @@ void EfficiencyMonitor::SetRunSlices(int iVar)
   }
   
   for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
-    dataContext.slices[iVar].push_back((float)*it);
+    dataContext.var[iVar].slice.push_back((float)*it);
 				       			
-  dataContext.slices[iVar].push_back( dataContext.slices[iVar].back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
+  dataContext.var[iVar].slice.push_back( dataContext.var[iVar].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
 
   // uncoment to check the run list
-  // cout<<"end slices "<<endl;
-  // for(uint i =0; i<dataContext.slices[iVar].size(); i++)
-  //   cout<<setprecision(6)<<dataContext.slices[iVar].at(i)<<endl;
-  
+  //  cout<<"Run slice "<<endl;
+  //for(uint i =0; i<dataContext.var[iVar].slice.size(); i++)
+  // cout<<setprecision(6)<<dataContext.var[iVar].slice.at(i)<<endl;
 }
 
 
@@ -669,12 +664,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
   double timewindowseg  =  800;
  
  float MBarea[3]; float MB4area[14];
-
- // MBarea[0] = 49 * 4.2;* 58 * 4.2;  //n wires phi X cell size X n wires theta.
- // MBarea[1] = 60 * 4.2;* 58 * 4.2;
- // MBarea[2] = 72 * 4.2;* 58 * 4.2;
-
- // float MBareaTh = 58*4.2;
 
  MBarea[0] = 49 * 4.2 * 58 * 4.2;  //n wires phi X cell size X n wires theta.
  MBarea[1] = 60 * 4.2 * 58 * 4.2;
@@ -695,7 +684,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
  MB4area[13-1] = MB4area[4-1];
  MB4area[14-1] = MB4area[10-1];
 
-  //
 
   Long64_t nentries     = fChain->GetEntriesFast();  
 
@@ -709,12 +697,13 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 NsegmSig[iwh][ise][ist]=0;    NsegmBck[iwh][ise][ist]=0;
        }
    
+
    int ChambCross[100][3];
    for (int i=0; i<100; i++) for (int geo=0; geo<3; geo++) ChambCross[i][geo]=-999;
    
    int NChambCross=0;
 
-   //   cout<<"Nmuons "<<Nmuons<<endl;   
+   //   cout<<"Nmuons "<<Nmuons<<endl;;   
    for (int imu=0; imu<Nmuons; imu++) {
      
      int Ncross = Mu_nMatches->at(imu); 
