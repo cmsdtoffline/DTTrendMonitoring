@@ -30,6 +30,8 @@ class Hist: public TNamed
 
   Int_t GetNbinsX() {return fHistogram->GetNbinsX();};
 
+  float Integral() {return fHistogram->Integral();};
+
   void ProfileX();
 
   void draw(string option);
@@ -40,6 +42,8 @@ class Hist: public TNamed
 
   void SetColor(Color_t mcolor = 1);
 
+  Color_t GetColor();
+  
   void SetMarkerStyle(Style_t mstyle = 1);
 
   void setEqualBin(vector<double> slices);
@@ -47,6 +51,8 @@ class Hist: public TNamed
   void set2DHistoBin(Float_t MaxErr= 0.1);
 
   void SetMaximum(float Max);
+
+  const char *getName() {return theName.c_str();};
 
  private:
 

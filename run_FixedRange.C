@@ -42,13 +42,15 @@ int run_FixedRange(string refName ="", string storingName ="", string storedName
 
   Var InsLumi;
   Var Pileup;
-  Var BckGr;
+  Var BkGr;
+  Var BunchX;
 
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json");
   variables::initVar(Pileup,"Pileup","variablesSetting.json");
-  variables::initVar(BckGr,"Bck","variablesSetting.json");
+  variables::initVar(BunchX,"bunchX","variablesSetting.json");
+  variables::initVar(BkGr,"Bkg","variablesSetting.json",0,0);
 
-  FixedCont.var   = {InsLumi,Pileup,BckGr};
+  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BunchX.name,BunchX},{BkGr.name,BkGr}};
   FixedCont.nVar = FixedCont.var.size();
   FixedCont.webFolder = "~/www/DT";
   

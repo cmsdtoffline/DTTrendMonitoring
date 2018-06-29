@@ -17,7 +17,7 @@
 int dead[10000][6];
 int Ndead=0;
 int nrequiredhit=7;
-gint MaxDead=0;
+int MaxDead=0;
 
 /* 
 note: MaxDead = maximum number of dead channels crossed by a selected segment
@@ -210,18 +210,19 @@ if (Ndead==0) {
 
      nb = fChain->GetEntry(jentry);   nbytes += nb;
      // if (Cut(ientry) < 0) continue;
-  
-     if(dataContext.name=="Fixed"){  
-       varVal[0] = lumiperblock;
-       varVal[1] = PV_Nvtx;
-     }
-     else{
-       varVal[0] = (float)runnumber; 
-       varVal[1] = bunchXing; 
+
+
+     for(auto const& ivar : dataContext.var) { //fixme
+       if (ivar.second.name == "InsLumi")     dataContext.var[ivar.first].value = lumiperblock;
+       else if (ivar.second.name =="Pileup" ) dataContext.var[ivar.first].value = PV_Nvtx;
+       else if (ivar.second.name =="BunchX" )  dataContext.var[ivar.first].value = bunchXing;
+       else if (ivar.second.name =="Run")  dataContext.var[ivar.first].value = (float)runnumber; 
      }
 
+  
      getBkgDigi(jentry);     
-     
+
+
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
      // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } //fix
      
@@ -334,8 +335,9 @@ if (Ndead==0) {
 	   nmissing++;
 	 }
        }
+
        if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
-       if(dataContext.name=="Fixed") varVal[2] = bkgCounts.DigiBckWhMB[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)]; //Fixme
+       if(dataContext.name=="Fixed") dataContext.var["Bkg"].value = bkgCounts.DigiBkgWhMB[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)];
 
 
        if (NHits<nrequiredhit) continue;
@@ -343,19 +345,20 @@ if (Ndead==0) {
 	 for (int sl=0; sl<2; sl++) for (int lay=0; lay<4; lay++) {
 	     //variables, points, stations, wheels 
 
-	     for (int ivar=0; ivar<dataContext.nVar; ivar++) { 
-	       plots->Eff_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,varVal[ivar]); 
-	       plots->EffA_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,varVal[ivar]); 
+	     for(auto const& ivar : dataContext.var) {
+	       if(!ivar.second.doEff) continue;
+	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
+	       plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
 	       // extra chamber of sector 4 (sector 13)
 	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		 plots->Eff_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(1,varVal[ivar]); 
-		 plots->EffA_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(1,varVal[ivar]); 
+		 plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(1,ivar.second.value ); 
+		 plots->EffA_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(1,ivar.second.value ); 
 	       }
   
 	       // extra chamber of sector 10 (sector 14) 
 	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-		 plots->Eff_phiMB4Bot[ivar]->Fill(1,varVal[ivar]); 
-		 plots->EffA_phiMB4Bot[ivar]->Fill(1,varVal[ivar]); 
+		 plots->Eff_phiMB4Bot[ivar.first]->Fill(1,ivar.second.value ); 
+		 plots->EffA_phiMB4Bot[ivar.first]->Fill(1,ivar.second.value ); 
 	       }
 	     }
 	   }
@@ -398,15 +401,15 @@ if (Ndead==0) {
 	     int sl = missingLayer[imiss][0] < 5 ? 0 : 1;
 	     int lay = sl==0 ? missingLayer[imiss][0]-1 : missingLayer[imiss][0]-5;
 	     
-	     for (int ivar=0; ivar<dataContext.nVar; ivar++) { 
-	       
-	       plots->Eff_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(missingLayer[imiss][1],varVal[ivar]); 
+	     for(auto const& ivar : dataContext.var) { 
+	       if(!ivar.second.doEff) continue;
+	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(missingLayer[imiss][1],ivar.second.value ); 
 	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		 plots->Eff_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(missingLayer[imiss][1],varVal[ivar]); 
+		 plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(missingLayer[imiss][1],ivar.second.value ); 
 
 	       }
 	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
-		 plots->Eff_phiMB4Bot[ivar]->Fill(missingLayer[imiss][1],varVal[ivar]);
+		 plots->Eff_phiMB4Bot[ivar.first]->Fill(missingLayer[imiss][1],ivar.second.value );
 
 	       }
 	     }
@@ -422,17 +425,18 @@ if (Ndead==0) {
 		   if (!missingLayer[imiss][1]) missDigi=true;
 		 }
 	       }
-	       for (int ivar=0; ivar<dataContext.nVar; ivar++) { 
-		 plots->Eff_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss&&missDigi),varVal[ivar]); 
-		 plots->EffA_phiMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss),varVal[ivar]); 
+	       for(auto const& ivar : dataContext.var) { 
+		 if(!ivar.second.doEff) continue;
+		 plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss&&missDigi),ivar.second.value ); 
+		 plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss),ivar.second.value ); 
 		 
 		 if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		   plots->Eff_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss&&missDigi),varVal[ivar]); 
-		   plots->EffA_phiMB4Top[ivar][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss),varVal[ivar]); 
+		   plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss&&missDigi),ivar.second.value ); 
+		   plots->EffA_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss),ivar.second.value ); 
 		 }
 		 else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
-		   plots->Eff_phiMB4Bot[ivar]->Fill(!(missAss&&missDigi),varVal[ivar]);
-		   plots->EffA_phiMB4Bot[ivar]->Fill(!(missAss),varVal[ivar]);
+		   plots->Eff_phiMB4Bot[ivar.first]->Fill(!(missAss&&missDigi),ivar.second.value );
+		   plots->EffA_phiMB4Bot[ivar.first]->Fill(!(missAss),ivar.second.value );
 		 }
 	       }
 	     }
@@ -513,10 +517,10 @@ if (Ndead==0) {
        else if (NHits==4) {
 	 
 	 for (int lay=0; lay<4; lay++) {
-	   for (int ivar=0; ivar<dataContext.nVar; ivar++) {
-	   plots->Eff_theMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,varVal[ivar]); 
-	   plots->EffA_theMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,varVal[ivar]); 
-
+	   for(auto const& ivar : dataContext.var) {
+	     if(!ivar.second.doEff) continue;
+	     plots->Eff_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
+	     plots->EffA_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
 	   }
 	 }
        }
@@ -545,8 +549,11 @@ if (Ndead==0) {
 	     d=expW-digiW;
 	   }
 	 }
-	 for (int ivar=0; ivar<dataContext.nVar; ivar++) plots->Eff_theMBWh[ivar][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill((fabs(d)< 1.1) ,varVal[ivar]); 
+	 for(auto const& ivar : dataContext.var){ 
+	   if(!ivar.second.doEff) continue;
+	   plots->Eff_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill((fabs(d)< 1.1) ,ivar.second.value ); 
 	 }
+       }
        else {
 	 cout<<" what do you want?? NHits (z) = "<<NHits<<endl;
 	 return;
@@ -554,68 +561,64 @@ if (Ndead==0) {
      }
    }
    
-
    ofstream results;
    std::string resultname;
    
    resultname.append("Results_"+fileName+".txt");
    results.open (resultname.c_str());
    
-   for (int ivar=0; ivar<dataContext.nVar; ivar++) {
-     int nPoints = dataContext.var[ivar].slice.size();	 
+   for(auto const& ivar : dataContext.var) {
+     if(!ivar.second.doEff) continue;
+     int nPoints = ivar.second.slice.size();	 
      for (int iwh=0; iwh<5; iwh++){
        for (int ist=0; ist<4; ist++){
 	 for (int ipoint=0; ipoint<nPoints; ipoint++) {
-	   
-	   results<<dataContext.var[ivar].slice[ipoint];
+
+	   results<<ivar.second.slice[ipoint];
 	   results <<" "<<ist+1<<" "<<iwh-2
-		   <<" "<<plots->Eff_phiMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	     plots->Eff_phiMBWh[ivar][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
-		   <<" "<<plots->EffA_phiMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
+		   <<" "<<plots->Eff_phiMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
+	     plots->Eff_phiMBWh[ivar.first][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
+		   <<" "<<plots->EffA_phiMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
 	   
 	   if(ist<3){	 
-	     results<<dataContext.var[ivar].slice[ipoint];
+	     results<<ivar.second.slice[ipoint];
 	     results <<" "<<ist+1<<" "<<iwh-2
-		     <<" "<<plots->Eff_theMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	       plots->Eff_theMBWh[ivar][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
-		     <<" "<<plots->EffA_theMBWh[ivar][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
+		     <<" "<<plots->Eff_theMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
+	       plots->Eff_theMBWh[ivar.first][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
+		     <<" "<<plots->EffA_theMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
 	   }
 	 }
        }      
        for (int ipoint=0; ipoint<nPoints; ipoint++) {
-	 results<<dataContext.var[ivar].slice[ipoint];      
+	 results<<ivar.second.slice[ipoint];      
 	 results <<" 4T"<<" "<<iwh-2
-		 <<" "<<plots->Eff_phiMB4Top[ivar][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	   plots->Eff_phiMB4Top[ivar][iwh]->GetPassedHistogram()->GetBinContent(ipoint+1)
-		 <<" "<<plots->EffA_phiMB4Top[ivar][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
+		 <<" "<<plots->Eff_phiMB4Top[ivar.first][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
+	   plots->Eff_phiMB4Top[ivar.first][iwh]->GetPassedHistogram()->GetBinContent(ipoint+1)
+		 <<" "<<plots->EffA_phiMB4Top[ivar.first][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
        }
      }
      
      for (int ipoint=0; ipoint<nPoints; ipoint++) {
        
-       results<<dataContext.var[ivar].slice[ipoint];  
+       results<<ivar.second.slice[ipoint];  
        results <<" 4B "
-	       <<" "<<plots->Eff_phiMB4Bot[ivar]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	 plots->Eff_phiMB4Bot[ivar]->GetPassedHistogram()->GetBinContent(ipoint+1)
-	       <<" "<<plots->EffA_phiMB4Bot[ivar]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
+	       <<" "<<plots->Eff_phiMB4Bot[ivar.first]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
+	 plots->Eff_phiMB4Bot[ivar.first]->GetPassedHistogram()->GetBinContent(ipoint+1)
+	       <<" "<<plots->EffA_phiMB4Bot[ivar.first]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
      }
    }    
 }
 
 void EfficiencyMonitor::write(){
-
   plots->write();     
-  
 }
 
 void EfficiencyMonitor::plot(){
-
   plots->plot(outName.c_str());     
-  
 }
 
 
-void EfficiencyMonitor::SetRunSlices(int iVar)
+void EfficiencyMonitor::SetRunSlices()
 {
 
   if (fChain == 0) return;   
@@ -640,16 +643,23 @@ void EfficiencyMonitor::SetRunSlices(int iVar)
     b_runnumber->GetEntry(jentry);
     runNumber_Set.insert(runnumber);
   }
-  
+ 
+ 
+
   for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
-    dataContext.var[iVar].slice.push_back((float)*it);
-				       			
-  dataContext.var[iVar].slice.push_back( dataContext.var[iVar].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
+    dataContext.var["Run"].slice.push_back((float)*it);
+  
+
+
+  dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
+
 
   // uncoment to check the run list
   //  cout<<"Run slice "<<endl;
-  //for(uint i =0; i<dataContext.var[iVar].slice.size(); i++)
-  // cout<<setprecision(6)<<dataContext.var[iVar].slice.at(i)<<endl;
+  //for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+  // cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+
+
 }
 
 
@@ -687,14 +697,14 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 
   Long64_t nentries     = fChain->GetEntriesFast();  
 
-   int NdigiSig[5][12][4];        int NdigiBck[5][12][4]; //wheel sector stations
-   int NsegmSig[5][12][4];        int NsegmBck[5][12][4]; 
+   int NdigiSig[5][12][4];        int NdigiBkg[5][12][4]; //wheel sector stations
+   int NsegmSig[5][12][4];        int NsegmBkg[5][12][4]; 
    
    //intilize to 0 the elements
    for (int iwh=0; iwh<5; iwh++) for (int ise=0; ise<12; ise++) for (int ist=0; ist<4;ist++) {
 	 
-	 NdigiSig[iwh][ise][ist]=0;    NdigiBck[iwh][ise][ist]=0;
-	 NsegmSig[iwh][ise][ist]=0;    NsegmBck[iwh][ise][ist]=0;
+	 NdigiSig[iwh][ise][ist]=0;    NdigiBkg[iwh][ise][ist]=0;
+	 NsegmSig[iwh][ise][ist]=0;    NsegmBkg[iwh][ise][ist]=0;
        }
    
 
@@ -765,14 +775,14 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
    
    for (int idigi=0; idigi<Ndigis; idigi++) {
      
-     bool digibck = true; 
+     bool digibkg = true; 
        
      for (int icross=0; icross<NChambCross; icross++) {
        
        if (digi_wheel->at(idigi)   == ChambCross[icross][0] &&
 	   digi_sector->at(idigi)  == ChambCross[icross][1] &&
 	   digi_station->at(idigi) == ChambCross[icross][2] ) {
-	 digibck=false;
+	 digibkg=false;
 	 
 	 //	 timesig->Fill(digi_time->at(idigi));
 	 if (digi_sector->at(idigi)<13)        NdigiSig[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]++;
@@ -783,17 +793,17 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
        }
      }
      
-     if (digibck) {
-       //       timebck->Fill(digi_time->at(idigi));
-       if (digi_sector->at(idigi)<13)        NdigiBck[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]++;
-       else if (digi_sector->at(idigi)==13)  NdigiBck[digi_wheel->at(idigi)+2][4-1][digi_station->at(idigi)-1]++;
-       else if (digi_sector->at(idigi)==14)  NdigiBck[digi_wheel->at(idigi)+2][10-1][digi_station->at(idigi)-1]++;
+     if (digibkg) {
+       //       timebkg->Fill(digi_time->at(idigi));
+       if (digi_sector->at(idigi)<13)        NdigiBkg[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]++;
+       else if (digi_sector->at(idigi)==13)  NdigiBkg[digi_wheel->at(idigi)+2][4-1][digi_station->at(idigi)-1]++;
+       else if (digi_sector->at(idigi)==14)  NdigiBkg[digi_wheel->at(idigi)+2][10-1][digi_station->at(idigi)-1]++;
      }
    } // loop sui digi
    
    for (int iseg=0; iseg<Ndtsegments; iseg++) {
      
-     bool segmbck = true; 
+     bool segmbkg = true; 
      
      float qual = dtsegm4D_phinhits->at(iseg) > 0 ?  dtsegm4D_phinhits->at(iseg) : 0.;
      qual += dtsegm4D_znhits->at(iseg) > 0 ?  dtsegm4D_znhits->at(iseg) : 0.;
@@ -803,7 +813,7 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
        if (dtsegm4D_wheel->at(iseg)   == ChambCross[icross][0] &&
 	   dtsegm4D_sector->at(iseg)  == ChambCross[icross][1] &&
 	   dtsegm4D_station->at(iseg) == ChambCross[icross][2] ) {
-	 segmbck=false;
+	 segmbkg=false;
 	 
 	 if(dtsegm4D_sector->at(iseg)<13)       NsegmSig[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_sector->at(iseg)-1][dtsegm4D_station->at(iseg)-1]++;
 	 else if(dtsegm4D_sector->at(iseg)==13) NsegmSig[dtsegm4D_wheel->at(iseg)+2][4-1][dtsegm4D_station->at(iseg)-1]++;
@@ -813,18 +823,18 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
        }
      }
      
-     if (segmbck) {
-       //       qualbck->Fill(qual);
-       //       if (qual>5) t0bck->Fill(dtsegm4D_t0->at(iseg));
+     if (segmbkg) {
+       //       qualbkg->Fill(qual);
+       //       if (qual>5) t0bkg->Fill(dtsegm4D_t0->at(iseg));
        
        if(dtsegm4D_sector->at(iseg)<13)       {
-	 NsegmBck[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_sector->at(iseg)-1][dtsegm4D_station->at(iseg)-1]++;
+	 NsegmBkg[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_sector->at(iseg)-1][dtsegm4D_station->at(iseg)-1]++;
        }
        else if(dtsegm4D_sector->at(iseg)==13) {
-	 NsegmBck[dtsegm4D_wheel->at(iseg)+2][4-1][dtsegm4D_station->at(iseg)-1]++;
+	 NsegmBkg[dtsegm4D_wheel->at(iseg)+2][4-1][dtsegm4D_station->at(iseg)-1]++;
        }
        else if(dtsegm4D_sector->at(iseg)==14) {
-	 NsegmBck[dtsegm4D_wheel->at(iseg)+2][10-1][dtsegm4D_station->at(iseg)-1]++;
+	 NsegmBkg[dtsegm4D_wheel->at(iseg)+2][10-1][dtsegm4D_station->at(iseg)-1]++;
        }
      }
    }
@@ -837,10 +847,7 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 
 	 if (ist+1 < 4) {
 	   normdigi = MBarea[ist] * 12; // 12 layers
-	   normseg  = MBarea[ist] * 12; // 12 layers //check
-
-	   //	   normdigi = MBarea[ist] * 8 + (4 * MBareaTh); // 12 layers
-	   // normseg  = MBarea[ist] * 8 + (4 * MBareaTh); // 12 layers; // 12 layers 
+	   normseg  = MBarea[ist] * 12; // 12 layers 
 	 }
 	 
 	 else {
@@ -853,37 +860,32 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 normseg  *= timewindowseg/1e9;  //* nentries;
 	 
 	 bkgCounts.DigiSigWhMB[iwh][ist]  = float(NdigiSig[iwh][ise][ist]) /normdigi/12; // we are integrating on 12 sectors
-	 bkgCounts.DigiBckWhMB[iwh][ist]  = float(NdigiBck[iwh][ise][ist]) /normdigi/12;
+	 bkgCounts.DigiBkgWhMB[iwh][ist]  = float(NdigiBkg[iwh][ise][ist]) /normdigi/12;
 	 bkgCounts.DigiSigSecMB[ise][ist] = float(NdigiSig[iwh][ise][ist]) /normdigi/5;  // we are integrating on 5 wheels
-	 bkgCounts.DigiBckSecMB[ise][ist] = float(NdigiBck[iwh][ise][ist]) /normdigi/5;
+	 bkgCounts.DigiBkgSecMB[ise][ist] = float(NdigiBkg[iwh][ise][ist]) /normdigi/5;
 	 
 	 bkgCounts.SegmSigWhMB[iwh][ist]  = float(NsegmSig[iwh][ise][ist]) /normseg/12;  // we are integrating on 12 sectors
-	 bkgCounts.SegmBckWhMB[iwh][ist]  = float(NsegmBck[iwh][ise][ist]) /normseg/12;
+	 bkgCounts.SegmBkgWhMB[iwh][ist]  = float(NsegmBkg[iwh][ise][ist]) /normseg/12;
 	 bkgCounts.SegmSigSecMB[ise][ist] = float(NsegmSig[iwh][ise][ist]) /normseg/5;  // we are integrating on 5 wheels
-	 bkgCounts.SegmBckSecMB[ise][ist] = float(NsegmBck[iwh][ise][ist]) /normseg/5;
+	 bkgCounts.SegmBkgSecMB[ise][ist] = float(NsegmBkg[iwh][ise][ist]) /normseg/5;
 
-  	 //cout<<" bkgCounts.DigiBckWhMB[iwh][ist]" << bkgCounts.DigiBckWhMB[iwh][ist]<<endl;
-	
-	 plots->Hist_MBWh[0][iwh][ist]->Fill(varVal[0],bkgCounts.DigiBckWhMB[iwh][ist]); 
-	 plots->Hist_MBWh[1][iwh][ist]->Fill(varVal[1],bkgCounts.DigiBckWhMB[iwh][ist]); 
 
-	 plots->Hist_SegMBWh[0][iwh][ist]->Fill(varVal[0],bkgCounts.SegmBckWhMB[iwh][ist]); 
-	 plots->Hist_SegMBWh[1][iwh][ist]->Fill(varVal[1],bkgCounts.SegmBckWhMB[iwh][ist]); 
+	 for(auto const& ivar : dataContext.var) {  //bool bkg
+	   if(!ivar.second.doBkg) continue;
 
-	 if (ist+1==4 && (ise+1==4 || ise+1 ==13)) {
-      
-	   plots->Hist_MB4Top[0][iwh]->Fill(varVal[0],bkgCounts.DigiBckWhMB[iwh][ist]); 
-	   plots->Hist_MB4Top[1][iwh]->Fill(varVal[1],bkgCounts.DigiBckWhMB[iwh][ist]);      
-	   plots->Hist_SegMB4Top[0][iwh]->Fill(varVal[0],bkgCounts.SegmBckWhMB[iwh][ist]); 
-	   plots->Hist_SegMB4Top[1][iwh]->Fill(varVal[1],bkgCounts.SegmBckWhMB[iwh][ist]);      
-	 }
-
-	 else if (ist+1==4 && (ise+1==10 || ise+1==14)) {
-	   plots->Hist_MB4Bot[0]->Fill(varVal[0],bkgCounts.DigiBckWhMB[iwh][ist]);
-	   plots->Hist_MB4Bot[1]->Fill(varVal[1],bkgCounts.DigiBckWhMB[iwh][ist]);     
-	   plots->Hist_SegMB4Bot[0]->Fill(varVal[0],bkgCounts.SegmBckWhMB[iwh][ist]);
-	   plots->Hist_SegMB4Bot[1]->Fill(varVal[1],bkgCounts.SegmBckWhMB[iwh][ist]);     
-	 }
+	   plots->Hist_MBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]); 
+	   plots->Hist_SegMBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]); 
+	   
+	   if (ist+1==4 && (ise+1==4 || ise+1 ==13)) {
+	     
+	     plots->Hist_MB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]);      
+	     plots->Hist_SegMB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]);   
+	   }
+	   else if (ist+1==4 && (ise+1==10 || ise+1==14)) {
+	     plots->Hist_MB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.DigiBkgWhMB[iwh][ist]);     
+	     plots->Hist_SegMB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.SegmBkgWhMB[iwh][ist]);     
+	   }
+	 } //End variables
        } // End stations
      } // End sector 
    } // End wheel

@@ -35,7 +35,6 @@ void Hist::Fill(Double_t x, Double_t y){
   fHistogram->Fill(x,y);
 }
 
-
 float Hist::GetProfMax(){
 
   return fProf->GetMaximum();
@@ -207,7 +206,6 @@ void Hist::setEqualBin(vector<double> slices){
  
   TH2F * hNew = new TH2F("","",xBins.size(),xBins[0],xBins.back(),nYBins,arrY->GetArray());
   
-  cout<<"nbins "<<hNew->GetNbinsX()<<endl;
   for(uint binx = 1; binx<=xBins.size(); binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNew->SetBinContent(binx,biny, fHistogram->GetBinContent(binx,biny));
@@ -229,6 +227,10 @@ void Hist::SetColor(Color_t mcolor){
   fHistogram->SetLineColor(mcolor);
 }
 
+
+Color_t Hist::GetColor(){
+  return fHistogram->GetMarkerColor();
+}
 
 void Hist::SetMarkerStyle(Style_t mstyle){
   fHistogram->SetMarkerStyle(mstyle);

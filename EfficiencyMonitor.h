@@ -30,33 +30,33 @@ namespace bkg {
   struct Bkg {
 
     float DigiSigWhMB[5][4];  // we are integrating on 12 sectors
-    float DigiBckWhMB[5][4]; 
+    float DigiBkgWhMB[5][4]; 
     
     float DigiSigSecMB[14][4];
-    float DigiBckSecMB[14][4];
+    float DigiBkgSecMB[14][4];
     
     float SegmSigWhMB[5][4];   // we are integrating on 12 sectors
-    float SegmBckWhMB[5][4];
+    float SegmBkgWhMB[5][4];
     
     float SegmSigSecMB[14][4]; // we are integrating on 5 wheels
-    float SegmBckSecMB[14][4];
+    float SegmBkgSecMB[14][4];
     
     Bkg(){
       for ( int w = 0; w<5; w++){
 	for ( int st = 0; st<4; st++){
 	  DigiSigWhMB[w][st] = 0;
-	  DigiBckWhMB[w][st] = 0;
+	  DigiBkgWhMB[w][st] = 0;
 	  SegmSigWhMB[w][st] = 0;
-	  SegmBckWhMB[w][st] = 0;
+	  SegmBkgWhMB[w][st] = 0;
 	}
       }
       
       for ( int sc = 0; sc<14; sc++){
 	for ( int st = 0; st<4; st++){
 	  DigiSigSecMB[sc][st] = 0;
-	  DigiBckSecMB[sc][st] = 0;
+	  DigiBkgSecMB[sc][st] = 0;
 	  SegmSigSecMB[sc][st] = 0;
-	  SegmBckSecMB[sc][st] = 0;
+	  SegmBkgSecMB[sc][st] = 0;
 	}
       }
     }   
@@ -76,10 +76,7 @@ public :
 
    TTree          *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent; //!current Tree number in a TChain
-
    plotter         *plots;
-
-   std::vector<Float_t>  varVal;
 
    // Declaration of leaf types
    Int_t           runnumber;
@@ -463,7 +460,7 @@ public :
    virtual void     Show(Long64_t entry = -1);
    void write();
    void plot();
-   void SetRunSlices(int iVar);
+   void SetRunSlices();
 
    void  getBkgDigi(Int_t jentry);
 
@@ -478,16 +475,23 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
        cout<<"ERROR, the tree is Null"<<endl;   
        abort();
    }
+
       fileName    = extFileName;
       legacyName  = extLegacyName;
       outName     = extOutName;
       dataContext = extContext; 
       Init(tree);
-      if(dataContext.name=="Incr") SetRunSlices(0); //fixme
+      if(dataContext.name=="Incr"){
+	if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
+	SetRunSlices(); 
+	}
+	else{
+	  cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
+	  abort();
+	}
+      }
       plots = new plotter(dataContext,legacyName,outName,fileName);
 
-      varVal.push_back(0);
-      varVal.push_back(0); //fixme
 }
 
 EfficiencyMonitor::~EfficiencyMonitor()

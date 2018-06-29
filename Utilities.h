@@ -26,9 +26,9 @@ std::vector<T> as_vector(ptree const& pt, ptree::key_type const& key)
 
 namespace lumi{
   
-  float getTotLumiRun(string run){
+  float getTotLumiRun(string run, string year){
     
-    string year = "2017";
+    string year = "2018";
     string path = "data/IntLumi/";
     string inFileTotal = path + "Total"+year+".json";
     
@@ -45,7 +45,7 @@ namespace lumi{
 
 namespace variables{
   
-  bool initVar(Var & var, string varname, string filename){    
+  bool initVar(Var & var, string varname, string filename, bool DoEff = 1, bool DoBkg =1){    
 
     pt::ptree pTree;
     pt::read_json(filename.c_str(), pTree);
@@ -55,6 +55,8 @@ namespace variables{
     var.Label =  pTree.get<std::string>( (varname+".Label").c_str()); 
     var.slice =  as_vector<double>(pTree,(varname+".slice").c_str());
 
+    var.doEff = DoEff;
+    var.doBkg = DoBkg;
 
     return 1;
     

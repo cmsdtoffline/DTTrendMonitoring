@@ -45,13 +45,13 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
 
   //initialize variable struct
   variables::initVar(IntLumi,"IntLumi","variablesSetting.json");
-  variables::initVar(BunchX,"bunchX","variablesSetting.json");
-  variables::initVar(BckGr,"Bck","variablesSetting.json");
+  //  variables::initVar(BunchX,"bunchX","variablesSetting.json");
+  variables::initVar(BckGr,"Bkg","variablesSetting.json",1,0);  // Var object, object name, json file, do eff plots, do bkg plots
 
   incrCont.name      = "Incr";
-  incrCont.var       = {IntLumi,BunchX,BckGr};
-  incrCont.nVar      = 2 ; //Fixme; incrCont.var.size();
+  incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr}};
   incrCont.webFolder = "~/www/DT";
+
 
   EfficiencyMonitor *eff = new EfficiencyMonitor(incrCont,chain,refName.c_str(),storingName,storedName);
 
@@ -63,7 +63,6 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
     cout<<"dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of producing it"<<endl;
   }
 
-  cout<<"Loop"<<endl;
   eff->Loop();
   eff->write();
   eff->plot();

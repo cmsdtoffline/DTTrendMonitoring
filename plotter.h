@@ -24,7 +24,7 @@
 #include <boost/format.hpp>
 #include <boost/numeric/conversion/cast.hpp>
 #include "Utilities.h"
-
+#include <TLegendEntry.h>
 
 struct stat st;
 
@@ -40,27 +40,26 @@ public :
 
   Float_t TotLumi = 0;
 
-
-  vector<vector<vector<TEfficiency* > > > Eff_phiMBWh;
-  vector<vector<vector<TEfficiency* > > > EffA_phiMBWh;
+  map<string,vector<vector<TEfficiency* > > > Eff_phiMBWh;
+  map<string,vector<vector<TEfficiency* > > > EffA_phiMBWh;
   
-  vector<vector<vector<TEfficiency* > > > Eff_theMBWh;
-  vector<vector<vector<TEfficiency* > > > EffA_theMBWh;
+  map<string,vector<vector<TEfficiency* > > > Eff_theMBWh;
+  map<string,vector<vector<TEfficiency* > > > EffA_theMBWh;
 
-  vector<vector<TEfficiency* > >          Eff_phiMB4Top;
-  vector<vector<TEfficiency* > >          EffA_phiMB4Top;
+  map<string,vector<TEfficiency* > >          Eff_phiMB4Top;
+  map<string,vector<TEfficiency* > >          EffA_phiMB4Top;
   
-  vector<TEfficiency* >                   Eff_phiMB4Bot;
-  vector<TEfficiency* >                   EffA_phiMB4Bot;
+  map<string,TEfficiency* >                   Eff_phiMB4Bot;
+  map<string,TEfficiency* >                   EffA_phiMB4Bot;
     
-  vector<vector<vector<Hist* > > >        Hist_MBWh;
-  vector<vector<vector<Hist* > > >        Hist_SegMBWh;
+  map<string,vector<vector<Hist* > > >        Hist_MBWh;
+  map<string,vector<vector<Hist* > > >        Hist_SegMBWh;
 
-  vector<vector<Hist* > >                 Hist_MB4Top;
-  vector<vector<Hist* > >                 Hist_SegMB4Top;
+  map<string,vector<Hist* > >                 Hist_MB4Top;
+  map<string,vector<Hist* > >                 Hist_SegMB4Top;
 
-  vector<Hist* >                          Hist_MB4Bot;
-  vector<Hist* >                          Hist_SegMB4Bot;
+  map<string,Hist* >                          Hist_MB4Bot;
+  map<string,Hist* >                          Hist_SegMB4Bot;
   
   plotter(context extDataCont, std::string inFileName = "", std::string outFileName="", string LumiFileName_ = "");
 
@@ -75,9 +74,10 @@ public :
   TEfficiency * setEffBin(     TEfficiency *effIn, Float_t MaxErr = 0.1); // Change bin size to adjuste the uncertanty below MaxErr
   TEfficiency * addEff(        TEfficiency *eff1,  TEfficiency *eff2 );   // Concatenate two teff. Not used so far
   TEfficiency * setEffRun(     TEfficiency *eff1 );                       // From variable bin size to identical bin size. Used for run number.
-  TEfficiency * addBins(       TEfficiency *effIn, int ivar);             // Method to add bins above range to a TEfficiency. Used to values variables such run number.
-  TEfficiency * getIntLumiEff( TEfficiency *effIn, Int_t ivar);           // Get integrated lumi from run number. It updates the value from the ones stored.
-  TH1F *        getPaintHisto(    TEfficiency *effIn, int ivar, bool doLumi);
+  TEfficiency * addBins(       TEfficiency *effIn, vector<Double_t> slice);             // Method to add bins above range to a TEfficiency. Used to values variables such run number.
+  void addBinsSlice(const TArrayD * arr, vector<double> & slices); 
+  TEfficiency * getIntLumiEff( TEfficiency *effIn, vector<Double_t>);           // Get integrated lumi from run number. It updates the value from the ones stored.
+  TH1F *        getPaintHisto(    TEfficiency *effIn, vector<Double_t> , bool doLumi);
 
   ~plotter();
 };
@@ -99,117 +99,117 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 
   LumiFileName = "DT_"+LumiFileName_;
 
-  for (int ivar=0; ivar<dataCont.nVar; ivar++){
+  for(auto const& ivar : dataCont.var){ 
 
-    Eff_phiMBWh.push_back(    vector<vector<TEfficiency*> > ());
-    EffA_phiMBWh.push_back(   vector<vector<TEfficiency*> > ());
-    Eff_theMBWh.push_back(    vector<vector<TEfficiency*> > ());
-    EffA_theMBWh.push_back(   vector<vector<TEfficiency*> > ());
-    Eff_phiMB4Top.push_back(  vector<TEfficiency*>  ());
-    EffA_phiMB4Top.push_back( vector<TEfficiency*>  ());
+    Eff_phiMBWh[ivar.first]    = vector<vector<TEfficiency*> > ();
+    EffA_phiMBWh[ivar.first]   = vector<vector<TEfficiency*> > ();
+    Eff_theMBWh[ivar.first]    = vector<vector<TEfficiency*> > ();
+    EffA_theMBWh[ivar.first]   = vector<vector<TEfficiency*> > ();
+    Eff_phiMB4Top[ivar.first]  = vector<TEfficiency*>  ();
+    EffA_phiMB4Top[ivar.first] = vector<TEfficiency*>  ();
 
 
-    Hist_MBWh.push_back(      vector<vector<Hist*> > ());
-    Hist_SegMBWh.push_back(   vector<vector<Hist*> > ());
+    Hist_MBWh[ivar.first]      = vector<vector<Hist*> > ();
+    Hist_SegMBWh[ivar.first]   = vector<vector<Hist*> > ();
 
-    Hist_MB4Top.push_back(    vector<Hist*>  ());
-    Hist_SegMB4Top.push_back( vector<Hist*>  ());
+    Hist_MB4Top[ivar.first]    = vector<Hist*>  ();
+    Hist_SegMB4Top[ivar.first] = vector<Hist*>  ();
     
-
-    int nPoints = dataCont.var[ivar].slice.size();
+    int nPoints = ivar.second.slice.size();
 
     for (int iwh=0; iwh<5; iwh++){
 
-      Eff_phiMBWh[ivar].push_back(vector<TEfficiency*> ());
-      EffA_phiMBWh[ivar].push_back(vector<TEfficiency*> ());
+      Eff_phiMBWh[ivar.first].push_back(vector<TEfficiency*> ());
+      EffA_phiMBWh[ivar.first].push_back(vector<TEfficiency*> ());
       
-      Eff_theMBWh[ivar].push_back(vector<TEfficiency*> ());
-      EffA_theMBWh[ivar].push_back(vector<TEfficiency*> ());
+      Eff_theMBWh[ivar.first].push_back(vector<TEfficiency*> ());
+      EffA_theMBWh[ivar.first].push_back(vector<TEfficiency*> ());
       
-      Hist_MBWh[ivar].push_back(vector<Hist*> ());
-      Hist_SegMBWh[ivar].push_back(vector<Hist*> ());
+      Hist_MBWh[ivar.first].push_back(vector<Hist*> ());
+      Hist_SegMBWh[ivar.first].push_back(vector<Hist*> ());
 
       for (int ist=0; ist<4; ist++){
 	if(inFileName==""){
-	  Eff_phiMBWh[ivar][iwh].push_back( new TEfficiency(("Eff"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-							     "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.var[ivar].slice.data()));
-	  EffA_phiMBWh[ivar][iwh].push_back( new TEfficiency(("EffA"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-							      "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.var[ivar].slice.data()));
 
-	  Hist_MBWh[ivar][iwh].push_back(new Hist(("Hist"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-						   "St"+std::to_string(ist)).c_str(),"",dataCont.var[ivar].slice.size()-1,
-						  dataCont.var[ivar].slice.data(),dataCont.var[2].slice.size()-1,dataCont.var[2].slice.data()));
+	  //cout<<"var "<<ivar.second.name<<" "<<ivar.second.doEff<<" "<<ivar.second.doBkg<<" "<<ivar.second.slice.size()<<endl;
 
-	  Hist_SegMBWh[ivar][iwh].push_back(new Hist(("HistSeg"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-						      "St"+std::to_string(ist)).c_str(),"",dataCont.var[ivar].slice.size()-1,
-						     dataCont.var[ivar].slice.data(),dataCont.var[2].slice.size()-1,dataCont.var[2].slice.data()));
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new TEfficiency(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+							     "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data()));
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new TEfficiency(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+							      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data()));
+	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh].push_back(new Hist(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+						   "St"+std::to_string(ist)).c_str(),"",ivar.second.slice.size()-1,
+						  ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
+	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh].push_back(new Hist(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+						      "St"+std::to_string(ist)).c_str(),"",ivar.second.slice.size()-1,
+						     ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
+
 	}
 	else{
-	  Eff_phiMBWh[ivar][iwh].push_back( (TEfficiency*) fIn->Get(("Eff"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( (TEfficiency*) fIn->Get(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 								     "St"+std::to_string(ist)).c_str()));
-	  EffA_phiMBWh[ivar][iwh].push_back( (TEfficiency*) fIn->Get(("EffA"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( (TEfficiency*) fIn->Get(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 								      "St"+std::to_string(ist)).c_str()));
-	  Hist_MBWh[ivar][iwh].push_back( (Hist*) fIn->Get(("Hist"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh].push_back( (Hist*) fIn->Get(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 							    "St"+std::to_string(ist)).c_str()));
-	  Hist_SegMBWh[ivar][iwh].push_back( (Hist*) fIn->Get(("HistSeg"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh].push_back( (Hist*) fIn->Get(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 							    "St"+std::to_string(ist)).c_str()));	  
 	}
 
 	if (ist!=3){
 	  if(inFileName==""){
-	    Eff_theMBWh[ivar][iwh].push_back( new TEfficiency(("EffThe"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-							       "St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.var[ivar].slice.data()));
-	    EffA_theMBWh[ivar][iwh].push_back( new TEfficiency(("EffAThe"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-								"St"+std::to_string(ist)).c_str(),"",nPoints-1,dataCont.var[ivar].slice.data()));
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back( new TEfficiency(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+							       "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data()));
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back( new TEfficiency(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+								"St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data()));
 	  }
 	  else{
-	    Eff_theMBWh[ivar][iwh].push_back(  (TEfficiency*) fIn->Get(("EffThe"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
-									"St"+std::to_string(ist)).c_str()));
-	    EffA_theMBWh[ivar][iwh].push_back(  (TEfficiency*) fIn->Get(("EffAThe"+dataCont.var[ivar].name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back(  (TEfficiency*) fIn->Get(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+													  "St"+std::to_string(ist)).c_str()));
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back(  (TEfficiency*) fIn->Get(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 									 "St"+std::to_string(ist)).c_str()));
 	  }
 	}
       }
       if(inFileName==""){
 
-	Eff_phiMB4Top[ivar].push_back( new TEfficiency(("Eff"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
-						       "",nPoints-1,dataCont.var[ivar].slice.data()));
-	EffA_phiMB4Top[ivar].push_back( new TEfficiency(("EffA"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
-							"",nPoints-1,dataCont.var[ivar].slice.data()));
-	Hist_MB4Top[ivar].push_back( new Hist(("Hist"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
-					      "",dataCont.var[ivar].slice.size()-1,dataCont.var[ivar].slice.data(),dataCont.var[2].slice.size()-1,dataCont.var[2].slice.data()));
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back( new TEfficiency(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+						       "",nPoints-1,ivar.second.slice.data()));
+	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back( new TEfficiency(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+							"",nPoints-1,ivar.second.slice.data()));
+	if(ivar.second.doBkg) Hist_MB4Top[ivar.first].push_back( new Hist(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+					      "",ivar.second.slice.size()-1,ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
 
-	Hist_SegMB4Top[ivar].push_back( new Hist(("HistSeg"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
-						 "",dataCont.var[ivar].slice.size()-1,dataCont.var[ivar].slice.data(),dataCont.var[2].slice.size()-1,dataCont.var[2].slice.data()));   
+	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first].push_back( new Hist(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+						 "",ivar.second.slice.size()-1,ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));   
    }
       
       else{
-	Eff_phiMB4Top[ivar].push_back(  (TEfficiency*) fIn->Get(("Eff"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
-	EffA_phiMB4Top[ivar].push_back(  (TEfficiency*) fIn->Get(("EffA"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back(  (TEfficiency*) fIn->Get(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back(  (TEfficiency*) fIn->Get(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
 
-	Hist_MB4Top[ivar].push_back( (Hist*) fIn->Get(("Hist"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
-	Hist_SegMB4Top[ivar].push_back( (Hist*) fIn->Get(("HistSeg"+dataCont.var[ivar].name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doBkg) Hist_MB4Top[ivar.first].push_back( (Hist*) fIn->Get(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first].push_back( (Hist*) fIn->Get(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
       }
 
     }
     
     if(inFileName==""){
-      Eff_phiMB4Bot.push_back( new TEfficiency(("Eff"+dataCont.var[ivar].name+"_MBBot").c_str(),"",nPoints-1,dataCont.var[ivar].slice.data()));
-      EffA_phiMB4Bot.push_back( new TEfficiency(("EffA"+dataCont.var[ivar].name+"_MBBot").c_str(),"",nPoints-1,dataCont.var[ivar].slice.data()));
-      Hist_MB4Bot.push_back( new Hist(("Hist"+dataCont.var[ivar].name+"_MBBot").c_str(),"",dataCont.var[ivar].slice.size()-1,
-				      dataCont.var[ivar].slice.data(),dataCont.var[2].slice.size()-1,dataCont.var[2].slice.data()));
+      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =  new TEfficiency(("Eff"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data());
+      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  new TEfficiency(("EffA"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data());
+      if(ivar.second.doBkg) Hist_MB4Bot[ivar.first] =  new Hist(("Hist"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
+				      ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
 
-      Hist_SegMB4Bot.push_back( new Hist(("HistSeg"+dataCont.var[ivar].name+"_MBBot").c_str(),"",dataCont.var[ivar].slice.size()-1,
-				      dataCont.var[ivar].slice.data(),dataCont.var[2].slice.size()-1,dataCont.var[2].slice.data()));
+      if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first] =  new Hist(("HistSeg"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
+				      ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
     }
     else{
-      Eff_phiMB4Bot.push_back(  (TEfficiency*) fIn->Get(("Eff"+dataCont.var[ivar].name+"_MBBot").c_str()));
-      EffA_phiMB4Bot.push_back(  (TEfficiency*) fIn->Get(("EffA"+dataCont.var[ivar].name+"_MBBot").c_str()));
+      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =   (TEfficiency*) fIn->Get(("Eff"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =   (TEfficiency*) fIn->Get(("EffA"+ivar.second.name+"_MBBot").c_str());
     
-      Hist_MB4Bot.push_back( (Hist*) fIn->Get(("Hist"+dataCont.var[ivar].name+"_MBBot").c_str()));
-      Hist_SegMB4Bot.push_back( (Hist*) fIn->Get(("HistSeg"+dataCont.var[ivar].name+"_MBBot").c_str()));
+      if(ivar.second.doBkg) Hist_MB4Bot[ivar.first] =  (Hist*) fIn->Get(("Hist"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first] =  (Hist*) fIn->Get(("HistSeg"+ivar.second.name+"_MBBot").c_str());
     }
-
   }
 
   if(inFileName!=""){
@@ -224,28 +224,28 @@ plotter::~plotter(){
 void plotter::write(){
 
    fOut->cd();
-   for (int ivar=0; ivar<dataCont.nVar; ivar++) {
+   for(auto const& ivar : dataCont.var) {
      for (int iwh=0; iwh<5; iwh++){
        for (int ist=0; ist<4; ist++){
-	 Eff_phiMBWh[ivar][iwh][ist]->Write();
-	 EffA_phiMBWh[ivar][iwh][ist]->Write();
-	 Hist_MBWh[ivar][iwh][ist]->Write();
-	 Hist_SegMBWh[ivar][iwh][ist]->Write();
+	 if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->Write();
+	 if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->Write();
+	 if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->Write();
+	 if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->Write();
 
 	 if(ist!=3){
-	   Eff_theMBWh[ivar][iwh][ist]->Write();
-	   EffA_theMBWh[ivar][iwh][ist]->Write();
+	   if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->Write();
+	   if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh][ist]->Write();
 	 }
        }
-       Eff_phiMB4Top[ivar][iwh]->Write();
-       EffA_phiMB4Top[ivar][iwh]->Write();
-       Hist_MB4Top[ivar][iwh]->Write();
-       Hist_SegMB4Top[ivar][iwh]->Write();
+       if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->Write();
+       if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh]->Write();
+       if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->Write();
+       if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->Write();
      }
-     Eff_phiMB4Bot[ivar]->Write();
-     EffA_phiMB4Bot[ivar]->Write();
-     Hist_MB4Bot[ivar]->Write();
-     Hist_SegMB4Bot[ivar]->Write();
+     if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->Write();
+     if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first]->Write();
+     if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->Write();
+     if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->Write();
    }
 }
 
@@ -264,7 +264,7 @@ void plotter::plot(string dateName){
   /* cout<<"stat(('/'+dataCont.webFolder'/'+dateName).c_str(),&st)"<<stat(("/"+dataCont.webFolder+"/"+dateName).c_str(),&st)<<endl; */
 
   if(stat((dataCont.webFolder+"/"+dateName+"/").c_str(),&st) != 0){
-    cout<<(dataCont.webFolder+"/"+dateName+"/").c_str()<<endl;
+    //    cout<<(dataCont.webFolder+"/"+dateName+"/").c_str()<<endl;
     system(("mkdir "+dataCont.webFolder+"/"+dateName).c_str());
     system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName).c_str());
   }
@@ -281,108 +281,108 @@ void plotter::plot(string dateName){
 
   fOut->cd();
 
-  for (int ivar=0; ivar<dataCont.nVar; ivar++) {
+  for(auto const& ivar : dataCont.var) {
     for (int iwh=0; iwh<5; iwh++){
       for (int ist=0; ist<4; ist++){
 	if(iwh!=4){
-	  Eff_phiMBWh[ivar][iwh][ist]->SetLineColor(iwh+1);
-	  Eff_phiMBWh[ivar][iwh][ist]->SetMarkerColor(iwh+1);
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetLineColor(iwh+1);
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetMarkerColor(iwh+1);
 
-	  Hist_MBWh[ivar][iwh][ist]->SetColor(iwh+1);
-	  Hist_SegMBWh[ivar][iwh][ist]->SetColor(iwh+1);
+	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
+	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
 	 
 	  if(ist!=3){
-	    Eff_theMBWh[ivar][iwh][ist]->SetLineColor(iwh+1);
-	    Eff_theMBWh[ivar][iwh][ist]->SetMarkerColor(iwh+1);
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetLineColor(iwh+1);
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetMarkerColor(iwh+1);
 	  }
 	}
 	else{
-	  Eff_phiMBWh[ivar][iwh][ist]->SetLineColor(6);
-	  Eff_phiMBWh[ivar][iwh][ist]->SetMarkerColor(6);
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetLineColor(6);
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetMarkerColor(6);
 	  
-	  Hist_MBWh[ivar][iwh][ist]->SetColor(6);
-	  Hist_SegMBWh[ivar][iwh][ist]->SetColor(6);
+	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->SetColor(6);
+	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->SetColor(6);
 	  
 	  if(ist!=3){
-	    Eff_theMBWh[ivar][iwh][ist]->SetLineColor(6);
-	    Eff_theMBWh[ivar][iwh][ist]->SetMarkerColor(6);
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetLineColor(6);
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetMarkerColor(6);
 	  }
 	}
 
-	Eff_phiMBWh[ivar][iwh][ist]->SetMarkerStyle(20);
-	Hist_MBWh[ivar][iwh][ist]->SetMarkerStyle(20);
-	Hist_SegMBWh[ivar][iwh][ist]->SetMarkerStyle(20);
+	if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
+	if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
+	if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
 	//profile of 2D histograms
 
-	 Hist_MBWh[ivar][iwh][ist]->ProfileX();
-	 Hist_SegMBWh[ivar][iwh][ist]->ProfileX();
+	 if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->ProfileX();
+	 if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->ProfileX();
   
 	
 	if(ist!=3){
-	  Eff_theMBWh[ivar][iwh][ist]->SetMarkerStyle(20);	  
+	  if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);	  
 	}
       }
-      Eff_phiMB4Top[ivar][iwh]->SetMarkerStyle(20);
-      Hist_MB4Top[ivar][iwh]->SetMarkerStyle(20);
-      Hist_SegMB4Top[ivar][iwh]->SetMarkerStyle(20);
+      if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
+      if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->SetMarkerStyle(20);
+      if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
       
       if(iwh!=4){
 
-	Eff_phiMB4Top[ivar][iwh]->SetLineColor(iwh+1);
-	Eff_phiMB4Top[ivar][iwh]->SetMarkerColor(iwh+1);
-	Hist_MB4Top[ivar][iwh]->SetColor(iwh+1);
-	Hist_SegMB4Top[ivar][iwh]->SetColor(iwh+1);
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetLineColor(iwh+1);
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerColor(iwh+1);
+	if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->SetColor(iwh+1);
+	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->SetColor(iwh+1);
 
       }
       else {
-	Eff_phiMB4Top[ivar][iwh]->SetLineColor(6);
-	Eff_phiMB4Top[ivar][iwh]->SetMarkerColor(6);
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetLineColor(6);
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerColor(6);
 	
-	Hist_MB4Top[ivar][iwh]->SetColor(6);
-	Hist_SegMB4Top[ivar][iwh]->SetColor(6);
+	if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->SetColor(6);
+	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->SetColor(6);
       }
 
-      Hist_MB4Top[ivar][iwh]->ProfileX();
-      Hist_SegMB4Top[ivar][iwh]->ProfileX();
+      if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->ProfileX();
+      if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->ProfileX();
     }
 
-    Eff_phiMB4Bot[ivar]->SetMarkerStyle(20);
-    Eff_phiMB4Bot[ivar]->SetLineColor(1);
-    Eff_phiMB4Bot[ivar]->SetMarkerColor(1);
+    if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetLineColor(1);
+    if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetMarkerColor(1);
 
-    Hist_MB4Bot[ivar]->SetMarkerStyle(20);
-    Hist_MB4Bot[ivar]->SetColor(1);
+    if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->SetColor(1);
    
-    Hist_SegMB4Bot[ivar]->SetMarkerStyle(20);
-    Hist_SegMB4Bot[ivar]->SetColor(1);
+    if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->SetColor(1);
     
-    Hist_MB4Bot[ivar]->ProfileX();
-    Hist_SegMB4Bot[ivar]->ProfileX();
+    if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->ProfileX();
+    if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->ProfileX();
 
   }
   
-  for (int ivar=0; ivar<dataCont.nVar; ivar++){
-    
-    for (int ist=0; ist<4; ist++){
-      // cout<<"ist "<<ist<<" "<<dataCont.var[ivar].name<<endl;
+    for(auto const& ivar : dataCont.var){ 
+      if(! ivar.second.doEff) continue;
+      for (int ist=0; ist<4; ist++){
+      // cout<<"ist "<<ist<<" "<<ivar.second.name<<endl;
       //phi
-      TCanvas *cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+dataCont.var[ivar].name).c_str());
+      TCanvas *cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
       
       TH1F * hPaint = new TH1F();
       
-      Eff_phiMBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" eff vs "+dataCont.var[ivar].Title+";"+dataCont.var[ivar].Label+";Eff").c_str());
+      Eff_phiMBWh[ivar.first][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str());
       
-      if(dataCont.var[ivar].name=="Run"){
-	hPaint  =  getPaintHisto(Eff_phiMBWh[ivar][0][ist], ivar, false);
+      if(ivar.second.name=="Run"){
+	hPaint  =  getPaintHisto(Eff_phiMBWh[ivar.first][0][ist], ivar.second.slice, false);
 	hPaint->SetMinimum(0.89);
 	hPaint->SetMaximum(1.02);
 	hPaint->Draw();
-	Eff_phiMBWh[ivar][0][ist]->Draw("samep");
+	Eff_phiMBWh[ivar.first][0][ist]->Draw("samep");
       }
-      else Eff_phiMBWh[ivar][0][ist]->Draw("ap");
+      else Eff_phiMBWh[ivar.first][0][ist]->Draw("ap");
       
       gPad->Update();
-      auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph();
+      auto graph = Eff_phiMBWh[ivar.first][0][ist]->GetPaintedGraph();
       
       cPhiMB->Update();
       graph->SetMinimum(0.89);
@@ -390,33 +390,33 @@ void plotter::plot(string dateName){
 
       TLegend * legPhiMB = new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
-	Eff_phiMBWh[ivar][iwh][ist]->Draw("samep");
-	legPhiMB->AddEntry(Eff_phiMBWh[ivar][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	Eff_phiMBWh[ivar.first][iwh][ist]->Draw("samep");
+	legPhiMB->AddEntry(Eff_phiMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
       }
       
       legPhiMB->Draw("same");
-      cPhiMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+dataCont.var[ivar].name+".png").c_str());
+      cPhiMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
       
       
-      if(dataCont.var[ivar].name=="Run"){
-	Eff_phiMBWh[ivar][0][ist] = getIntLumiEff(Eff_phiMBWh[ivar][0][ist],ivar);
-	Eff_phiMBWh[ivar][0][ist]->Draw("ap");
+      if(ivar.second.name=="Run"){
+	Eff_phiMBWh[ivar.first][0][ist] = getIntLumiEff(Eff_phiMBWh[ivar.first][0][ist],ivar.second.slice);
+	Eff_phiMBWh[ivar.first][0][ist]->Draw("ap");
 	for (int iwh=1; iwh<5; iwh++){
-	  Eff_phiMBWh[ivar][iwh][ist] = getIntLumiEff(Eff_phiMBWh[ivar][iwh][ist],ivar);
-	  Eff_phiMBWh[ivar][iwh][ist]->Draw("samep");
+	  Eff_phiMBWh[ivar.first][iwh][ist] = getIntLumiEff(Eff_phiMBWh[ivar.first][iwh][ist],ivar.second.slice);
+	  Eff_phiMBWh[ivar.first][iwh][ist]->Draw("samep");
 	}
 
 	gPad->Update();
-	auto graph = Eff_phiMBWh[ivar][0][ist]->GetPaintedGraph();
+	auto graph = Eff_phiMBWh[ivar.first][0][ist]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
        
 	legPhiMB->Draw("same");
-	cPhiMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+dataCont.var[ivar].name+"_intLum.png").c_str());
+	cPhiMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_intLum.png").c_str());
       }
 
-      if(dataCont.var[ivar].name=="Run"){
+      if(ivar.second.name=="Run"){
 
       }
 
@@ -425,27 +425,27 @@ void plotter::plot(string dateName){
       //theta
       
       if(ist!=3){
-	TCanvas *cTheMB = new TCanvas(("cTheMB"+(std::to_string(ist+1))+dataCont.var[ivar].name).c_str());
+	TCanvas *cTheMB = new TCanvas(("cTheMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
 	
 	
 	TH1F * hPaint = new TH1F();
 	
-	Eff_theMBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" theta eff vs "+dataCont.var[ivar].Title+";"+dataCont.var[ivar].Label+";Eff").c_str());
+	Eff_theMBWh[ivar.first][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" theta eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str());
 	
-	if(dataCont.var[ivar].name=="Run"){
-	  hPaint  =  getPaintHisto(Eff_theMBWh[ivar][0][ist], ivar, false);
+	if(ivar.second.name=="Run"){
+	  hPaint  =  getPaintHisto(Eff_theMBWh[ivar.first][0][ist], ivar.second.slice, false);
 	  hPaint->SetMinimum(0.89);
 	  hPaint->SetMaximum(1.02);
 	  hPaint->Draw();
-	  Eff_theMBWh[ivar][0][ist]->Draw("samep");
+	  Eff_theMBWh[ivar.first][0][ist]->Draw("samep");
 	}
 	else{
-	  Eff_theMBWh[ivar][0][ist]->Draw("ap");
+	  Eff_theMBWh[ivar.first][0][ist]->Draw("ap");
 	}
 	
 
 	gPad->Update();
-	auto graph = Eff_theMBWh[ivar][0][ist]->GetPaintedGraph();
+	auto graph = Eff_theMBWh[ivar.first][0][ist]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
@@ -454,31 +454,31 @@ void plotter::plot(string dateName){
 	
 	TLegend * legTheMB = new TLegend(0.75,0.75,0.9,0.9);
 	for (int iwh=0; iwh<5; iwh++){
-	  Eff_theMBWh[ivar][iwh][ist]->Draw("samep");
-	  legTheMB->AddEntry(Eff_theMBWh[ivar][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	  Eff_theMBWh[ivar.first][iwh][ist]->Draw("samep");
+	  legTheMB->AddEntry(Eff_theMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
 	}
 	legTheMB->Draw("same");
-	cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+dataCont.var[ivar].name+".png").c_str());
+	cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".png").c_str());
 	
 	
        
-	if(dataCont.var[ivar].name=="Run"){
+	if(ivar.second.name=="Run"){
 	  
-	  Eff_theMBWh[ivar][0][ist] = getIntLumiEff(Eff_theMBWh[ivar][0][ist],ivar);
-	  Eff_theMBWh[ivar][0][ist]->Draw("ap");
+	  Eff_theMBWh[ivar.first][0][ist] = getIntLumiEff(Eff_theMBWh[ivar.first][0][ist],ivar.second.slice);
+	  Eff_theMBWh[ivar.first][0][ist]->Draw("ap");
 	  for (int iwh=1; iwh<5; iwh++){
-	    Eff_theMBWh[ivar][iwh][ist] = getIntLumiEff(Eff_theMBWh[ivar][iwh][ist],ivar);
-	    Eff_theMBWh[ivar][iwh][ist]->Draw("samep");
+	    Eff_theMBWh[ivar.first][iwh][ist] = getIntLumiEff(Eff_theMBWh[ivar.first][iwh][ist],ivar.second.slice);
+	    Eff_theMBWh[ivar.first][iwh][ist]->Draw("samep");
 	  }
 	  
 	  gPad->Update();
-	  auto graph = Eff_theMBWh[ivar][0][ist]->GetPaintedGraph();
+	  auto graph = Eff_theMBWh[ivar.first][0][ist]->GetPaintedGraph();
 	  
 	  graph->SetMinimum(0.89);
 	  graph->SetMaximum(1.02);
 	  
 	  legTheMB->Draw("same");
-	  cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+dataCont.var[ivar].name+"_intLum.png").c_str());
+	  cTheMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_intLum.png").c_str());
 	}
 	delete 	cTheMB;
       }
@@ -486,24 +486,24 @@ void plotter::plot(string dateName){
     
     //phi MB4 Top
     
-    TCanvas *cPhiMB4Top = new TCanvas(("cPhiMB4Top"+dataCont.var[ivar].name).c_str());
+    TCanvas *cPhiMB4Top = new TCanvas(("cPhiMB4Top"+ivar.second.name).c_str());
     
     TH1F * hPaint = new TH1F();
-    Eff_phiMB4Top[ivar][0]->SetTitle(("MB4Top eff vs "+dataCont.var[ivar].Title+" eff vs "+dataCont.var[ivar].Title+";"+dataCont.var[ivar].Label+";Eff").c_str());
+    Eff_phiMB4Top[ivar.first][0]->SetTitle(("MB4Top eff vs "+ivar.second.Title+" eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str());
     
-    if(dataCont.var[ivar].name=="Run"){
-      hPaint  =  getPaintHisto(Eff_phiMB4Top[ivar][0], ivar, false);
+    if(ivar.second.name=="Run"){
+      hPaint  =  getPaintHisto(Eff_phiMB4Top[ivar.first][0], ivar.second.slice, false);
       hPaint->SetMinimum(0.89);
       hPaint->SetMaximum(1.02);
       hPaint->Draw();
-      Eff_phiMB4Top[ivar][0]->Draw("samep");
+      Eff_phiMB4Top[ivar.first][0]->Draw("samep");
     }
     else{
-      Eff_phiMB4Top[ivar][0]->Draw("ap");
+      Eff_phiMB4Top[ivar.first][0]->Draw("ap");
     }
     gPad->Update();
     
-    auto graph = Eff_phiMB4Top[ivar][0]->GetPaintedGraph();
+    auto graph = Eff_phiMB4Top[ivar.first][0]->GetPaintedGraph();
     graph->SetMinimum(0.89);
     graph->SetMaximum(1.02);
     
@@ -511,70 +511,70 @@ void plotter::plot(string dateName){
     
     TLegend * legPhiMB4Top = new TLegend(0.75,0.75,0.9,0.9);
     for (int iwh=0; iwh<5; iwh++){
-      Eff_phiMB4Top[ivar][iwh]->Draw("samep");
-      legPhiMB4Top->AddEntry(Eff_phiMB4Top[ivar][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      Eff_phiMB4Top[ivar.first][iwh]->Draw("samep");
+      legPhiMB4Top->AddEntry(Eff_phiMB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
     }
     legPhiMB4Top->Draw("same");
-    cPhiMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4TopPhiEffVs"+dataCont.var[ivar].name+".png").c_str());
+    cPhiMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4TopPhiEffVs"+ivar.second.name+".png").c_str());
     
     
-    if(dataCont.var[ivar].name=="Run"){
+    if(ivar.second.name=="Run"){
 
-	Eff_phiMB4Top[ivar][0] = getIntLumiEff(Eff_phiMB4Top[ivar][0],ivar);
-	Eff_phiMB4Top[ivar][0]->Draw("ap");
+	Eff_phiMB4Top[ivar.first][0] = getIntLumiEff(Eff_phiMB4Top[ivar.first][0],ivar.second.slice);
+	Eff_phiMB4Top[ivar.first][0]->Draw("ap");
 	for (int iwh=1; iwh<5; iwh++){
-	  Eff_phiMB4Top[ivar][iwh] = getIntLumiEff(Eff_phiMB4Top[ivar][iwh],ivar);
-	  Eff_phiMB4Top[ivar][iwh]->Draw("samep");
+	  Eff_phiMB4Top[ivar.first][iwh] = getIntLumiEff(Eff_phiMB4Top[ivar.first][iwh],ivar.second.slice);
+	  Eff_phiMB4Top[ivar.first][iwh]->Draw("samep");
 	}
 
 	gPad->Update();
-	auto graph = Eff_phiMB4Top[ivar][0]->GetPaintedGraph();
+	auto graph = Eff_phiMB4Top[ivar.first][0]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
        
 	legPhiMB4Top->Draw("same");
-	cPhiMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4TopPhiEffVs"+dataCont.var[ivar].name+"_intLum.png").c_str());
+	cPhiMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4TopPhiEffVs"+ivar.second.name+"_intLum.png").c_str());
       }
       
     delete   cPhiMB4Top ;
 
     //phi MB4 Bot
-    TCanvas *cPhiMB4Bot = new TCanvas(("cPhiMB4Bot"+dataCont.var[ivar].name).c_str());
+    TCanvas *cPhiMB4Bot = new TCanvas(("cPhiMB4Bot"+ivar.second.name).c_str());
        
-    Eff_phiMB4Bot[ivar]->SetTitle(("MB4Bot eff vs "+dataCont.var[ivar].Title+" eff vs "+dataCont.var[ivar].Title+";"+dataCont.var[ivar].Label+";Eff").c_str());
+    Eff_phiMB4Bot[ivar.first]->SetTitle(("MB4Bot eff vs "+ivar.second.Title+" eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str());
 
-    if(dataCont.var[ivar].name=="Run"){
-      hPaint  =  getPaintHisto(Eff_phiMB4Bot[ivar], ivar, false);
+    if(ivar.second.name=="Run"){
+      hPaint  =  getPaintHisto(Eff_phiMB4Bot[ivar.first], ivar.second.slice, false);
       hPaint->SetMinimum(0.89);
       hPaint->SetMaximum(1.02);
       hPaint->Draw();
-      Eff_phiMB4Bot[ivar]->Draw("samep");
+      Eff_phiMB4Bot[ivar.first]->Draw("samep");
     }
-    else  Eff_phiMB4Bot[ivar]->Draw("ap");
+    else  Eff_phiMB4Bot[ivar.first]->Draw("ap");
     
     gPad->Update();
-    graph = Eff_phiMB4Bot[ivar]->GetPaintedGraph();
+    graph = Eff_phiMB4Bot[ivar.first]->GetPaintedGraph();
     graph->SetMinimum(0.89);
     graph->SetMaximum(1.02);
     
     gPad->Update();
     
-    cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+dataCont.var[ivar].name+".png").c_str());
+    cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+ivar.second.name+".png").c_str());
     
     
-    if(dataCont.var[ivar].name=="Run"){
+    if(ivar.second.name=="Run"){
 
-	Eff_phiMB4Bot[ivar] = getIntLumiEff(Eff_phiMB4Bot[ivar],ivar);
-	Eff_phiMB4Bot[ivar]->Draw("ap");
+	Eff_phiMB4Bot[ivar.first] = getIntLumiEff(Eff_phiMB4Bot[ivar.first],ivar.second.slice);
+	Eff_phiMB4Bot[ivar.first]->Draw("ap");
 
 	gPad->Update();
-	auto graph = Eff_phiMB4Bot[ivar]->GetPaintedGraph();
+	auto graph = Eff_phiMB4Bot[ivar.first]->GetPaintedGraph();
 	
 	graph->SetMinimum(0.89);
 	graph->SetMaximum(1.02);
        
-	cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+dataCont.var[ivar].name+"_intLum.png").c_str());
+	cPhiMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4BotPhiEffVs"+ivar.second.name+"_intLum.png").c_str());
       }
     delete cPhiMB4Bot ;
 
@@ -582,31 +582,32 @@ void plotter::plot(string dateName){
   
   //Graph bkg
 
-  for (int ivar=0; ivar<2; ivar++){
+    for(auto const& ivar : dataCont.var){
+      if(!ivar.second.doBkg) continue;
+           
     for (int ist=0; ist<4; ist++){
-      // cout<<"ist "<<ist<<" "<<dataCont.var[ivar].name<<endl;
-      //find maximum
+      // find maximum
       float_t Max = 0;
       for (int iwh=0; iwh<5; iwh++){
-      	if(Hist_MBWh[ivar][iwh][ist]->GetProfMax() > Max) Max = Hist_MBWh[ivar][iwh][ist]->GetProfMax();
+      	if(Hist_MBWh[ivar.first][iwh][ist]->GetProfMax() > Max) Max = Hist_MBWh[ivar.first][iwh][ist]->GetProfMax();
       }
 
-
       //phi
-      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+dataCont.var[ivar].name).c_str());
-      Hist_MBWh[ivar][0][ist]->SetMaximum(Max*1.3);
-      Hist_MBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" bkg vs "+dataCont.var[ivar].Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
+      Hist_MBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
+      Hist_MBWh[ivar.first][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" bkg vs "+ivar.second.Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
       
-      Hist_MBWh[ivar][0][ist]->draw("E1");
+      Hist_MBWh[ivar.first][0][ist]->draw("E1");
       
 
       TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
-	Hist_MBWh[ivar][iwh][ist]->draw("sameE1");
-	legMB->AddEntry(Hist_MBWh[ivar][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	Hist_MBWh[ivar.first][iwh][ist]->draw("sameE1");
+	TLegendEntry *le = legMB->AddEntry(Hist_MBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	le->SetMarkerColor(Hist_MBWh[ivar.first][iwh][ist]->GetColor());
       }
       legMB->Draw("same");
-      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+dataCont.var[ivar].name+".png").c_str());
+      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+ivar.second.name+".png").c_str());
    
       delete  cMB ;
     }//end stations
@@ -617,46 +618,48 @@ void plotter::plot(string dateName){
       //find maximum
       float_t Max = 0;
       for (int iwh=0; iwh<5; iwh++){
-      	if(Hist_SegMBWh[ivar][iwh][ist]->GetProfMax() > Max) Max = Hist_SegMBWh[ivar][iwh][ist]->GetProfMax();
+      	if(Hist_SegMBWh[ivar.first][iwh][ist]->GetProfMax() > Max) Max = Hist_SegMBWh[ivar.first][iwh][ist]->GetProfMax();
       }
 
       //phi
-      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+dataCont.var[ivar].name).c_str());
-      Hist_SegMBWh[ivar][0][ist]->SetMaximum(Max*1.3);
-      Hist_SegMBWh[ivar][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+dataCont.var[ivar].Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
-      Hist_SegMBWh[ivar][0][ist]->draw("E1");
+      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
+      Hist_SegMBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
+      Hist_SegMBWh[ivar.first][0][ist]->SetTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+ivar.second.Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+      Hist_SegMBWh[ivar.first][0][ist]->draw("E1");
       
-
       TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
-	Hist_SegMBWh[ivar][iwh][ist]->draw("sameE1");
-	legMB->AddEntry(Hist_SegMBWh[ivar][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	Hist_SegMBWh[ivar.first][iwh][ist]->draw("sameE1");
+	TLegendEntry *le = legMB->AddEntry(Hist_SegMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	le->SetMarkerColor(Hist_SegMBWh[ivar.first][iwh][ist]->GetColor());
       }
+      
       legMB->Draw("same");
-      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"SegBkgVs"+dataCont.var[ivar].name+".png").c_str());
+      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"SegBkgVs"+ivar.second.name+".png").c_str());
       delete  cMB ;
      }
 
 
-
     // MB4 Top
 
-    //find maximum
+    // find maximum
     float_t Max = 0;
-    for (int iwh=0; iwh<5; iwh++) if(Hist_MB4Top[ivar][iwh]->GetProfMax() > Max) Max = Hist_MB4Top[ivar][iwh]->GetProfMax();
+    for (int iwh=0; iwh<5; iwh++) if(Hist_MB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Hist_MB4Top[ivar.first][iwh]->GetProfMax();
     
-    TCanvas *cMB4Top = new TCanvas(("cMB4Top"+dataCont.var[ivar].name).c_str());
-    Hist_MB4Top[ivar][0]->SetMaximum(Max*1.15);
-    Hist_MB4Top[ivar][0]->SetTitle(("MB4Top bkg vs "+dataCont.var[ivar].Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
-    Hist_MB4Top[ivar][0]->draw("E1");
+    TCanvas *cMB4Top = new TCanvas(("cMB4Top"+ivar.second.name).c_str());
+    Hist_MB4Top[ivar.first][0]->SetMaximum(Max*1.3);
+    Hist_MB4Top[ivar.first][0]->SetTitle(("MB4Top bkg vs "+ivar.second.Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    Hist_MB4Top[ivar.first][0]->draw("E1");
     
     TLegend * legMB4Top = new TLegend(0.75,0.75,0.9,0.9);
+
     for (int iwh=0; iwh<5; iwh++){
-      Hist_MB4Top[ivar][iwh]->draw("sameE1");
-      legMB4Top->AddEntry(Hist_MB4Top[ivar][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
-    }
+      Hist_MB4Top[ivar.first][iwh]->draw("sameE1");
+      TLegendEntry *le = legMB4Top->AddEntry(Hist_MB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      le->SetMarkerColor(Hist_MB4Top[ivar.first][iwh]->GetColor());  
+    }    
     legMB4Top->Draw("same");
-    cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+dataCont.var[ivar].name+".png").c_str());
+    cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+ivar.second.name+".png").c_str());
     delete cMB4Top ;
     
 
@@ -664,42 +667,45 @@ void plotter::plot(string dateName){
 
     //find maximum
     Max = 0;
-    for (int iwh=0; iwh<5; iwh++) if(Hist_SegMB4Top[ivar][iwh]->GetProfMax() > Max) Max = Hist_SegMB4Top[ivar][iwh]->GetProfMax();
+    for (int iwh=0; iwh<5; iwh++) if(Hist_SegMB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Hist_SegMB4Top[ivar.first][iwh]->GetProfMax();
     
-    TCanvas *cSegMB4Top = new TCanvas(("cSegMB4Top"+dataCont.var[ivar].name).c_str());
-    Hist_SegMB4Top[ivar][0]->SetMaximum(Max*1.15);
-    Hist_SegMB4Top[ivar][0]->SetTitle(("MB4Top segment bkg vs "+dataCont.var[ivar].Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
-    Hist_SegMB4Top[ivar][0]->draw("E1");
+    TCanvas *cSegMB4Top = new TCanvas(("cSegMB4Top"+ivar.second.name).c_str());
+    Hist_SegMB4Top[ivar.first][0]->SetMaximum(Max*1.3);
+    Hist_SegMB4Top[ivar.first][0]->SetTitle(("MB4Top segment bkg vs "+ivar.second.Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    Hist_SegMB4Top[ivar.first][0]->draw("E1");
     
     TLegend * legSegMB4Top = new TLegend(0.75,0.75,0.9,0.9);
     for (int iwh=0; iwh<5; iwh++){
-      Hist_SegMB4Top[ivar][iwh]->draw("sameE1");
-      legSegMB4Top->AddEntry(Hist_SegMB4Top[ivar][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      Hist_SegMB4Top[ivar.first][iwh]->draw("sameE1");
+      TLegendEntry *le = legSegMB4Top->AddEntry(Hist_SegMB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      le->SetMarkerColor(Hist_SegMB4Top[ivar.first][iwh]->GetColor());
     }
    
     legSegMB4Top->Draw("same");
-    cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+dataCont.var[ivar].name+".png").c_str());
+    cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+ivar.second.name+".png").c_str());
     delete cSegMB4Top ;
     
 
     // MB4 Bot
-    TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+dataCont.var[ivar].name).c_str());
+    TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
     
-    //    Hist_MB4Bot[ivar]->SetTitle(("MB4Bot bkg vs "+dataCont.var[ivar].Title+dataCont.var[ivar].Title+";"+dataCont.var[ivar].Label+";Rate(Hz/cm^{-2})").c_str());
-    Hist_MB4Bot[ivar]->SetTitle(("MB4Bot bkg vs "+dataCont.var[ivar].Title+dataCont.var[ivar].Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
-    Hist_MB4Bot[ivar]->draw("E1");
+    //    Hist_MB4Bot[ivar.first]->SetTitle(("MB4Bot bkg vs "+ivar.second.Title+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{-2})").c_str());
+    Hist_MB4Bot[ivar.first]->SetTitle(("MB4Bot bkg vs "+ivar.second.Title+ivar.second.Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    Hist_MB4Bot[ivar.first]->SetMaximum(Max*1.3);
+    Hist_MB4Bot[ivar.first]->draw("E1");
     
-    cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+dataCont.var[ivar].name+".png").c_str());
+    cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".png").c_str());
     delete cMB4Bot;
 
 
     // MB4 Bot segment
-    TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+dataCont.var[ivar].name).c_str());
+    TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
     
-    Hist_SegMB4Bot[ivar]->SetTitle(("MB4Bot segment bkg vs "+dataCont.var[ivar].Title+dataCont.var[ivar].Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
-    Hist_SegMB4Bot[ivar]->draw("E1");
+    Hist_SegMB4Bot[ivar.first]->SetTitle(("MB4Bot segment bkg vs "+ivar.second.Title+ivar.second.Title+";Int.Lumi. pb^{-1};Rate(Hz/cm^{-2})").c_str());
+    Hist_SegMB4Bot[ivar.first]->SetMaximum(Max*1.3);
+    Hist_SegMB4Bot[ivar.first]->draw("E1");
     
-    cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+dataCont.var[ivar].name+".png").c_str());
+    cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+ivar.second.name+".png").c_str());
     delete cSegMB4Bot;
   }
 }
@@ -750,7 +756,7 @@ TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
 
 
   // xBins.insert(xBins.begin(),arrX->GetArray()[firstBin-1]);
-  //Cont.insert(Cont.begin(),0);
+  //Cont.insert(Cont.begin(),0); //del check
 
   //insert last  value to have the right edge of the last  bin
   xBins.push_back(arr->GetArray()[maxBin]);
@@ -778,71 +784,73 @@ TEfficiency * plotter::setEffBin( TEfficiency *effIn, Float_t MaxErr){
 
 void plotter::setPlots(){
 
-
-   for (int ivar=0; ivar<dataCont.nVar; ivar++) {
+     for(auto const& ivar : dataCont.var) {
      for (int iwh=0; iwh<5; iwh++){
        for (int ist=0; ist<4; ist++){
-	 if(dataCont.var[ivar].name=="Run"){
-	   Eff_phiMBWh[ivar][iwh][ist]  = setEffRun(Eff_phiMBWh[ivar][iwh][ist]);
-	   EffA_phiMBWh[ivar][iwh][ist] = setEffRun(EffA_phiMBWh[ivar][iwh][ist]);
-	   //	   Hist_MBWh[ivar][iwh][ist]    = set2DHistoBinRun(Hist_MBWh[ivar][iwh][ist], ivar);
-	   Hist_MBWh[ivar][iwh][ist]->getIntLumiHisto();
-	   Hist_SegMBWh[ivar][iwh][ist]->getIntLumiHisto();
+	 if(ivar.second.name=="Run"){
+
+	   if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]  = setEffRun(Eff_phiMBWh[ivar.first][iwh][ist]);
+	   if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist] = setEffRun(EffA_phiMBWh[ivar.first][iwh][ist]);
+	   //	   if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]    = set2DHistoBinRun(Hist_MBWh[ivar.first][iwh][ist], ivar.second.slice);
+
+	   if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->getIntLumiHisto();
+	   if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->getIntLumiHisto();
 	 }
 	 else{
-	   Eff_phiMBWh[ivar][iwh][ist]  = setEffBin(Eff_phiMBWh[ivar][iwh][ist]);
-	   EffA_phiMBWh[ivar][iwh][ist] = setEffBin(EffA_phiMBWh[ivar][iwh][ist]);
+	   if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]  = setEffBin(Eff_phiMBWh[ivar.first][iwh][ist]);
+	   if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist] = setEffBin(EffA_phiMBWh[ivar.first][iwh][ist]);
 	 }
-	 if(dataCont.var[ivar].name != "Run" &&  dataCont.var[ivar].name != "Bkg"){
-	   Hist_MBWh[ivar][iwh][ist]->set2DHistoBin();
-	   Hist_SegMBWh[ivar][iwh][ist]->set2DHistoBin();
+	 if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){
+	   // cout<<ivar.second.name<<" "<<Hist_MBWh[ivar.first][iwh][ist]->getName()<<" "<<setprecision(2)<<Hist_MBWh[ivar.first][iwh][ist]->Integral()<<endl;
+	   if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->set2DHistoBin();
+	   if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->set2DHistoBin();
 	
 	 }
 	 if(ist!=3){
-	   if(dataCont.var[ivar].name=="Run"){
-	     Eff_theMBWh[ivar][iwh][ist]  = setEffRun(Eff_theMBWh[ivar][iwh][ist]);
-	     EffA_theMBWh[ivar][iwh][ist] = setEffRun(EffA_theMBWh[ivar][iwh][ist]);	     
-	     //Hist_theMBWh[ivar][iwh][ist]->getIntLumiHisto();
-	     //Hist_theMBWh[ivar][iwh][ist] = set2DHistoBinRun();
+	   if(ivar.second.name=="Run"){
+	     if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]  = setEffRun(Eff_theMBWh[ivar.first][iwh][ist]);
+	     if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh][ist] = setEffRun(EffA_theMBWh[ivar.first][iwh][ist]);	     
+	     //if(ivar.second.doBkg) Hist_theMBWh[ivar.first][iwh][ist]->getIntLumiHisto();
+	     //if(ivar.second.doBkg) Hist_theMBWh[ivar.first][iwh][ist] = set2DHistoBinRun();
 	   }
 	   else{
-	     Eff_theMBWh[ivar][iwh][ist]  = setEffBin(Eff_theMBWh[ivar][iwh][ist]);
-	     EffA_theMBWh[ivar][iwh][ist] = setEffBin(EffA_theMBWh[ivar][iwh][ist]);
+	     if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]  = setEffBin(Eff_theMBWh[ivar.first][iwh][ist]);
+	     if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh][ist] = setEffBin(EffA_theMBWh[ivar.first][iwh][ist]);
 	   }
 	 }
        }
-       if(dataCont.var[ivar].name=="Run"){
-	 Eff_phiMB4Top[ivar][iwh]  = setEffRun(Eff_phiMB4Top[ivar][iwh]);
-	 EffA_phiMB4Top[ivar][iwh] = setEffRun(EffA_phiMB4Top[ivar][iwh]);
-	 //Hist_MB4Top[ivar][iwh]    = set2DHistoBinRun(Hist_MB4Top[ivar][iwh], ivar);
-	 Hist_MB4Top[ivar][iwh]->getIntLumiHisto();
-	 Hist_SegMB4Top[ivar][iwh]->getIntLumiHisto();
+       if(ivar.second.name=="Run"){
+	 if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]  = setEffRun(Eff_phiMB4Top[ivar.first][iwh]);
+	 if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh] = setEffRun(EffA_phiMB4Top[ivar.first][iwh]);
+
+	 if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->getIntLumiHisto();
+	 if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->getIntLumiHisto();
 
        }
        else{
-	 Eff_phiMB4Top[ivar][iwh]  = setEffBin(Eff_phiMB4Top[ivar][iwh]);
-	 EffA_phiMB4Top[ivar][iwh] = setEffBin(EffA_phiMB4Top[ivar][iwh]);
+	 if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]  = setEffBin(Eff_phiMB4Top[ivar.first][iwh]);
+	 if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh] = setEffBin(EffA_phiMB4Top[ivar.first][iwh]);
        }
-       if(dataCont.var[ivar].name != "Run" &&  dataCont.var[ivar].name != "Bkg"){
-	 Hist_MB4Top[ivar][iwh]->set2DHistoBin();
-	 Hist_SegMB4Top[ivar][iwh]->set2DHistoBin();
+       if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){
+	 if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->set2DHistoBin();
+	 if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->set2DHistoBin();
        }
      }
-     if(dataCont.var[ivar].name=="Run"){
+     if(ivar.second.name=="Run"){
 
-       Eff_phiMB4Bot[ivar]  = setEffRun(Eff_phiMB4Bot[ivar]);
-       EffA_phiMB4Bot[ivar] = setEffRun(EffA_phiMB4Bot[ivar]);
-       //Hist_MB4Bot[ivar]    = set2DHistoBinRun(Hist_MB4Bot[ivar], ivar);
-       Hist_MB4Bot[ivar]->getIntLumiHisto();
-       Hist_SegMB4Bot[ivar]->getIntLumiHisto();
+       if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  = setEffRun(Eff_phiMB4Bot[ivar.first]);
+       if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] = setEffRun(EffA_phiMB4Bot[ivar.first]);
+      
+       if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->getIntLumiHisto();
+       if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->getIntLumiHisto();
      }
      else{
-       Eff_phiMB4Bot[ivar]  = setEffBin(Eff_phiMB4Bot[ivar]);
-       EffA_phiMB4Bot[ivar] = setEffBin(EffA_phiMB4Bot[ivar]);
+       if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  = setEffBin(Eff_phiMB4Bot[ivar.first]);
+       if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] = setEffBin(EffA_phiMB4Bot[ivar.first]);
      }
-     if(dataCont.var[ivar].name != "Run" &&  dataCont.var[ivar].name != "Bkg"){
-       Hist_MB4Bot[ivar]->set2DHistoBin();
-       Hist_SegMB4Bot[ivar]->set2DHistoBin();
+     if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){
+       if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->set2DHistoBin();
+       if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->set2DHistoBin();
      }
    }
 }
@@ -886,47 +894,45 @@ TEfficiency * plotter::setEffRun( TEfficiency *eff1 ){
 
 void plotter::setAddBins(){
   
-  for (int ivar=0; ivar<dataCont.nVar; ivar++) {
-    if(dataCont.var[ivar].name=="Run"){
+    for(auto & ivar : dataCont.var) {
+    if(ivar.second.name=="Run"){
+
+      addBinsSlice(Eff_phiMBWh[ivar.first][0][0]->GetTotalHistogram()->GetXaxis()->GetXbins(), ivar.second.slice);
+
       for (int iwh=0; iwh<5; iwh++){
 	for (int ist=0; ist<4; ist++){
-	  Eff_phiMBWh[ivar][iwh][ist]  = addBins(Eff_phiMBWh[ivar][iwh][ist],ivar);
-	  EffA_phiMBWh[ivar][iwh][ist] = addBins(EffA_phiMBWh[ivar][iwh][ist],ivar);	  
-	  Hist_MBWh[ivar][iwh][ist]->addHisto(dataCont.var[ivar].slice);
-	  Hist_SegMBWh[ivar][iwh][ist]->addHisto(dataCont.var[ivar].slice);
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]  = addBins(Eff_phiMBWh[ivar.first][iwh][ist],ivar.second.slice);
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist] = addBins(EffA_phiMBWh[ivar.first][iwh][ist],ivar.second.slice);	  
+	  if(ivar.second.doBkg)	Hist_MBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
+	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
 
 	  if(ist!=3){
-	    Eff_theMBWh[ivar][iwh][ist]  = addBins(Eff_theMBWh[ivar][iwh][ist],ivar);
-	    EffA_theMBWh[ivar][iwh][ist] = addBins(EffA_theMBWh[ivar][iwh][ist],ivar);
-	    // Hist_theMBWh[ivar][iwh][ist]->addHisto(dataCont.var[ivar].slice);
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]  = addBins(Eff_theMBWh[ivar.first][iwh][ist],ivar.second.slice);
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh][ist] = addBins(EffA_theMBWh[ivar.first][iwh][ist],ivar.second.slice);
+	    // if(ivar.second.doBkg) Hist_theMBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
 	  }
 
-	  Eff_phiMB4Top[ivar][iwh]  = addBins(Eff_phiMB4Top[ivar][iwh],ivar);
-	  EffA_phiMB4Top[ivar][iwh] = addBins(EffA_phiMB4Top[ivar][iwh],ivar);
-	  Hist_MB4Top[ivar][iwh]->addHisto(dataCont.var[ivar].slice);
-	  Hist_SegMB4Top[ivar][iwh]->addHisto(dataCont.var[ivar].slice);
+	  if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]  = addBins(Eff_phiMB4Top[ivar.first][iwh],ivar.second.slice);
+	  if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh] = addBins(EffA_phiMB4Top[ivar.first][iwh],ivar.second.slice);
+	  if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->addHisto(ivar.second.slice);
+	  if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->addHisto(ivar.second.slice);
 	}
 
-	Eff_phiMB4Bot[ivar]  = addBins(Eff_phiMB4Bot[ivar],ivar);
-	EffA_phiMB4Bot[ivar] = addBins(EffA_phiMB4Bot[ivar],ivar);
-	Hist_MB4Bot[ivar]->addHisto(dataCont.var[ivar].slice);
-	Hist_SegMB4Bot[ivar]->addHisto(dataCont.var[ivar].slice);
+	if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  = addBins(Eff_phiMB4Bot[ivar.first],ivar.second.slice);
+	if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] = addBins(EffA_phiMB4Bot[ivar.first],ivar.second.slice);
+	if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->addHisto(ivar.second.slice);
+	if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->addHisto(ivar.second.slice);
       }    
     }
   } 
 }
 
-TEfficiency * plotter::addBins( TEfficiency *effIn, int ivar){
 
-  std::vector<Double_t> xBins = {};
-  Int_t nBins  = effIn->GetTotalHistogram()->GetNbinsX();
+// Add the run bins to slice 
+void plotter::addBinsSlice(const TArrayD * arr, vector<double> & slices){
 
-  // run slices has to changed just once
-  if(!isSliceChanged){
-      
-    const  TArrayD *arr = effIn->GetTotalHistogram()->GetXaxis()->GetXbins(); 
- 
-    for(int bin = 1; bin<=nBins+1; bin++) {
+  std::vector<Double_t> xBins = {}; 
+    for(int bin = 1; bin<=arr->GetSize(); bin++) {
       xBins.push_back(arr->GetArray()[bin-1]); 
     }
     
@@ -934,24 +940,56 @@ TEfficiency * plotter::addBins( TEfficiency *effIn, int ivar){
     xBins.erase(xBins.end()-1);
    
     //insert in xBins the new runs
-    xBins.insert(xBins.end(), dataCont.var[ivar].slice.begin(), dataCont.var[ivar].slice.end());
+    xBins.insert(xBins.end(), slices.begin(), slices.end());
     
     // update slice with old run numbers
-    dataCont.var[ivar].slice= xBins;
+    slices= xBins; //check
     isSliceChanged= true; 
+}
 
- }
-  else{
-    // dataCont.var[ivar].slice has already been changed and now Xbins can be simply makes equal to  dataCont.var[ivar].slice
-    xBins  =  dataCont.var[ivar].slice;
-  }
 
-  //  TEfficiency * effNew = new TEfficiency(effIn->GetName(),effIn->GetTitle(),xBins.size()-1,xBins.data());
-  TEfficiency * effNew = new TEfficiency("",effIn->GetTitle(),xBins.size()-1,xBins.data());
+TEfficiency * plotter::addBins( TEfficiency *effIn, vector<double> slices){ //fix
+
+
+
+
+ /*  std::vector<Double_t> xBins = {}; */
+ /*  Int_t nBins  = effIn->GetTotalHistogram()->GetNbinsX(); */
+
+ /*  // run slices has to changed just once */
+ /*  if(!isSliceChanged){ */
+      
+ /*    const  TArrayD *arr = effIn->GetTotalHistogram()->GetXaxis()->GetXbins();  */
+ 
+ /*    for(int bin = 1; bin<=nBins+1; bin++) { */
+ /*      xBins.push_back(arr->GetArray()[bin-1]);  */
+ /*    } */
+    
+ /*    //Delete last elements that was added just to have an extra item to have the last bin             */
+ /*    xBins.erase(xBins.end()-1); */
+   
+ /*    //insert in xBins the new runs */
+ /*    xBins.insert(xBins.end(), slices.begin(), slices.end()); */
+    
+ /*    // update slice with old run numbers */
+ /*    slices= xBins; //check */
+ /*    isSliceChanged= true;  */
+
+ /* } */
+ /*  else{ */
+ /*    // ivar.second.slice has already been changed and now Xbins can be simply makes equal to  ivar.second.slice */
+ /*    xBins  =  slices; */
+ /*  } */
+
+ /*  //  TEfficiency * effNew = new TEfficiency(effIn->GetName(),effIn->GetTitle(),xBins.size()-1,xBins.data()); */
+
+  Int_t nBins  = effIn->GetTotalHistogram()->GetNbinsX();
+
+  TEfficiency * effNew = new TEfficiency("",effIn->GetTitle(),slices.size()-1,slices.data());
   string effName = effIn->GetName();
   effNew->SetName(effName.c_str());
 
-  for(int bin = 1; bin<=nBins; bin++){
+  for(int bin = 1; bin<= nBins; bin++){
     effNew->SetTotalEvents( bin, effIn->GetTotalHistogram()->GetBinContent(bin));
     effNew->SetPassedEvents(bin, effIn->GetPassedHistogram()->GetBinContent(bin));
   }
@@ -1022,7 +1060,6 @@ float plotter::getLumiRun(string run){
   }
   TotLumi+=intLumi;
   return TotLumi;  
-
 }
 
 // take a vector of list and pusch inside the files inside a directory. Used for lumi per run files.
@@ -1043,7 +1080,7 @@ int plotter::getdir(string dir, vector<string> &files){
 
 
 //Create histogram with equal bins to be used as graphic plot instead of tgraph.
-TH1F * plotter::getPaintHisto( TEfficiency *effIn, int ivar, bool doLumi){
+TH1F * plotter::getPaintHisto( TEfficiency *effIn, vector<double> slices, bool doLumi){
 
   TH1F * hPaint = new TH1F();
   
@@ -1055,14 +1092,14 @@ TH1F * plotter::getPaintHisto( TEfficiency *effIn, int ivar, bool doLumi){
   
   if(doLumi){ 
     for(int bin = 1; bin <= nBins; bin++){
-      hPaint->GetXaxis()->SetBinLabel(bin, (boost::str(boost::format("%.2f") % lumi::getTotLumiRun(to_string(static_cast<int>(dataCont.var[ivar].slice[bin-1]))))).c_str());
+      hPaint->GetXaxis()->SetBinLabel(bin, (boost::str(boost::format("%.2f") % lumi::getTotLumiRun(to_string(static_cast<int>(slices[bin-1]))))).c_str());
     }
     hPaint->GetXaxis()->SetTitle("Int.Lumi. pb^{-1}");
     TotLumi = 0; // reset total lumi
   }
   else{
     for(int bin = 1; bin <= nBins; bin++){
-      hPaint->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(dataCont.var[ivar].slice[bin-1]))).c_str()); 
+      hPaint->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(slices[bin-1]))).c_str()); 
     }
   }
 
@@ -1070,14 +1107,14 @@ TH1F * plotter::getPaintHisto( TEfficiency *effIn, int ivar, bool doLumi){
 }
 
 
-TEfficiency * plotter::getIntLumiEff( TEfficiency *effIn, Int_t ivar){
+TEfficiency * plotter::getIntLumiEff( TEfficiency *effIn, vector<double> slices){
 
   std::vector<Double_t> xBins = {};
   Int_t nBins  = effIn->GetTotalHistogram()->GetNbinsX();
 
-  for(int bin = 1; bin <= nBins; bin++) xBins.push_back(lumi::getTotLumiRun(to_string(static_cast<int>(dataCont.var[ivar].slice[bin-1]))));
-  
-  TotLumi = 0; // reset total lumi
+  for(int bin = 1; bin <= nBins; bin++)  xBins.push_back(lumi::getTotLumiRun(to_string(static_cast<int>(slices[bin-1])))); 
+
+  TotLumi = 0; // reset total lumi //del fix
 
   //To be updated using SetTotalEvents TEfficiency method.
 
