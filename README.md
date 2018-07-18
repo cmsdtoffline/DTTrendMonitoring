@@ -9,6 +9,22 @@ More info about the code could be found in the pdf presentation stored in the `d
 
 An envoirment from cmssw is needed to have the right libraries. So you need to type cmsenv from a release > 8_0_X
 
+Check-out the code from this repository. 
+
+```
+git clone https://github.com/cmsdtoffline/DTTrendMonitoring.git DTTrendMonitoring  
+```
+```
+
+cd DTTrendMonitoring/
+```
+
+```
+
+git checkout plotterClass
+```
+
+
 To set up brilcalc use:
 
 ```
