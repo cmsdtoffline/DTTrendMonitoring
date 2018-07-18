@@ -8,6 +8,7 @@
 int run_IncreasingRange(string refName ="", string storingName ="", string storedName = "", string run0 = "", string run1 = "", string run2 = "", string run3 ="", string run4 ="", string run5 ="", string run6 ="") {
 
   gROOT->LoadMacro("Hist.cxx++");
+  gROOT->LoadMacro("Eff2D.cxx++");
   gROOT->LoadMacro("EfficiencyMonitor.cc++");
 
   TChain * chain = new TChain("DTTree");
@@ -39,17 +40,24 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
  
   context incrCont;
  
+  Var InsLumi;
   Var IntLumi;
   Var BunchX;
   Var BckGr;
+  Var Empty;
 
-  //initialize variable struct
-  variables::initVar(IntLumi,"IntLumi","variablesSetting.json");
-  //  variables::initVar(BunchX,"bunchX","variablesSetting.json");
-  variables::initVar(BckGr,"Bkg","variablesSetting.json",1,0);  // Var object, object name, json file, do eff plots, do bkg plots
+
+  //initialize variable struct  Var object, object name, json file, do eff plots, do bkg plots
+  variables::initVar(Empty,"Empty","variablesSetting.json",0,0); 
+  variables::initVar(BckGr,"Bkg","variablesSetting.json",0,0);  
+  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",0,0);
+
+
+  variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,1,1,"InsLumi");
+
 
   incrCont.name      = "Incr";
-  incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr}};
+  incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr},{Empty.name,Empty},{InsLumi.name,InsLumi}};
   incrCont.webFolder = "~/www/DT";
 
 

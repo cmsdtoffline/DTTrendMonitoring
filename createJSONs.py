@@ -90,7 +90,6 @@ if __name__ == '__main__':
 
     for key in sorted(Dataset):
         fname = Dataset[key]
-
         # Class define in lumi_utils that handles Runs and Lumi Blocks
         datasetRunLumis = getLumis(fname)
 
@@ -112,9 +111,8 @@ if __name__ == '__main__':
         ### Run brilcalc
         subprocess.call(["brilcalc", "lumi", "-u/pb", "-o"+outFileCSV, "-i"+outFileName])
 
-        for key, val in datasetRunLumis.getJson().items():
-
-            subprocess.call(["brilcalc", "lumi", "-u/pb", "-o","temp.csv", "--begin",firstRun,"--end",str(key)])
+        for k, val in datasetRunLumis.getJson().items():
+            subprocess.call(["brilcalc", "lumi", "-u/pb", "-o","temp.csv", "--begin",firstRun,"--end",str(k)])
 
             fileTemp  = open("temp.csv", "r")
             runDic = {}
@@ -127,15 +125,15 @@ if __name__ == '__main__':
                 except ValueError:
                     print "Creating new file"
 
-                if str(key) in runDic: 
-                    print "Run",key,"already in the file"
+                if str(k) in runDic: 
+                    print "Run",k,"already in the file"
                     continue
 
                 outjson.seek(0)  #should reset file position to the beginning.
 
-                runDic[key] = line.split(",")
-                runDic[key][0] = runDic[key][0].replace("#","") 
-                runDic[key][5] = runDic[key][5].replace("\n","") 
+                runDic[k] = line.split(",")
+                runDic[k][0] = runDic[k][0].replace("#","") 
+                runDic[k][5] = runDic[k][5].replace("\n","") 
 
 #                json.dumps('"comments":["nfill","nrun","nls","ncms","totdelivered(/pb)","totrecorded(/pb)"]',outjson, indent=4) //fixme
                 json.dump(runDic,outjson, indent=4)

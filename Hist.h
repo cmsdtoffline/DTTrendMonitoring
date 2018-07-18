@@ -38,6 +38,8 @@ class Hist: public TNamed
 
   float GetProfMax();
 
+  void setTitle(const char *title);
+
   void getIntLumiHisto();
 
   void SetColor(Color_t mcolor = 1);

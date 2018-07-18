@@ -9,6 +9,7 @@ int run_FixedRange(string refName ="", string storingName ="", string storedName
   
   gROOT->LoadMacro("Hist.cxx++");
   gROOT->LoadMacro("EfficiencyMonitor.cc++");
+  gROOT->LoadMacro("Eff2D.cxx++");
   
   TChain * chain = new TChain("DTTree");
   
@@ -44,14 +45,18 @@ int run_FixedRange(string refName ="", string storingName ="", string storedName
   Var Pileup;
   Var BkGr;
   Var BunchX;
+  Var Empty;
+
+
+  variables::initVar(Pileup,"Pileup","variablesSetting.json");
 
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json");
-  variables::initVar(Pileup,"Pileup","variablesSetting.json");
   variables::initVar(BunchX,"bunchX","variablesSetting.json");
-  variables::initVar(BkGr,"Bkg","variablesSetting.json",0,0);
+  variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
+  variables::initVar(Empty,"Empty","variablesSetting.json",0,0);
 
-  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BunchX.name,BunchX},{BkGr.name,BkGr}};
-  FixedCont.nVar = FixedCont.var.size();
+  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BunchX.name,BunchX},{BkGr.name,BkGr},{Empty.name,Empty}};
+  FixedCont.nVar  = FixedCont.var.size();
   FixedCont.webFolder = "~/www/DT";
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName);

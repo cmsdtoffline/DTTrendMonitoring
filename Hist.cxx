@@ -36,9 +36,7 @@ void Hist::Fill(Double_t x, Double_t y){
 }
 
 float Hist::GetProfMax(){
-
   return fProf->GetMaximum();
-
 }
 
 
@@ -51,7 +49,6 @@ void Hist::ProfileX(){
 
 void Hist::draw(string  option){
   fProf->Draw(option.c_str());
-  //fHistogram->Draw(option.c_str());
 }
 
 void Hist::addHisto(vector<double> slices){
@@ -73,6 +70,9 @@ void Hist::addHisto(vector<double> slices){
 }
 
 
+void Hist::setTitle(const char *title){
+  fProf->SetTitle(title);
+}
 
 void Hist::set2DHistoBin(Float_t MaxErr){
   
