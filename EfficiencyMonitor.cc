@@ -212,14 +212,14 @@ if (Ndead==0) {
      // if (Cut(ientry) < 0) continue;
 
 
-     for(auto const& ivar : dataContext.var) { //fixme
-       if (ivar.second.name == "InsLumi")     dataContext.var[ivar.first].value = lumiperblock;
+     for(auto const& ivar : dataContext.var) { 
+       if (ivar.second.name == "InsLumi")     dataContext.var[ivar.first].value = lumiperblock;  //add secons value for slices here? 
        else if (ivar.second.name =="Pileup" ) dataContext.var[ivar.first].value = PV_Nvtx;
-       else if (ivar.second.name =="BunchX" )  dataContext.var[ivar.first].value = bunchXing;
-       else if (ivar.second.name =="Run")  dataContext.var[ivar.first].value = (float)runnumber; 
+       else if (ivar.second.name =="BunchX" ) dataContext.var[ivar.first].value = bunchXing;
+       else if (ivar.second.name =="Run")     dataContext.var[ivar.first].value = (float)runnumber; 
+       else if (ivar.second.name =="Empty")   dataContext.var[ivar.first].value = 1.; // Default value for variables with no projection option 
      }
 
-  
      getBkgDigi(jentry);     
 
 
@@ -337,7 +337,9 @@ if (Ndead==0) {
        }
 
        if (nmissing != 8-NHits) {cout<<NHits<<" hits and "<<nmissing<<" missing!!"<<endl; return;}
-       if(dataContext.name=="Fixed") dataContext.var["Bkg"].value = bkgCounts.DigiBkgWhMB[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)];
+
+       // background value add only here because depend on chamber, section ecc...
+       if(dataContext.name=="Fixed") dataContext.var["Bkg"].value = bkgCounts.DigiBkgWhMB[dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)]; //check. Only for fixed? maybe an external option would be better
 
 
        if (NHits<nrequiredhit) continue;
@@ -347,18 +349,19 @@ if (Ndead==0) {
 
 	     for(auto const& ivar : dataContext.var) {
 	       if(!ivar.second.doEff) continue;
-	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
-	       plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
+	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value );    
+	       plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	       // extra chamber of sector 4 (sector 13)
+
 	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		 plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(1,ivar.second.value ); 
-		 plots->EffA_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(1,ivar.second.value ); 
+		 plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
+		 plots->EffA_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	       }
   
 	       // extra chamber of sector 10 (sector 14) 
 	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {
-		 plots->Eff_phiMB4Bot[ivar.first]->Fill(1,ivar.second.value ); 
-		 plots->EffA_phiMB4Bot[ivar.first]->Fill(1,ivar.second.value ); 
+		 plots->Eff_phiMB4Bot[ivar.first]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
+		 plots->EffA_phiMB4Bot[ivar.first]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	       }
 	     }
 	   }
@@ -403,13 +406,13 @@ if (Ndead==0) {
 	     
 	     for(auto const& ivar : dataContext.var) { 
 	       if(!ivar.second.doEff) continue;
-	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(missingLayer[imiss][1],ivar.second.value ); 
+	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(missingLayer[imiss][1],ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	       if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		 plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(missingLayer[imiss][1],ivar.second.value ); 
+		 plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(missingLayer[imiss][1],ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 
 	       }
 	       else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
-		 plots->Eff_phiMB4Bot[ivar.first]->Fill(missingLayer[imiss][1],ivar.second.value );
+		 plots->Eff_phiMB4Bot[ivar.first]->Fill(missingLayer[imiss][1],ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value );
 
 	       }
 	     }
@@ -427,16 +430,16 @@ if (Ndead==0) {
 	       }
 	       for(auto const& ivar : dataContext.var) { 
 		 if(!ivar.second.doEff) continue;
-		 plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss&&missDigi),ivar.second.value ); 
-		 plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss),ivar.second.value ); 
+		 plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss&&missDigi),ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
+		 plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(!(missAss),ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 		 
 		 if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==4 || dtsegm4D_sector->at(iseg)==13)) {
-		   plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss&&missDigi),ivar.second.value ); 
-		   plots->EffA_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss),ivar.second.value ); 
+		   plots->Eff_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss&&missDigi),ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
+		   plots->EffA_phiMB4Top[ivar.first][dtsegm4D_wheel->at(iseg)+2]->Fill(!(missAss),ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 		 }
 		 else if (dtsegm4D_station->at(iseg)==4 && (dtsegm4D_sector->at(iseg)==10 || dtsegm4D_sector->at(iseg)==14)) {		
-		   plots->Eff_phiMB4Bot[ivar.first]->Fill(!(missAss&&missDigi),ivar.second.value );
-		   plots->EffA_phiMB4Bot[ivar.first]->Fill(!(missAss),ivar.second.value );
+		   plots->Eff_phiMB4Bot[ivar.first]->Fill(!(missAss&&missDigi),ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value );
+		   plots->EffA_phiMB4Bot[ivar.first]->Fill(!(missAss),ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value );
 		 }
 	       }
 	     }
@@ -519,8 +522,8 @@ if (Ndead==0) {
 	 for (int lay=0; lay<4; lay++) {
 	   for(auto const& ivar : dataContext.var) {
 	     if(!ivar.second.doEff) continue;
-	     plots->Eff_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
-	     plots->EffA_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value ); 
+	     plots->Eff_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
+	     plots->EffA_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	   }
 	 }
        }
@@ -551,7 +554,7 @@ if (Ndead==0) {
 	 }
 	 for(auto const& ivar : dataContext.var){ 
 	   if(!ivar.second.doEff) continue;
-	   plots->Eff_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill((fabs(d)< 1.1) ,ivar.second.value ); 
+	   plots->Eff_theMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill((fabs(d)< 1.1) ,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	 }
        }
        else {
@@ -559,54 +562,8 @@ if (Ndead==0) {
 	 return;
        }
      }
+    
    }
-   
-   ofstream results;
-   std::string resultname;
-   
-   resultname.append("Results_"+fileName+".txt");
-   results.open (resultname.c_str());
-   
-   for(auto const& ivar : dataContext.var) {
-     if(!ivar.second.doEff) continue;
-     int nPoints = ivar.second.slice.size();	 
-     for (int iwh=0; iwh<5; iwh++){
-       for (int ist=0; ist<4; ist++){
-	 for (int ipoint=0; ipoint<nPoints; ipoint++) {
-
-	   results<<ivar.second.slice[ipoint];
-	   results <<" "<<ist+1<<" "<<iwh-2
-		   <<" "<<plots->Eff_phiMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	     plots->Eff_phiMBWh[ivar.first][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
-		   <<" "<<plots->EffA_phiMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
-	   
-	   if(ist<3){	 
-	     results<<ivar.second.slice[ipoint];
-	     results <<" "<<ist+1<<" "<<iwh-2
-		     <<" "<<plots->Eff_theMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	       plots->Eff_theMBWh[ivar.first][iwh][ist]->GetPassedHistogram()->GetBinContent(ipoint+1)
-		     <<" "<<plots->EffA_theMBWh[ivar.first][iwh][ist]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
-	   }
-	 }
-       }      
-       for (int ipoint=0; ipoint<nPoints; ipoint++) {
-	 results<<ivar.second.slice[ipoint];      
-	 results <<" 4T"<<" "<<iwh-2
-		 <<" "<<plots->Eff_phiMB4Top[ivar.first][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	   plots->Eff_phiMB4Top[ivar.first][iwh]->GetPassedHistogram()->GetBinContent(ipoint+1)
-		 <<" "<<plots->EffA_phiMB4Top[ivar.first][iwh]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
-       }
-     }
-     
-     for (int ipoint=0; ipoint<nPoints; ipoint++) {
-       
-       results<<ivar.second.slice[ipoint];  
-       results <<" 4B "
-	       <<" "<<plots->Eff_phiMB4Bot[ivar.first]->GetTotalHistogram()->GetBinContent(ipoint+1)<<" "<<
-	 plots->Eff_phiMB4Bot[ivar.first]->GetPassedHistogram()->GetBinContent(ipoint+1)
-	       <<" "<<plots->EffA_phiMB4Bot[ivar.first]->GetTotalHistogram()->GetBinContent(ipoint+1)<<endl;
-     }
-   }    
 }
 
 void EfficiencyMonitor::write(){
@@ -655,11 +612,9 @@ void EfficiencyMonitor::SetRunSlices()
 
 
   // uncoment to check the run list
-  //  cout<<"Run slice "<<endl;
-  //for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
-  // cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
-
-
+  cout<<"Run slice "<<endl;
+  for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+  cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
 }
 
 
@@ -723,7 +678,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
      TVectorF *Mu_cross_Se=(TVectorF*)Mu_matches_Sec->At(imu);
      TVectorF *Mu_cross_St=(TVectorF*)Mu_matches_St->At(imu);
      
-
      for (int ich=0; ich<Ncross; ich++) {
        
        int wheel    = (*Mu_cross_Wh)(ich);
@@ -873,15 +827,18 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 for(auto const& ivar : dataContext.var) {  //bool bkg
 	   if(!ivar.second.doBkg) continue;
 
+	   //	   cout<<"hei ivar "<<ivar.first<<endl;
+
 	   plots->Hist_MBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]); 
 	   plots->Hist_SegMBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]); 
-	   
+	  
 	   if (ist+1==4 && (ise+1==4 || ise+1 ==13)) {
-	     
 	     plots->Hist_MB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]);      
 	     plots->Hist_SegMB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]);   
 	   }
+
 	   else if (ist+1==4 && (ise+1==10 || ise+1==14)) {
+	     //	     cout<<"val "<<ivar.second.value<<" bkg "<<bkgCounts.DigiBkgWhMB[iwh][ist]<<endl;
 	     plots->Hist_MB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.DigiBkgWhMB[iwh][ist]);     
 	     plots->Hist_SegMB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.SegmBkgWhMB[iwh][ist]);     
 	   }
