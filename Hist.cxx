@@ -20,6 +20,15 @@ Hist::Hist(const char* name,const char* title,Int_t nbinsx,
 }
 
 
+Hist::Hist(const char* name,const char* title,Int_t nbinsx,
+	   Float_t X0, Float_t X1, Int_t nbinsy,Float_t Y0, Float_t Y1) :TNamed(name,title){
+  theName = name;
+  fHistogram = new TH2F((theName).c_str(),title,nbinsx,X0,X1,nbinsy,Y0,Y1);
+  fProf = new TProfile();
+}
+
+
+
 Hist::Hist() :TNamed("","")
 {
   theName = "";
@@ -69,6 +78,11 @@ void Hist::addHisto(vector<double> slices){
   fHistogram->SetName(theName.c_str());
 }
 
+
+
+TH2F * Hist::GetHisto(){ //return dynamic_cast<TH2F>(fHistogram);};
+  return fHistogram;
+}
 
 void Hist::setTitle(const char *title){
   fProf->SetTitle(title);

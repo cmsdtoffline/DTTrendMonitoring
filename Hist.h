@@ -20,6 +20,9 @@ class Hist: public TNamed
   Hist(const char* name,const char* title,Int_t nbinsx,
 	const Double_t* xbins,Int_t nbinsy,const Double_t* ybins);
 
+  Hist(const char* name,const char* title,Int_t nbinsx,
+      Float_t X0, Float_t X1, Int_t nbinsy,Float_t Y0, Float_t Y1);
+    
   Hist();
 
   ~Hist();
@@ -45,6 +48,8 @@ class Hist: public TNamed
   void SetColor(Color_t mcolor = 1);
 
   Color_t GetColor();
+
+  TH2F *GetHisto();
   
   void SetMarkerStyle(Style_t mstyle = 1);
 
@@ -58,7 +63,7 @@ class Hist: public TNamed
 
  private:
 
-  TH2* fHistogram; 
+  TH2F* fHistogram; 
   TProfile *fProf;
 
   string theName;
