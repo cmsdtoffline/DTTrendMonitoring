@@ -459,6 +459,7 @@ public :
    virtual Bool_t   Notify();
    virtual void     Show(Long64_t entry = -1);
    void write();
+   void close();
    void plot();
    void SetRunSlices();
 
@@ -481,7 +482,7 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
       outName     = extOutName;
       dataContext = extContext; 
       Init(tree);
-      if(dataContext.name=="Incr"){
+      if(dataContext.name=="Increasing"){
 	if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
 	SetRunSlices(); 
 	}

@@ -14,6 +14,11 @@ struct Var{
   std::string Label;
   std::string projVar;
 
+  Int_t nBins;
+  Float_t X0;
+  Float_t X1;
+
+
   bool doEff;
   bool doBkg;
   bool doProj;

@@ -1,12 +1,14 @@
 #ifndef EFF2D
 #define EFF2D
- 
-//standard header
+
+/* class Eff2D                                                                                                                                                                                                                               
+ Jun. 18, 2018                                                                                                                                                                                                                                 Gian Luca Pinna Angioni                                                                                                                                                                                                                    
+*/
+
 #include <vector>
 #include <utility>
 #include <TROOT.h> 
 #include <TH2.h>
-//#include <TObject.h>
 #include "TEfficiency.h"
 #include <TNamed.h>
 #include <TColor.h>
@@ -38,8 +40,6 @@ class Eff2D: public TNamed
 		    Int_t  firstxbin,
 		    Int_t  lastxbin, string option);
 
-  //  void draw(string option = "");
-
   bool checkProj(vector<double> slices, int bin, int bin2);
 
   Int_t GetNbinsX() {return fTotalHistogram->GetNbinsX();};
@@ -62,13 +62,7 @@ class Eff2D: public TNamed
 
   Color_t GetColor();
 
-  //  TGraphAsymmErrors * GetPaintedGraph();
-//  TEfficiency * getEffProj(  Int_t  firstxbin = 0,
-  //Int_t  lastxbin = -1 );
-
   TH1D * getPaintHisto(vector<double> slices, bool doLumi, bool isRun = false);
-  //  TEfficiency * get2DEff(vector<double> slices);
-
 
  private:
 

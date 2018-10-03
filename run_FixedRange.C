@@ -5,7 +5,7 @@
 #include "Utilities.h"
 #include "Types.h"
 
-int run_FixedRange(string refName ="", string storingName ="", string storedName = "", string run0 = "", string run1 = "", string run2 = "", string run3 ="", string run4 ="", string run5 ="", string run6 ="") {
+void run_FixedRange(string refName ="", string storingName ="", string storedName = "", string run0 = "", string run1 = "", string run2 = "", string run3 ="", string run4 ="", string run5 ="", string run6 ="") {
   
   gROOT->LoadMacro("Hist.cxx++");
   gROOT->LoadMacro("EfficiencyMonitor.cc++");
@@ -44,33 +44,32 @@ int run_FixedRange(string refName ="", string storingName ="", string storedName
   Var InsLumi;
   Var Pileup;
   Var BkGr;
-  Var BunchX;
   Var Empty;
 
-
   variables::initVar(Pileup,"Pileup","variablesSetting.json");
-
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json");
-  variables::initVar(BunchX,"bunchX","variablesSetting.json");
   variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
   variables::initVar(Empty,"Empty","variablesSetting.json",0,0);
 
-  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BunchX.name,BunchX},{BkGr.name,BkGr},{Empty.name,Empty}};
+  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty}};
   FixedCont.nVar  = FixedCont.var.size();
   FixedCont.webFolder = "~/www/DT";
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName);
 
   if(stat(("data/DeadList/DeadList_"+refName).c_str(),&st) != 0) { 
-   cout<<"dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;
+   cout<<"Dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;
    eff->PreLoop();
   }
   else {
-    cout<<"dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of producing it"<<endl;
+    cout<<"Dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of produce it"<<endl;
   }
+
   eff->Loop();
+  cout<<"Write"<<endl;
   eff->write();
+  cout<<"Plot"<<endl;
   eff->plot();
-  
-  return 1;
+  eff->close();  
+
 }

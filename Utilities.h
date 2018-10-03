@@ -52,6 +52,9 @@ namespace variables{
     var.Title =  pTree.get<std::string>( (varname+".Title").c_str()); 
     var.Label =  pTree.get<std::string>( (varname+".Label").c_str()); 
     var.slice =  as_vector<double>(pTree,(varname+".slice").c_str());
+    var.nBins =  pTree.get<int>( (varname+".nBins").c_str()); 
+    var.X0    =  pTree.get<float>( (varname+".X0").c_str()); 
+    var.X1    =  pTree.get<float>( (varname+".X1").c_str()); 
 
     var.doEff = DoEff;
     var.doBkg = DoBkg;

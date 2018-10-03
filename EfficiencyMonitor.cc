@@ -25,7 +25,7 @@ MaxDead = 0 allows an umbiased selection.
 If MaxDead > 0, dead wires will have efficiency zero while alive wires in the same segment won't contribute!
 */
 
-int lessentries=1000000;
+int lessentries=500000;
 
 
 void EfficiencyMonitor::PreLoop(){
@@ -155,7 +155,7 @@ void EfficiencyMonitor::Loop()
 
    char go;
 
-   //  nentries=lessentries;
+   //   nentries=lessentries;
 
    Long64_t nbytes = 0, nb = 0;
 
@@ -574,6 +574,9 @@ void EfficiencyMonitor::plot(){
   plots->plot(outName.c_str());     
 }
 
+void EfficiencyMonitor::close(){
+  plots->close();
+}
 
 void EfficiencyMonitor::SetRunSlices()
 {
@@ -612,16 +615,16 @@ void EfficiencyMonitor::SetRunSlices()
 
 
   // uncoment to check the run list
-  cout<<"Run slice "<<endl;
-  for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
-  cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+
+  // cout<<"Run slice "<<endl;
+  // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+  // cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
 }
 
 
 void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 
   //to moved in .h
-
   // double timewindowdigi = MC? 400 : 1275;
   // double timewindowseg  = MC? 400 : 800;
  
@@ -810,24 +813,23 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 }
 	 
 	 if (ist+1 ==4 && (ise+1 == 4 ||  ise+1 == 10) ) {normdigi *=2; normseg *=2;}
-	 normdigi *= timewindowdigi/1e9; //* nentries; //1e9 = conversion from ns to s
+	 normdigi *= timewindowdigi/1e9;// * nentries; //1e9 = conversion from ns to s
 	 normseg  *= timewindowseg/1e9;  //* nentries;
 	 
-	 bkgCounts.DigiSigWhMB[iwh][ist]  = float(NdigiSig[iwh][ise][ist]) /normdigi/12; // we are integrating on 12 sectors
-	 bkgCounts.DigiBkgWhMB[iwh][ist]  = float(NdigiBkg[iwh][ise][ist]) /normdigi/12;
-	 bkgCounts.DigiSigSecMB[ise][ist] = float(NdigiSig[iwh][ise][ist]) /normdigi/5;  // we are integrating on 5 wheels
-	 bkgCounts.DigiBkgSecMB[ise][ist] = float(NdigiBkg[iwh][ise][ist]) /normdigi/5;
+	 // if(iwh==0 && ist==0) cout<<"norm digi "<<normdigi <<endl;
+
+	 bkgCounts.DigiSigWhMB[iwh][ist]  = float(NdigiSig[iwh][ise][ist]) /normdigi;
+	 bkgCounts.DigiBkgWhMB[iwh][ist]  = float(NdigiBkg[iwh][ise][ist]) /normdigi;
+	 bkgCounts.DigiSigSecMB[ise][ist] = float(NdigiSig[iwh][ise][ist]) /normdigi;
+	 bkgCounts.DigiBkgSecMB[ise][ist] = float(NdigiBkg[iwh][ise][ist]) /normdigi;
 	 
-	 bkgCounts.SegmSigWhMB[iwh][ist]  = float(NsegmSig[iwh][ise][ist]) /normseg/12;  // we are integrating on 12 sectors
-	 bkgCounts.SegmBkgWhMB[iwh][ist]  = float(NsegmBkg[iwh][ise][ist]) /normseg/12;
-	 bkgCounts.SegmSigSecMB[ise][ist] = float(NsegmSig[iwh][ise][ist]) /normseg/5;  // we are integrating on 5 wheels
-	 bkgCounts.SegmBkgSecMB[ise][ist] = float(NsegmBkg[iwh][ise][ist]) /normseg/5;
+	 bkgCounts.SegmSigWhMB[iwh][ist]  = float(NsegmSig[iwh][ise][ist]) /normseg;
+	 bkgCounts.SegmBkgWhMB[iwh][ist]  = float(NsegmBkg[iwh][ise][ist]) /normseg;
+	 bkgCounts.SegmSigSecMB[ise][ist] = float(NsegmSig[iwh][ise][ist]) /normseg;
+	 bkgCounts.SegmBkgSecMB[ise][ist] = float(NsegmBkg[iwh][ise][ist]) /normseg;
 
-
-	 for(auto const& ivar : dataContext.var) {  //bool bkg
+	 for(auto const& ivar : dataContext.var) { 
 	   if(!ivar.second.doBkg) continue;
-
-	   //	   cout<<"hei ivar "<<ivar.first<<endl;
 
 	   plots->Hist_MBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]); 
 	   plots->Hist_SegMBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]); 
@@ -838,7 +840,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	   }
 
 	   else if (ist+1==4 && (ise+1==10 || ise+1==14)) {
-	     //	     cout<<"val "<<ivar.second.value<<" bkg "<<bkgCounts.DigiBkgWhMB[iwh][ist]<<endl;
 	     plots->Hist_MB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.DigiBkgWhMB[iwh][ist]);     
 	     plots->Hist_SegMB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.SegmBkgWhMB[iwh][ist]);     
 	   }

@@ -48,32 +48,32 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
 
 
   //initialize variable struct  Var object, object name, json file, do eff plots, do bkg plots
+
   variables::initVar(Empty,"Empty","variablesSetting.json",0,0); 
   variables::initVar(BckGr,"Bkg","variablesSetting.json",0,0);  
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json",0,0);
 
-
   variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,1,1,"InsLumi");
 
-
-  incrCont.name      = "Incr";
+  incrCont.name      = "Increasing";
   incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr},{Empty.name,Empty},{InsLumi.name,InsLumi}};
   incrCont.webFolder = "~/www/DT";
-
 
   EfficiencyMonitor *eff = new EfficiencyMonitor(incrCont,chain,refName.c_str(),storingName,storedName);
 
   if(stat(("data/DeadList/DeadList_"+refName).c_str(),&st) != 0) { 
-   cout<<"dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;
+   cout<<"Dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;
    eff->PreLoop();
   }
   else {
-    cout<<"dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of producing it"<<endl;
+    cout<<"Dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of produce it"<<endl;
   }
 
   eff->Loop();
+  cout<<"Write"<<endl;
   eff->write();
+  cout<<"Plot"<<endl;
   eff->plot();
-
+  eff->close();
   return 1;
 }

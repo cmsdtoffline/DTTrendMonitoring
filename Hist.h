@@ -1,7 +1,13 @@
 #ifndef HIST
 #define HIST
- 
-//standard header
+
+
+/* class Hist
+ Jun. 19, 2018
+ Gian Luca Pinna Angioni 
+*/
+
+
 #include <vector>
 #include <utility>
 #include <TROOT.h> 
@@ -15,8 +21,7 @@ class Hist: public TNamed
 {
 
  public:
-  
-  
+    
   Hist(const char* name,const char* title,Int_t nbinsx,
 	const Double_t* xbins,Int_t nbinsy,const Double_t* ybins);
 
@@ -35,9 +40,14 @@ class Hist: public TNamed
 
   float Integral() {return fHistogram->Integral();};
 
+  vector<double>  GetHistoArrayX();
+  vector<double>  GetHistoArrayY();
+  
   void ProfileX();
 
   void draw(string option);
+
+  void drawHisto(string  option);
 
   float GetProfMax();
 

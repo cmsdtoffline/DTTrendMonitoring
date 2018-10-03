@@ -1,5 +1,3 @@
-//standard header
-
 #include <iostream>
 #include "Eff2D.h"
 #include <vector>
@@ -96,13 +94,11 @@ void Eff2D:: draw(Int_t  firstxbin,
   effNew->SetMaximum(1.02);
 
   effNew->SetName((hPass->GetName()+theName).c_str());
-
-
   eff = effNew;
-
   eff->Draw(option.c_str());
 
 }
+
 
 
 
@@ -125,21 +121,16 @@ void Eff2D:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
   
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
-      
       hTot->SetBinContent(hTot->FindBin(xBins[binx-1],arrY->GetArray()[biny-1]), fTotalHistogram->GetBinContent(binx,biny));
-      hPass->SetBinContent(hPass->FindBin(xBins[binx-1],arrY->GetArray()[biny-1]), fPassedHistogram->GetBinContent(binx,biny));
-      
+      hPass->SetBinContent(hPass->FindBin(xBins[binx-1],arrY->GetArray()[biny-1]), fPassedHistogram->GetBinContent(binx,biny));    
     }
   }  
   
-  
   const  TH1D *hPrPass =  hPass->ProjectionX("_passpx",firstxbin,lastxbin);
   const  TH1D *hPrTot  =  hTot->ProjectionX("_totpx",firstxbin,lastxbin);
-
-
-  //  cout<<"hei "<<firstxbin<<" "<<hPass->ProjectionX("_passpx",0,0)->Integral()<<" "<<hPass->ProjectionX("_passpx",-1,-1)->Integral()<<" "<<hPrPass->Integral()<<" "<<hPrTot->Integral()<<endl;
+  
   TGraphAsymmErrors * effNew = new TGraphAsymmErrors(hPrPass,hPrTot,"cp");
-
+  
   effNew->SetMarkerColor(eff->GetMarkerColor());
   effNew->SetLineColor(eff->GetLineColor());
   effNew->SetMarkerStyle(20);
@@ -164,8 +155,6 @@ void Eff2D::setEffRun(){
   Int_t nXbins = fTotalHistogram->GetNbinsX();
   Int_t nYbins = fTotalHistogram->GetNbinsY();
 
-  cout<<"hei seteffrun "<<nXbins<<" "<<nYbins<<endl;
-
   const  TArrayD *arrY = fPassedHistogram->GetYaxis()->GetXbins();
 
   TH2F * hNewPass = new TH2F("","",nXbins,0,nXbins,nYbins,arrY->GetArray());
@@ -183,26 +172,6 @@ void Eff2D::setEffRun(){
 
 }
 
-
-// TEfficiency * Eff2D::get2DEff(vector<double>  slices){
-
-//   TH2F *fPassedH = dynamic_cast<TH2F*>(fPassedHistogram->Clone("pass_2D"));
-//   TH2F *fTotalH  = dynamic_cast<TH2F*>(fTotalHistogram->Clone("tot_2d"));
-
-//   fPassedH->SetMinimum(0.8);
-//   fTotalH->SetMinimum(0.8);
-
-//   for(int bin = 1; bin < fPassedH->GetNbinsX(); bin++){
-//     fPassedH->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(slices[bin-1]))).c_str()); 
-//     fTotalH->GetXaxis()->SetBinLabel(bin,(to_string(static_cast<int>(slices[bin-1]))).c_str()); 
-//   }  
-
-//   TEfficiency * effNew = new TEfficiency(*fPassedH,*fTotalH);
-//   effNew->SetName(theName.c_str());
-//   return effNew;
-// }
-
-
 const TArrayD * Eff2D::GetArrayX(){
   return fTotalHistogram->GetXaxis()->GetXbins();
 }
@@ -216,8 +185,6 @@ void Eff2D::addBins(vector<double> slices){
   TH2F * hNewPass = new TH2F(("pass_"+theName).c_str(),"",slices.size()-1,slices.data(),nYBins,arrY->GetArray());
   TH2F * hNewTot  = new TH2F(("tot_"+theName).c_str(),"",slices.size()-1,slices.data(),nYBins,arrY->GetArray());
  
-  // string hName = hIn->GetName();
-
   for(int binx = 1; binx<=nXBins; binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hNewPass->SetBinContent(binx,biny, fPassedHistogram->GetBinContent(binx,biny));
@@ -253,8 +220,7 @@ void Eff2D::getIntLumiEff( vector<double> slices){
   const  TArrayD *arrY = fPassedHistogram->GetYaxis()->GetXbins();
 
   for(int bin = 1; bin <= nXBins; bin++){
-    ///    cout<<"hei bin "<<bin<<" "<<slices[bin-1]<<endl;
-    // cout<<"hei "<<lumi::getTotLumiRun(to_string(static_cast<int>(slices[bin-1])))<<endl;
+
     xBins.push_back(lumi::getTotLumiRun(to_string(static_cast<int>(slices[bin-1])))); 
   }
   
@@ -380,6 +346,7 @@ void Eff2D::setEffBin(Float_t MaxErr){
 bool Eff2D::checkProj(vector<double> slices, int bin,int bin2){
   return fTotalHistogram->ProjectionX("_px",bin,bin2)->Integral()==0;
 }
+
 //Create histogram with equal bins to be used as graphic plot instead of tgraph.
 TH1D * Eff2D::getPaintHisto(vector<double> slices, bool doLumi, bool isRun){
 
@@ -405,14 +372,3 @@ TH1D * Eff2D::getPaintHisto(vector<double> slices, bool doLumi, bool isRun){
   
   return hPaint;
 }
-
-
-
-// TGraphAsymmErrors * Eff2D::GetPaintedGraph(){
-
-// return eff->GetPaintedGraph();
-
-// }
-
-//#endif
-
