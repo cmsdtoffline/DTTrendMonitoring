@@ -101,9 +101,8 @@ void Eff2D:: draw(Int_t  firstxbin,
 
 
 
-
 void Eff2D:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
-			  Int_t  lastxbin, string option){
+			  Int_t  lastxbin, string option, bool plotRuns){
   
   std::vector<Double_t> xBins = {};
   Int_t nXBins  = fPassedHistogram->GetNbinsX();
@@ -131,6 +130,11 @@ void Eff2D:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
   
   TGraphAsymmErrors * effNew = new TGraphAsymmErrors(hPrPass,hPrTot,"cp");
   
+  if(plotRuns){
+    for(int bin = 1; bin<=nXBins; bin++){
+      effNew->GetXaxis()->SetBinLabel( effNew->GetXaxis()->FindBin(xBins[bin-1]) , to_string( (int)slices[bin-1] ).c_str());
+  }
+}
   effNew->SetMarkerColor(eff->GetMarkerColor());
   effNew->SetLineColor(eff->GetLineColor());
   effNew->SetMarkerStyle(20);
@@ -140,7 +144,9 @@ void Eff2D:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
 
   eff = effNew;
 
-  eff->GetXaxis()->SetTitle(xLabel.c_str());
+  if(plotRuns)  eff->GetXaxis()->SetTitle("Run"); 
+  else  eff->GetXaxis()->SetTitle(xLabel.c_str());
+
   eff->SetMinimum(0.89);
   eff->SetMaximum(1.02);
 

@@ -370,7 +370,7 @@ void plotter::plot(string dateName){
   for(auto const& ivar : dataCont.var){ 
     if(! ivar.second.doEff) continue;
     for (int ist=0; ist<4; ist++){
-      for(uint bin = 0; bin<ivar.second.projSlice.size(); bin++){ 
+      for(int bin = -1; bin<(int)ivar.second.projSlice.size(); bin++){ 
 	
 	if(bin==1 && !ivar.second.doProj) break;
 	if(bin!=0 && Eff_phiMBWh[ivar.first][0][ist]->checkProj(ivar.second.slice,bin,bin)) continue;
@@ -383,13 +383,13 @@ void plotter::plot(string dateName){
 	Eff_phiMBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+" eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
 	
 	if(ivar.second.name=="Run"){
-	  // Bin 0 is used to draw the inclusive plot
-	  if(bin == 0)
-	    Eff_phiMBWh[ivar.first][0][ist]->drawWithLumi(ivar.second.slice,0,-1,"ap"); 
+	  // Bin -1 amnd 0 ared used to draw the inclusive plots
+	  if(bin <= 0)
+	    Eff_phiMBWh[ivar.first][0][ist]->drawWithLumi(ivar.second.slice,0,-1,"ap",abs(bin)); 
 	  else       Eff_phiMBWh[ivar.first][0][ist]->drawWithLumi(ivar.second.slice,bin,bin,"ap");
 	}
 	else{
-	  if(bin == 0)  Eff_phiMBWh[ivar.first][0][ist]->draw(0,-1,"ap"); 
+	  if(bin <= 0)  Eff_phiMBWh[ivar.first][0][ist]->draw(0,-1,"ap"); 
 	  else 	  Eff_phiMBWh[ivar.first][0][ist]->draw(bin,bin,"ap");			    
 	}
 	
@@ -400,7 +400,7 @@ void plotter::plot(string dateName){
 	    else Eff_phiMBWh[ivar.first][iwh][ist]->drawWithLumi(ivar.second.slice,bin,bin,"samep");
 	  }
 	  else{
-	    if(bin == 0) Eff_phiMBWh[ivar.first][iwh][ist]->draw(0,-1,"samep");
+	    if(bin <= 0) Eff_phiMBWh[ivar.first][iwh][ist]->draw(0,-1,"samep");
 	    else Eff_phiMBWh[ivar.first][iwh][ist]->draw(bin,bin,"samep");
 	  }
 	  
@@ -410,7 +410,8 @@ void plotter::plot(string dateName){
 	
 	legPhiMB->Draw("same");
 	
-	if(bin == 0)   cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
+	if(bin == 0)      cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
+	else if(bin==-1)  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.png").c_str());
 	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	
 	delete   cPhiMB;

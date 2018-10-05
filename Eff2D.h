@@ -2,7 +2,7 @@
 #define EFF2D
 
 /* class Eff2D                                                                                                                                                                                                                               
- Jun. 18, 2018                                                                                                                                                                                                                                 Gian Luca Pinna Angioni                                                                                                                                                                                                                    
+ Jun. 18, 2018                                                                                                                                                                       Gian Luca Pinna Angioni                                                                                                                                                                                                                    
 */
 
 #include <vector>
@@ -16,6 +16,7 @@
 
 class Eff2D: public TNamed 
 {
+
 
  public:
   
@@ -38,7 +39,7 @@ class Eff2D: public TNamed
 
   void drawWithLumi(vector<double> slices,
 		    Int_t  firstxbin,
-		    Int_t  lastxbin, string option);
+		    Int_t  lastxbin, string option, bool plotRuns = false);
 
   bool checkProj(vector<double> slices, int bin, int bin2);
 
