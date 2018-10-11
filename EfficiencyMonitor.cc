@@ -831,17 +831,17 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 for(auto const& ivar : dataContext.var) { 
 	   if(!ivar.second.doBkg) continue;
 
-	   plots->Hist_MBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]); 
-	   plots->Hist_SegMBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]); 
+	   plots->Dist_MBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]); 
+	   plots->Dist_SegMBWh[ivar.first][iwh][ist]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]); 
 	  
 	   if (ist+1==4 && (ise+1==4 || ise+1 ==13)) {
-	     plots->Hist_MB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]);      
-	     plots->Hist_SegMB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]);   
+	     plots->Dist_MB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.DigiBkgWhMB[iwh][ist]);      
+	     plots->Dist_SegMB4Top[ivar.first][iwh]->Fill(ivar.second.value ,bkgCounts.SegmBkgWhMB[iwh][ist]);   
 	   }
 
 	   else if (ist+1==4 && (ise+1==10 || ise+1==14)) {
-	     plots->Hist_MB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.DigiBkgWhMB[iwh][ist]);     
-	     plots->Hist_SegMB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.SegmBkgWhMB[iwh][ist]);     
+	     plots->Dist_MB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.DigiBkgWhMB[iwh][ist]);     
+	     plots->Dist_SegMB4Bot[ivar.first]->Fill(ivar.second.value,bkgCounts.SegmBkgWhMB[iwh][ist]);     
 	   }
 	 } //End variables
        } // End stations
