@@ -1,8 +1,8 @@
 #ifndef plotter_h
 #define plotter_h
 
-#include "Hist.h"
-#include "Eff2D.h"
+#include "DistTrend.h"
+#include "EffTrend.h"
 #include <TROOT.h>
 #include <TFile.h>
 #include <vector>
@@ -41,26 +41,26 @@ public :
 
   Float_t TotLumi = 0;
 
-  map<string,vector<vector<Eff2D* > > > Eff_phiMBWh;
-  map<string,vector<vector<Eff2D* > > > EffA_phiMBWh;
+  map<string,vector<vector<EffTrend* > > > Eff_phiMBWh;
+  map<string,vector<vector<EffTrend* > > > EffA_phiMBWh;
   
-  map<string,vector<vector<Eff2D* > > > Eff_theMBWh;
-  map<string,vector<vector<Eff2D* > > > EffA_theMBWh;
+  map<string,vector<vector<EffTrend* > > > Eff_theMBWh;
+  map<string,vector<vector<EffTrend* > > > EffA_theMBWh;
 
-  map<string,vector<Eff2D* > >          Eff_phiMB4Top;
-  map<string,vector<Eff2D* > >          EffA_phiMB4Top;
+  map<string,vector<EffTrend* > >          Eff_phiMB4Top;
+  map<string,vector<EffTrend* > >          EffA_phiMB4Top;
   
-  map<string,Eff2D* >                   Eff_phiMB4Bot;
-  map<string,Eff2D* >                   EffA_phiMB4Bot;
+  map<string,EffTrend* >                   Eff_phiMB4Bot;
+  map<string,EffTrend* >                   EffA_phiMB4Bot;
     
-  map<string,vector<vector<Hist* > > >        Hist_MBWh;
-  map<string,vector<vector<Hist* > > >        Hist_SegMBWh;
+  map<string,vector<vector<DistTrend* > > >        Dist_MBWh;
+  map<string,vector<vector<DistTrend* > > >        Dist_SegMBWh;
 
-  map<string,vector<Hist* > >                 Hist_MB4Top;
-  map<string,vector<Hist* > >                 Hist_SegMB4Top;
+  map<string,vector<DistTrend* > >                 Dist_MB4Top;
+  map<string,vector<DistTrend* > >                 Dist_SegMB4Top;
 
-  map<string,Hist* >                          Hist_MB4Bot;
-  map<string,Hist* >                          Hist_SegMB4Bot;
+  map<string,DistTrend* >                          Dist_MB4Bot;
+  map<string,DistTrend* >                          Dist_SegMB4Bot;
   
   plotter(context extDataCont, std::string inFileName = "", std::string outFileName="", string LumiFileName_ = "");
 
@@ -95,54 +95,54 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   LumiFileName = "DT_"+LumiFileName_;
   for(auto const& ivar : dataCont.var){ 
 
-    Eff_phiMBWh[ivar.first]    = vector<vector<Eff2D*> > ();
-    EffA_phiMBWh[ivar.first]   = vector<vector<Eff2D*> > ();
-    Eff_theMBWh[ivar.first]    = vector<vector<Eff2D*> > ();
-    EffA_theMBWh[ivar.first]   = vector<vector<Eff2D*> > ();
-    Eff_phiMB4Top[ivar.first]  = vector<Eff2D*>  ();
-    EffA_phiMB4Top[ivar.first] = vector<Eff2D*>  ();
+    Eff_phiMBWh[ivar.first]    = vector<vector<EffTrend*> > ();
+    EffA_phiMBWh[ivar.first]   = vector<vector<EffTrend*> > ();
+    Eff_theMBWh[ivar.first]    = vector<vector<EffTrend*> > ();
+    EffA_theMBWh[ivar.first]   = vector<vector<EffTrend*> > ();
+    Eff_phiMB4Top[ivar.first]  = vector<EffTrend*>  ();
+    EffA_phiMB4Top[ivar.first] = vector<EffTrend*>  ();
 
 
-    Hist_MBWh[ivar.first]      = vector<vector<Hist*> > ();
-    Hist_SegMBWh[ivar.first]   = vector<vector<Hist*> > ();
+    Dist_MBWh[ivar.first]      = vector<vector<DistTrend*> > ();
+    Dist_SegMBWh[ivar.first]   = vector<vector<DistTrend*> > ();
 
-    Hist_MB4Top[ivar.first]    = vector<Hist*>  ();
-    Hist_SegMB4Top[ivar.first] = vector<Hist*>  ();
+    Dist_MB4Top[ivar.first]    = vector<DistTrend*>  ();
+    Dist_SegMB4Top[ivar.first] = vector<DistTrend*>  ();
     
     int nPoints = ivar.second.slice.size();
 
     for (int iwh=0; iwh<5; iwh++){
 
-      Eff_phiMBWh[ivar.first].push_back(vector<Eff2D*> ());
-      EffA_phiMBWh[ivar.first].push_back(vector<Eff2D*> ());
+      Eff_phiMBWh[ivar.first].push_back(vector<EffTrend*> ());
+      EffA_phiMBWh[ivar.first].push_back(vector<EffTrend*> ());
       
-      Eff_theMBWh[ivar.first].push_back(vector<Eff2D*> ());
-      EffA_theMBWh[ivar.first].push_back(vector<Eff2D*> ());
+      Eff_theMBWh[ivar.first].push_back(vector<EffTrend*> ());
+      EffA_theMBWh[ivar.first].push_back(vector<EffTrend*> ());
       
-      Hist_MBWh[ivar.first].push_back(vector<Hist*> ());
-      Hist_SegMBWh[ivar.first].push_back(vector<Hist*> ());
+      Dist_MBWh[ivar.first].push_back(vector<DistTrend*> ());
+      Dist_SegMBWh[ivar.first].push_back(vector<DistTrend*> ());
 
       for (int ist=0; ist<4; ist++){
 	if(inFileName==""){
 
-	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new Eff2D(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										   "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										  dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
 
 	  
-	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new Eff2D(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										    "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										   dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
 
 
-	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh].push_back(new Hist(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back(new DistTrend(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 									       "St"+std::to_string(ist)).c_str(),"",
 									      //ivar.second.nBins,ivar.second.X0, ivar.second.X1, // equal bin constructor to be fix for increasing option.
 									      //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
 									      ivar.second.slice.size()-1,
 									      ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
 
-	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh].push_back(new Hist(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back(new DistTrend(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										  "St"+std::to_string(ist)).c_str(),"",		
 										 //ivar.second.nBins,ivar.second.X0, ivar.second.X1,						   
 										 //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
@@ -151,79 +151,79 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 	  
 	}
 	else{
-	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( (Eff2D*)  fIn->Get(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( (EffTrend*)  fIn->Get(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 											   "St"+std::to_string(ist)).c_str()));  
-	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( (Eff2D*) fIn->Get(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 											    "St"+std::to_string(ist)).c_str()));
-	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh].push_back( (Hist*)     fIn->Get(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back( (DistTrend*)     fIn->Get(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 											    "St"+std::to_string(ist)).c_str()));
-	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh].push_back( (Hist*)  fIn->Get(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back( (DistTrend*)  fIn->Get(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 											    "St"+std::to_string(ist)).c_str()));	  
 	}
 	
 	if (ist!=3){
 	  if(inFileName==""){
-	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back( new Eff2D(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										     "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										    dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
-	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back( new Eff2D(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										     dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
 	  }
 	  else{
-	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back(  (Eff2D*) fIn->Get(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 													  "St"+std::to_string(ist)).c_str()));
-	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back(  (Eff2D*) fIn->Get(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 											       "St"+std::to_string(ist)).c_str()));
 	  }
 	}
       }
       if(inFileName==""){
 
-	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back( new Eff2D(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 									     "",nPoints-1,ivar.second.slice.data(),
 									     dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
 
-	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back( new Eff2D(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 									      "",nPoints-1,ivar.second.slice.data(),
 									      dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
 
-	if(ivar.second.doBkg) Hist_MB4Top[ivar.first].push_back( new Hist(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+	if(ivar.second.doBkg) Dist_MB4Top[ivar.first].push_back( new DistTrend(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 					      "",ivar.second.slice.size()-1,ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
 
-	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first].push_back( new Hist(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
+	if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first].push_back( new DistTrend(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 						 "",ivar.second.slice.size()-1,ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));   
    }
       
       else{
-	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back(  (Eff2D*) fIn->Get(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
-	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back(  (Eff2D*) fIn->Get(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back(  (EffTrend*) fIn->Get(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back(  (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
 
-	if(ivar.second.doBkg) Hist_MB4Top[ivar.first].push_back( (Hist*) fIn->Get(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
-	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first].push_back( (Hist*) fIn->Get(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doBkg) Dist_MB4Top[ivar.first].push_back( (DistTrend*) fIn->Get(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
+	if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first].push_back( (DistTrend*) fIn->Get(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
       }
 
     }
     
     if(inFileName==""){
 
-      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =  new Eff2D(("Eff"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
+      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =  new EffTrend(("Eff"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
 								   dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() );
-      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  new Eff2D(("EffA"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
+      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  new EffTrend(("EffA"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
 								    dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() );
       
-      if(ivar.second.doBkg) Hist_MB4Bot[ivar.first] =  new Hist(("Hist"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
+      if(ivar.second.doBkg) Dist_MB4Bot[ivar.first] =  new DistTrend(("Hist"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
 								ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
       
-      if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first] =  new Hist(("HistSeg"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
+      if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first] =  new DistTrend(("HistSeg"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
 								   ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
     }
     else{
-      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =   (Eff2D*) fIn->Get(("Eff"+ivar.second.name+"_MBBot").c_str());
-      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =   (Eff2D*) fIn->Get(("EffA"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =   (EffTrend*) fIn->Get(("Eff"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =   (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBBot").c_str());
       
-      if(ivar.second.doBkg) Hist_MB4Bot[ivar.first] =  (Hist*) fIn->Get(("Hist"+ivar.second.name+"_MBBot").c_str());
-      if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first] =  (Hist*) fIn->Get(("HistSeg"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doBkg) Dist_MB4Bot[ivar.first] =  (DistTrend*) fIn->Get(("Hist"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first] =  (DistTrend*) fIn->Get(("HistSeg"+ivar.second.name+"_MBBot").c_str());
     }
   }
 
@@ -244,8 +244,8 @@ void plotter::write(){
        for (int ist=0; ist<4; ist++){
 	 if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->Write();
 	 if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->Write();
-	 if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->Write();
-	 if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->Write();
+	 if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->Write();
+	 if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->Write();
 
 	 if(ist!=3){
 	   if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->Write();
@@ -254,13 +254,13 @@ void plotter::write(){
        }
        if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->Write();
        if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh]->Write();
-       if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->Write();
-       if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->Write();
+       if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->Write();
+       if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->Write();
      }
      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->Write();
      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first]->Write();
-     if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->Write();
-     if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->Write();
+     if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->Write();
+     if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->Write();
    }
 }
 
@@ -300,8 +300,8 @@ void plotter::plot(string dateName){
       for (int ist=0; ist<4; ist++){
 	if(iwh!=4){
 	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
-	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
-	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
+	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
 	 
 	  if(ist!=3){
 	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetColor(iwh+1);
@@ -309,8 +309,8 @@ void plotter::plot(string dateName){
 	}
 	else{
 	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetColor(6);
-	  if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->SetColor(6);
-	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->SetColor(6);
+	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->SetColor(6);
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->SetColor(6);
 	  
 	  if(ist!=3){
 	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetColor(6);
@@ -319,12 +319,12 @@ void plotter::plot(string dateName){
 	}
 
 	if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
-	if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
-	if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
+	if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
+	if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
 	//profile of 2D histograms
 
-	 if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->ProfileX();
-	 if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->ProfileX();
+	 if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->ProfileX();
+	 if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->ProfileX();
   
 	
 	if(ist!=3){
@@ -332,38 +332,38 @@ void plotter::plot(string dateName){
 	}
       }
       if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
-      if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->SetMarkerStyle(20);
-      if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
+      if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->SetMarkerStyle(20);
+      if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
       
       if(iwh!=4){
 
 	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetColor(iwh+1);
-	if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->SetColor(iwh+1);
-	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->SetColor(iwh+1);
+	if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->SetColor(iwh+1);
+	if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->SetColor(iwh+1);
 
       }
       else {
 	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetColor(6);
-	if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->SetColor(6);
-	if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->SetColor(6);
+	if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->SetColor(6);
+	if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->SetColor(6);
       }
 
-      if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->ProfileX();
-      if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->ProfileX();
+      if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->ProfileX();
+      if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->ProfileX();
     }
 
     if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetMarkerStyle(20);
     if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetColor(1);
 
 
-    if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->SetMarkerStyle(20);
-    if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->SetColor(1);
+    if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->SetColor(1);
    
-    if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->SetMarkerStyle(20);
-    if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->SetColor(1);
+    if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->SetColor(1);
     
-    if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->ProfileX();
-    if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->ProfileX();
+    if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->ProfileX();
+    if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->ProfileX();
     
   }
   
@@ -551,23 +551,23 @@ void plotter::plot(string dateName){
       // find maximum
       float_t Max = 0;
       for (int iwh=0; iwh<5; iwh++){
-      	if(Hist_MBWh[ivar.first][iwh][ist]->GetProfMax() > Max) Max = Hist_MBWh[ivar.first][iwh][ist]->GetProfMax();
+      	if(Dist_MBWh[ivar.first][iwh][ist]->GetProfMax() > Max) Max = Dist_MBWh[ivar.first][iwh][ist]->GetProfMax();
       }
 
       //phi
       TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
       cMB->SetGrid();
 
-      Hist_MBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
-      Hist_MBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+"bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-      Hist_MBWh[ivar.first][0][ist]->draw("E1");
+      Dist_MBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
+      Dist_MBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+"bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
+      Dist_MBWh[ivar.first][0][ist]->draw("E1");
       
 
       TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
-	Hist_MBWh[ivar.first][iwh][ist]->draw("sameE1");
-	TLegendEntry *le = legMB->AddEntry(Hist_MBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
-	le->SetMarkerColor(Hist_MBWh[ivar.first][iwh][ist]->GetColor());
+	Dist_MBWh[ivar.first][iwh][ist]->draw("sameE1");
+	TLegendEntry *le = legMB->AddEntry(Dist_MBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	le->SetMarkerColor(Dist_MBWh[ivar.first][iwh][ist]->GetColor());
       }
 
       legMB->Draw("same");
@@ -582,21 +582,21 @@ void plotter::plot(string dateName){
       //find maximum
       float_t Max = 0;
       for (int iwh=0; iwh<5; iwh++){
-      	if(Hist_SegMBWh[ivar.first][iwh][ist]->GetProfMax() > Max) Max = Hist_SegMBWh[ivar.first][iwh][ist]->GetProfMax();
+      	if(Dist_SegMBWh[ivar.first][iwh][ist]->GetProfMax() > Max) Max = Dist_SegMBWh[ivar.first][iwh][ist]->GetProfMax();
       }
 
       //phi
       TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
       cMB->SetGrid();
-      Hist_SegMBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
-      Hist_SegMBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-      Hist_SegMBWh[ivar.first][0][ist]->draw("E1");
+      Dist_SegMBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
+      Dist_SegMBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
+      Dist_SegMBWh[ivar.first][0][ist]->draw("E1");
       
       TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
-	Hist_SegMBWh[ivar.first][iwh][ist]->draw("sameE1");
-	TLegendEntry *le = legMB->AddEntry(Hist_SegMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
-	le->SetMarkerColor(Hist_SegMBWh[ivar.first][iwh][ist]->GetColor());
+	Dist_SegMBWh[ivar.first][iwh][ist]->draw("sameE1");
+	TLegendEntry *le = legMB->AddEntry(Dist_SegMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	le->SetMarkerColor(Dist_SegMBWh[ivar.first][iwh][ist]->GetColor());
       }
       
       legMB->Draw("same");
@@ -609,20 +609,20 @@ void plotter::plot(string dateName){
 
     // find maximum
     float_t Max = 0;
-    for (int iwh=0; iwh<5; iwh++) if(Hist_MB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Hist_MB4Top[ivar.first][iwh]->GetProfMax();
+    for (int iwh=0; iwh<5; iwh++) if(Dist_MB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Dist_MB4Top[ivar.first][iwh]->GetProfMax();
     
     TCanvas *cMB4Top = new TCanvas(("cMB4Top"+ivar.second.name).c_str());
     cMB4Top->SetGrid();
-    Hist_MB4Top[ivar.first][0]->SetMaximum(Max*1.3);
-    Hist_MB4Top[ivar.first][0]->setTitle(("MBTop segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-    Hist_MB4Top[ivar.first][0]->draw("E1");
+    Dist_MB4Top[ivar.first][0]->SetMaximum(Max*1.3);
+    Dist_MB4Top[ivar.first][0]->setTitle(("MBTop segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
+    Dist_MB4Top[ivar.first][0]->draw("E1");
     
     TLegend * legMB4Top = new TLegend(0.75,0.75,0.9,0.9);
 
     for (int iwh=0; iwh<5; iwh++){
-      Hist_MB4Top[ivar.first][iwh]->draw("sameE1");
-      TLegendEntry *le = legMB4Top->AddEntry(Hist_MB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
-      le->SetMarkerColor(Hist_MB4Top[ivar.first][iwh]->GetColor());  
+      Dist_MB4Top[ivar.first][iwh]->draw("sameE1");
+      TLegendEntry *le = legMB4Top->AddEntry(Dist_MB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      le->SetMarkerColor(Dist_MB4Top[ivar.first][iwh]->GetColor());  
     }    
     legMB4Top->Draw("same");
     cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+ivar.second.name+".png").c_str());
@@ -633,20 +633,20 @@ void plotter::plot(string dateName){
 
     //find maximum
     Max = 0;
-    for (int iwh=0; iwh<5; iwh++) if(Hist_SegMB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Hist_SegMB4Top[ivar.first][iwh]->GetProfMax();
+    for (int iwh=0; iwh<5; iwh++) if(Dist_SegMB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Dist_SegMB4Top[ivar.first][iwh]->GetProfMax();
     
     TCanvas *cSegMB4Top = new TCanvas(("cSegMB4Top"+ivar.second.name).c_str());
     cSegMB4Top->SetGrid();
 
-    Hist_SegMB4Top[ivar.first][0]->SetMaximum(Max*1.3);
-    Hist_SegMB4Top[ivar.first][0]->setTitle(("MB4Top segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-    Hist_SegMB4Top[ivar.first][0]->draw("E1");
+    Dist_SegMB4Top[ivar.first][0]->SetMaximum(Max*1.3);
+    Dist_SegMB4Top[ivar.first][0]->setTitle(("MB4Top segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
+    Dist_SegMB4Top[ivar.first][0]->draw("E1");
     
     TLegend * legSegMB4Top = new TLegend(0.75,0.75,0.9,0.9);
     for (int iwh=0; iwh<5; iwh++){
-      Hist_SegMB4Top[ivar.first][iwh]->draw("sameE1");
-      TLegendEntry *le = legSegMB4Top->AddEntry(Hist_SegMB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
-      le->SetMarkerColor(Hist_SegMB4Top[ivar.first][iwh]->GetColor());
+      Dist_SegMB4Top[ivar.first][iwh]->draw("sameE1");
+      TLegendEntry *le = legSegMB4Top->AddEntry(Dist_SegMB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      le->SetMarkerColor(Dist_SegMB4Top[ivar.first][iwh]->GetColor());
     }
    
     legSegMB4Top->Draw("same");
@@ -658,9 +658,9 @@ void plotter::plot(string dateName){
     TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
     cMB4Bot->SetGrid();
 
-    Hist_MB4Bot[ivar.first]->setTitle(("MB4Bot bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-    Hist_MB4Bot[ivar.first]->SetMaximum( Hist_MB4Bot[ivar.first]->GetProfMax()*1.3);
-    Hist_MB4Bot[ivar.first]->draw("E1");
+    Dist_MB4Bot[ivar.first]->setTitle(("MB4Bot bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
+    Dist_MB4Bot[ivar.first]->SetMaximum( Dist_MB4Bot[ivar.first]->GetProfMax()*1.3);
+    Dist_MB4Bot[ivar.first]->draw("E1");
     
     cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".png").c_str());
     delete cMB4Bot;
@@ -670,9 +670,9 @@ void plotter::plot(string dateName){
     TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
     cSegMB4Bot->SetGrid();    
 
-    Hist_SegMB4Bot[ivar.first]->setTitle(("MB4Bot segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-    Hist_SegMB4Bot[ivar.first]->SetMaximum( Hist_SegMB4Bot[ivar.first]->GetProfMax()*1.3);
-    Hist_SegMB4Bot[ivar.first]->draw("E1");
+    Dist_SegMB4Bot[ivar.first]->setTitle(("MB4Bot segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
+    Dist_SegMB4Bot[ivar.first]->SetMaximum( Dist_SegMB4Bot[ivar.first]->GetProfMax()*1.3);
+    Dist_SegMB4Bot[ivar.first]->draw("E1");
     
     cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+ivar.second.name+".png").c_str());
     delete cSegMB4Bot;
@@ -685,16 +685,16 @@ void plotter::setPlots(){
      for (int iwh=0; iwh<5; iwh++){
        for (int ist=0; ist<4; ist++){
 	 if(ivar.second.name=="Run"){
-	   if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->getIntLumiHisto();
-	   if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->getIntLumiHisto();
+	   if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->getIntLumiHisto();
+	   if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->getIntLumiHisto();
 	 }
 	 else{
 	   if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->setEffBin();
 	    if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->setEffBin();
 	 }
 	  if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){ 
-	    if(ivar.second.doBkg) Hist_MBWh[ivar.first][iwh][ist]->set2DHistoBin();
-	    if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->set2DHistoBin();
+	    if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->set2DHistoBin();
+	    if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->set2DHistoBin();
 	  }
 	 if(ist!=3){
 	   if(ivar.second.name!="Run"){
@@ -704,29 +704,29 @@ void plotter::setPlots(){
 	 }
        }
        if(ivar.second.name=="Run"){
-	 if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->getIntLumiHisto();
-	 if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->getIntLumiHisto();
+	 if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->getIntLumiHisto();
+	 if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->getIntLumiHisto();
        }
        else{
 	 if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->setEffBin();
 	 if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh]->setEffBin();
        }
        if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){
-	 if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->set2DHistoBin();
-	 if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->set2DHistoBin();
+	 if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->set2DHistoBin();
+	 if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->set2DHistoBin();
        }
      }
      if(ivar.second.name=="Run"){
-       if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->getIntLumiHisto();
-       if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->getIntLumiHisto();
+       if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->getIntLumiHisto();
+       if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->getIntLumiHisto();
      }
      else{
        if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->setEffBin();
        if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first]->setEffBin();
      }
      if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){
-       if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->set2DHistoBin();
-       if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->set2DHistoBin();
+       if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->set2DHistoBin();
+       if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->set2DHistoBin();
      }
    }
 }
@@ -744,8 +744,8 @@ void plotter::setAddBins(){
 
 	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->addBins(ivar.second.slice);
 	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->addBins(ivar.second.slice);	  
-	  if(ivar.second.doBkg)	Hist_MBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
-	  if(ivar.second.doBkg) Hist_SegMBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
+	  if(ivar.second.doBkg)	Dist_MBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->addHisto(ivar.second.slice);
 
 	  if(ist!=3){
 	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->addBins(ivar.second.slice);
@@ -754,14 +754,14 @@ void plotter::setAddBins(){
 	}
 	  if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->addBins(ivar.second.slice);
 	  if(ivar.second.doEff) EffA_phiMB4Top[ivar.first][iwh]->addBins(ivar.second.slice);
-	  if(ivar.second.doBkg) Hist_MB4Top[ivar.first][iwh]->addHisto(ivar.second.slice);
-	  if(ivar.second.doBkg) Hist_SegMB4Top[ivar.first][iwh]->addHisto(ivar.second.slice);
+	  if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->addHisto(ivar.second.slice);
+	  if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->addHisto(ivar.second.slice);
       }	
 
 	if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->addBins(ivar.second.slice);
 	if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first]->addBins(ivar.second.slice);
-	if(ivar.second.doBkg) Hist_MB4Bot[ivar.first]->addHisto(ivar.second.slice);
-	if(ivar.second.doBkg) Hist_SegMB4Bot[ivar.first]->addHisto(ivar.second.slice);
+	if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->addHisto(ivar.second.slice);
+	if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->addHisto(ivar.second.slice);
          
     }
   } 

@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Eff2D.h"
+#include "EffTrend.h"
 #include <vector>
 #include <utility>
 #include <TROOT.h> 
@@ -15,9 +15,9 @@
 #include <boost/algorithm/string.hpp>
 #include "TPad.h"
 
-ClassImp(Eff2D)
+ClassImp(EffTrend)
 
-Eff2D::Eff2D(const char* name,const char* title,Int_t nbinsx,
+EffTrend::EffTrend(const char* name,const char* title,Int_t nbinsx,
 	     const Double_t* xbins,Int_t nbinsy,const Double_t* ybins) :TNamed(name,title){
   theName = name;
 
@@ -29,7 +29,7 @@ Eff2D::Eff2D(const char* name,const char* title,Int_t nbinsx,
   eff = new TGraphAsymmErrors();
 }
 
-Eff2D::Eff2D() :TNamed("","")
+EffTrend::EffTrend() :TNamed("","")
 {
   theName = "none";
   fPassedHistogram = new TH2F();
@@ -37,17 +37,17 @@ Eff2D::Eff2D() :TNamed("","")
   eff = new TGraphAsymmErrors();
 }
 
-Eff2D::~Eff2D() 
+EffTrend::~EffTrend() 
 {
 }
 
 
-void Eff2D::Fill(Bool_t bPassed, Double_t x, string test = ""){ 
+void EffTrend::Fill(Bool_t bPassed, Double_t x, string test = ""){ 
   fTotalHistogram->Fill(x,1);
   if(bPassed)  fPassedHistogram->Fill(x,1);
 }
 
-void Eff2D::Fill(Bool_t bPassed, Double_t x, Double_t y){ 
+void EffTrend::Fill(Bool_t bPassed, Double_t x, Double_t y){ 
 
   fTotalHistogram->Fill(x,y);
   if(bPassed)  fPassedHistogram->Fill(x,y);
@@ -55,7 +55,7 @@ void Eff2D::Fill(Bool_t bPassed, Double_t x, Double_t y){
 
 
 
-void Eff2D::setTitle(const char *title){
+void EffTrend::setTitle(const char *title){
 
   vector<string> strs;
   boost::split(strs,title,boost::is_any_of(";"));
@@ -75,7 +75,7 @@ void Eff2D::setTitle(const char *title){
 
 
 
-void Eff2D:: draw(Int_t  firstxbin,
+void EffTrend:: draw(Int_t  firstxbin,
 		  Int_t  lastxbin, string option){
     
   const  TH1D *hPass =  fPassedHistogram->ProjectionX("_passpx",firstxbin,lastxbin);
@@ -101,7 +101,7 @@ void Eff2D:: draw(Int_t  firstxbin,
 
 
 
-void Eff2D:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
+void EffTrend:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
 			  Int_t  lastxbin, string option, bool plotRuns){
   
   std::vector<Double_t> xBins = {};
@@ -155,7 +155,7 @@ void Eff2D:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
 
 }
 
-void Eff2D::setEffRun(){
+void EffTrend::setEffRun(){
                  
 
   Int_t nXbins = fTotalHistogram->GetNbinsX();
@@ -178,11 +178,11 @@ void Eff2D::setEffRun(){
 
 }
 
-const TArrayD * Eff2D::GetArrayX(){
+const TArrayD * EffTrend::GetArrayX(){
   return fTotalHistogram->GetXaxis()->GetXbins();
 }
 
-void Eff2D::addBins(vector<double> slices){
+void EffTrend::addBins(vector<double> slices){
   
   Int_t nXBins  = fPassedHistogram->GetNbinsX();       
   Int_t nYBins  = fPassedHistogram->GetNbinsY();       
@@ -202,22 +202,22 @@ void Eff2D::addBins(vector<double> slices){
   fTotalHistogram  = hNewTot;
 }
 
-void Eff2D::SetColor(Color_t mcolor){
+void EffTrend::SetColor(Color_t mcolor){
   eff->SetLineColor(mcolor);
   eff->SetMarkerColor(mcolor);
 
 }
 
 
-Color_t Eff2D::GetColor(){
+Color_t EffTrend::GetColor(){
   return eff->GetMarkerColor();
 }
 
-void Eff2D::SetMarkerStyle(Style_t mstyle){
+void EffTrend::SetMarkerStyle(Style_t mstyle){
   eff->SetMarkerStyle(mstyle);
 }
 
-void Eff2D::getIntLumiEff( vector<double> slices){
+void EffTrend::getIntLumiEff( vector<double> slices){
 
   std::vector<Double_t> xBins = {};
   Int_t nXBins  = fPassedHistogram->GetNbinsX();
@@ -249,7 +249,7 @@ void Eff2D::getIntLumiEff( vector<double> slices){
 
 
 
-void Eff2D::setEffBin(Float_t MaxErr){
+void EffTrend::setEffBin(Float_t MaxErr){
   
   Int_t nXBins  = fTotalHistogram->GetNbinsX();
   Int_t nYBins  = fTotalHistogram->GetNbinsY();
@@ -349,12 +349,12 @@ void Eff2D::setEffBin(Float_t MaxErr){
   }
 }
 
-bool Eff2D::checkProj(vector<double> slices, int bin,int bin2){
+bool EffTrend::checkProj(vector<double> slices, int bin,int bin2){
   return fTotalHistogram->ProjectionX("_px",bin,bin2)->Integral()==0;
 }
 
 //Create histogram with equal bins to be used as graphic plot instead of tgraph.
-TH1D * Eff2D::getPaintHisto(vector<double> slices, bool doLumi, bool isRun){
+TH1D * EffTrend::getPaintHisto(vector<double> slices, bool doLumi, bool isRun){
 
   TH1D * hPaint = new TH1D();
   

@@ -1,8 +1,8 @@
-#ifndef HIST
-#define HIST
+#ifndef DISTTREND
+#define DISTTREND
 
 
-/* class Hist
+/* class DistTrend
  Jun. 19, 2018
  Gian Luca Pinna Angioni 
 */
@@ -17,20 +17,20 @@
 #include <TColor.h>
 //#include <RtypesCore.h>
 
-class Hist: public TNamed 
+class DistTrend: public TNamed 
 {
 
  public:
     
-  Hist(const char* name,const char* title,Int_t nbinsx,
+  DistTrend(const char* name,const char* title,Int_t nbinsx,
 	const Double_t* xbins,Int_t nbinsy,const Double_t* ybins);
 
-  Hist(const char* name,const char* title,Int_t nbinsx,
+  DistTrend(const char* name,const char* title,Int_t nbinsx,
       Float_t X0, Float_t X1, Int_t nbinsy,Float_t Y0, Float_t Y1);
     
-  Hist();
+  DistTrend();
 
-  ~Hist();
+  ~DistTrend();
 
   void Fill(Double_t x,Double_t y);
   
@@ -77,7 +77,7 @@ class Hist: public TNamed
   TProfile *fProf;
 
   string theName;
-  ClassDef(Hist,1)
+  ClassDef(DistTrend,1)
 
 };
 

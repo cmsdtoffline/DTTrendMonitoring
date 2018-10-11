@@ -1,5 +1,5 @@
 #include <iostream>
-#include "Hist.h"
+#include "DistTrend.h"
 #include <vector>
 #include <utility>
 #include <TROOT.h> 
@@ -8,9 +8,9 @@
 #include <TColor.h>
 #include "Utilities.h"
 
-ClassImp(Hist)
+ClassImp(DistTrend)
 
-Hist::Hist(const char* name,const char* title,Int_t nbinsx,
+DistTrend::DistTrend(const char* name,const char* title,Int_t nbinsx,
 	     const Double_t* xbins,Int_t nbinsy,const Double_t* ybins) :TNamed(name,title){
   theName = name;
   fHistogram = new TH2F((theName).c_str(),title,nbinsx,xbins,nbinsy,ybins);
@@ -18,7 +18,7 @@ Hist::Hist(const char* name,const char* title,Int_t nbinsx,
 }
 
 
-Hist::Hist(const char* name,const char* title,Int_t nbinsx,
+DistTrend::DistTrend(const char* name,const char* title,Int_t nbinsx,
 	   Float_t X0, Float_t X1, Int_t nbinsy,Float_t Y0, Float_t Y1) :TNamed(name,title){
   theName = name;
   fHistogram = new TH2F((theName).c_str(),title,nbinsx,X0,X1,nbinsy,Y0,Y1);
@@ -27,43 +27,43 @@ Hist::Hist(const char* name,const char* title,Int_t nbinsx,
 
 
 
-Hist::Hist() :TNamed("","")
+DistTrend::DistTrend() :TNamed("","")
 {
   theName = "";
   fHistogram = new TH2F();
   fProf = new TProfile();
 }
 
-Hist::~Hist() 
+DistTrend::~DistTrend() 
 {
 }
 
-void Hist::Fill(Double_t x, Double_t y){ 
+void DistTrend::Fill(Double_t x, Double_t y){ 
   fHistogram->Fill(x,y);
 }
 
-float Hist::GetProfMax(){
+float DistTrend::GetProfMax(){
   return fProf->GetMaximum();
 }
 
 
-void Hist::SetMaximum(float Max){fProf->SetMaximum(Max);}
+void DistTrend::SetMaximum(float Max){fProf->SetMaximum(Max);}
 
 
-void Hist::ProfileX(){
+void DistTrend::ProfileX(){
   fProf = fHistogram->ProfileX((theName+"_prx").c_str(),1,-1);
 }
 
-void Hist::draw(string  option){
+void DistTrend::draw(string  option){
   fProf->Draw(option.c_str());
 }
 
-void Hist::drawHisto(string  option){
+void DistTrend::drawHisto(string  option){
   fHistogram->Draw(option.c_str());
 }
 
 
-void Hist::addHisto(vector<double> slices){
+void DistTrend::addHisto(vector<double> slices){
   
   Int_t nXBins  = fHistogram->GetNbinsX();       
   Int_t nYBins  = fHistogram->GetNbinsY();       
@@ -82,17 +82,17 @@ void Hist::addHisto(vector<double> slices){
 }
 
 
-TH2F * Hist::GetHisto(){ 
+TH2F * DistTrend::GetHisto(){ 
   return fHistogram;
 }
 
-void Hist::setTitle(const char *title){
+void DistTrend::setTitle(const char *title){
   fProf->SetTitle(title);
 }
 
 
 // To be used for equal bins constructor. To be fix for increasing range case.
-vector<double> Hist::GetHistoArrayX() {
+vector<double> DistTrend::GetHistoArrayX() {
   
 
   if ( fHistogram->GetXaxis()->GetXbins()->GetSize()!=0){
@@ -116,7 +116,7 @@ vector<double> Hist::GetHistoArrayX() {
 }
 
 
-vector<double> Hist::GetHistoArrayY() {
+vector<double> DistTrend::GetHistoArrayY() {
   
 
   if ( fHistogram->GetYaxis()->GetXbins()->GetSize()!=0){
@@ -141,7 +141,7 @@ vector<double> Hist::GetHistoArrayY() {
 
 
 
-void Hist::set2DHistoBin(Float_t MaxErr){
+void DistTrend::set2DHistoBin(Float_t MaxErr){
   
   Int_t nXBins  = fHistogram->GetNbinsX();
   Int_t nYBins  = fHistogram->GetNbinsY();
@@ -223,7 +223,7 @@ void Hist::set2DHistoBin(Float_t MaxErr){
 }
 
 
-void Hist::getIntLumiHisto(){
+void DistTrend::getIntLumiHisto(){
 
   Int_t nXBins  = fHistogram->GetNbinsX();       
   Int_t nYBins  = fHistogram->GetNbinsY();       
@@ -256,7 +256,7 @@ void Hist::getIntLumiHisto(){
 }
 
 
-void Hist::setEqualBin(vector<double> slices){
+void DistTrend::setEqualBin(vector<double> slices){
 
   Int_t nXBins  = fHistogram->GetNbinsX();       
   Int_t nYBins  = fHistogram->GetNbinsY();       
@@ -286,16 +286,16 @@ void Hist::setEqualBin(vector<double> slices){
   fHistogram->SetName(theName.c_str());
 }
 
-void Hist::SetColor(Color_t mcolor){
+void DistTrend::SetColor(Color_t mcolor){
   fHistogram->SetMarkerColor(mcolor);
   fHistogram->SetLineColor(mcolor);
 }
 
-Color_t Hist::GetColor(){
+Color_t DistTrend::GetColor(){
   return fHistogram->GetMarkerColor();
 }
 
-void Hist::SetMarkerStyle(Style_t mstyle){
+void DistTrend::SetMarkerStyle(Style_t mstyle){
   fHistogram->SetMarkerStyle(mstyle);
 }
 

@@ -1,7 +1,7 @@
-#ifndef EFF2D
-#define EFF2D
+#ifndef EFFTREND
+#define EFFTREND
 
-/* class Eff2D                                                                                                                                                                                                                               
+/* class EffTrend                                                                                                                                                                                                                               
  Jun. 18, 2018                                                                                                                                                                       Gian Luca Pinna Angioni                                                                                                                                                                                                                    
 */
 
@@ -14,19 +14,19 @@
 #include <TColor.h>
 
 
-class Eff2D: public TNamed 
+class EffTrend: public TNamed 
 {
 
 
  public:
   
   
-  Eff2D(const char* name,const char* title,Int_t nbinsx,
+  EffTrend(const char* name,const char* title,Int_t nbinsx,
 	const Double_t* xbins,Int_t nbinsy,const Double_t* ybins);
 
-  Eff2D();
+  EffTrend();
 
-  ~Eff2D();
+  ~EffTrend();
 
   void Fill(Bool_t bPassed, Double_t x, string test);
 
@@ -77,7 +77,7 @@ class Eff2D: public TNamed
   string yLabel;
   string Title;
 
-  ClassDef(Eff2D,1)
+  ClassDef(EffTrend,1)
 
 };
 
