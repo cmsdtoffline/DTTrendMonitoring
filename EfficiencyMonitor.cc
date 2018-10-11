@@ -136,10 +136,12 @@ void EfficiencyMonitor::PreLoop(){
    DeadList<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "<<0<<" "
           <<endl<<Ndead<<" dead wires of out "<<NwireTot<<endl;
 
-   for (int idead=0; idead<Ndead; idead++) {
-     cout<<"YB"<<dead[idead][0]<<"/Sec"<<dead[idead][1]<<"/MB"<<dead[idead][2]<<"_SL"<<dead[idead][3]
-         <<"_layer"<<dead[idead][4]<<"_cell"<<dead[idead][5]<<endl;
-   }
+   //Uncomment to see list of dead channels.
+
+   // for (int idead=0; idead<Ndead; idead++) {
+   //   cout<<"YB"<<dead[idead][0]<<"/Sec"<<dead[idead][1]<<"/MB"<<dead[idead][2]<<"_SL"<<dead[idead][3]
+   //       <<"_layer"<<dead[idead][4]<<"_cell"<<dead[idead][5]<<endl;
+   // }
    
    DeadList.close();
 }
@@ -224,12 +226,10 @@ if (Ndead==0) {
 
 
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
-     // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } //fix
+     // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } 
      
      // First search for Phi segments
-     
-     //cout<<"Ndtsegments "<<Ndtsegments<<std::endl;     
-     
+          
      for (int iseg=0; iseg<Ndtsegments; iseg++) {
        //selection
        if (!dtsegm4D_hasPhi->at(iseg)) continue;
@@ -241,7 +241,6 @@ if (Ndead==0) {
        if (fabs(dtsegm4D_x_dir_loc->at(iseg))>0.7) continue; // angle
        
        TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
-       //	expWire->Print(); //del
        
        // If a hit is missing, let us check that the extrapolation doesn't fall beyond layer or cross a dead cell!
        int NexpDead=0; bool OutOfLayer=false;
@@ -278,7 +277,7 @@ if (Ndead==0) {
 	   }
 	   
            Float_t expW = (*expWire)(iex);
-	   //	   std::cout<<"iex "<<iex<<" explay "<<expLay<<std::endl; //del
+
            if (expW>nwire) {
 	     OutOfLayer=true;
 	     //	     std::cout<<"Out of layer "<<expW<<" nwire "<<nwire<<" "<<dtsegm4D_wheel->at(iseg)<<" "<<dtsegm4D_sector->at(iseg)<<" "<<dtsegm4D_station->at(iseg)<<" "<<expSL<<" "<<expLay<<" "<<expW<<std::endl; //del
@@ -309,13 +308,6 @@ if (Ndead==0) {
        TVectorF *hitLayerPhi      =(TVectorF*)dtsegm4D_phi_hitsLayer->At(iseg);
        TVectorF *hitWirePhi       =(TVectorF*)dtsegm4D_phi_hitsWire->At(iseg);
        
-       // std::cout<<"SuperLayerphi"<<std::endl;
-       // hitSuperLayerPhi->Print();//del
-       // std::cout<<"Layerphi"<<std::endl;
-       // hitLayerPhi->Print(); //del
-       // std::cout<<"Wirephi"<<std::endl;
-       // hitWirePhi->Print(); //del
-
        for (int ilay=1; ilay<9; ilay++) {
 	 // Search for associated hits
 	 bool foundh = false;
@@ -389,10 +381,10 @@ if (Ndead==0) {
 	     if (digi_sl->at(idigi) == 1 && sl != 0) continue;
 	     if (digi_sl->at(idigi) == 3 && sl != 1) continue;
 	     if (digi_layer->at(idigi) != lay+1)     continue;
+
 	     //let's loop all over the digis and take the closest digis to the extrapolated wire. 
 	     // Think about an extra condition on time.
              if (fabs(expW-digi_wire->at(idigi))<fabs(d)) {
-	       // std::cout<<expW<< " "<<digi_wire->at(idigi)<<" "<<expW-digi_wire->at(idigi)<<std::endl;
                digiW=digi_wire->at(idigi);
 	       d=expW-digiW; 
 	     }
@@ -453,7 +445,6 @@ if (Ndead==0) {
        //selection
        //if (!dtsegm4D_hasZed->at(iseg) || !dtsegm4D_hasPhi->at(iseg)) continue; 
        if (!dtsegm4D_hasZed->at(iseg) || dtsegm4D_phinhits->at(iseg)<nrequiredhit) continue; 
-       //10-01-17 capire perchè theta efficiency va giù con l ainst.luminosity: è il denominatore che sale?!
 
        int seg_znhits = dtsegm4D_znhits->at(iseg);
        
@@ -623,10 +614,6 @@ void EfficiencyMonitor::SetRunSlices()
 
 
 void EfficiencyMonitor::getBkgDigi(Int_t jentry){
-
-  //to moved in .h
-  // double timewindowdigi = MC? 400 : 1275;
-  // double timewindowseg  = MC? 400 : 800;
  
   double timewindowdigi =  1275;
   double timewindowseg  =  800;
