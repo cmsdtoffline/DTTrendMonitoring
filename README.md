@@ -54,6 +54,9 @@ There are two type of run:
 - As a function of variables such instantaneous luminosity or PU where the variable range is fixed and you can increase the statistic using new files. 
   - The code is run_FixedRange.C
 
+
+To save the plots in a web page incrCont.webFolder must be modifed with the right path and the file index.php that is in the folder named plot has to be copied in the same path.
+
 To run the code for the first option, please follow these steps:
 
 ```
