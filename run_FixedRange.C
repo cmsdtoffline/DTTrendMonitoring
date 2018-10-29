@@ -43,7 +43,7 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
     chain->Add(run3.c_str());
     chain->Add(run4.c_str());
   }
-
+  
   else if(run0 != "" && run1 != "" && run2 !="" && run3 != "" && run4 != "" && run5 ==""){  
     chain->Add(run0.c_str());
     chain->Add(run1.c_str());
@@ -54,16 +54,16 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
   }
   
   else {cout<<"Problems with files "<<endl;    exit(1);}
-
+  
   context FixedCont;
   
   FixedCont.name = "Fixed";
-
+  
   Var InsLumi;
   Var Pileup;
   Var BkGr;
   Var Empty;
-
+  
   variables::initVar(Pileup,"Pileup","variablesSetting.json");
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json");
   variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
@@ -75,19 +75,21 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName);
 
-  if(stat(("data/DeadList/DeadList_"+refName).c_str(),&st) != 0) { 
-   cout<<"Dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;
-   eff->PreLoop();
+  std::ifstream ifs(("data/DeadList/DeadList_"+refName).c_str(), std::ios::ate); // std::ios::ate means open at end
+
+  if(ifs.tellg() <= 0){
+    cout<<"Dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList or is empty/\nStarting pre-loop to produce it"<<endl;
+    eff->PreLoop();
   }
   else {
     cout<<"Dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of producing it"<<endl;
   }
-
+  
   eff->Loop();
   cout<<"Write"<<endl;
   eff->write();
   cout<<"Plot"<<endl;
   eff->plot();
   eff->close();  
-
+  
 }

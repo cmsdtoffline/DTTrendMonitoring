@@ -78,9 +78,11 @@ int run_IncreasingRange(string refName ="", string storingName ="", string store
 
   EfficiencyMonitor *eff = new EfficiencyMonitor(incrCont,chain,refName.c_str(),storingName,storedName);
 
-  if(stat(("data/DeadList/DeadList_"+refName).c_str(),&st) != 0) { 
-   cout<<"Dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList/\nStarting pre-loop to produce it"<<endl;
-   eff->PreLoop();
+  std::ifstream ifs(("data/DeadList/DeadList_"+refName).c_str(), std::ios::ate); // std::ios::ate means open at end
+  
+  if(ifs.tellg() <= 0){
+    cout<<"Dead cell list named DeadList_"+refName+" doesn't exist in data/DeadList or is empty/\nStarting pre-loop to produce it"<<endl;
+    eff->PreLoop();
   }
   else {
     cout<<"Dead cell list named DeadList_"+refName+" found in data/DeadList/\nIt will be used instead of producing it"<<endl;
