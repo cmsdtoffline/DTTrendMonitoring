@@ -35,7 +35,7 @@ void EfficiencyMonitor::PreLoop(){
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nRealEntries = fChain->GetEntries();
 
-   //nentries=lessentries;
+   nentries=lessentries;
 
    Long64_t nbytes = 0, nb = 0;
 
@@ -627,10 +627,12 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
  MB4area[1-1]  = 96 * 4.2 * 58 * 4.2;
  MB4area[2-1]  = MB4area[1-1];
  MB4area[3-1]  = MB4area[1-1];
+ 
  MB4area[4-1]  = 72 * 4.2 * 58 * 4.2;
  MB4area[5-1]  = MB4area[1-1];
  MB4area[6-1]  = MB4area[1-1];
  MB4area[7-1]  = MB4area[1-1];
+
  MB4area[8-1]  = 92 * 4.2 * 58 * 4.2;
  MB4area[9-1]  = 49 * 4.2 * 58 * 4.2;
  MB4area[10-1] = 60 * 4.2 * 58 * 4.2;
@@ -791,12 +793,12 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 
 	 if (ist+1 < 4) {
 	   normdigi = MBarea[ist] * 12; // 12 layers
-	   normseg  = MBarea[ist] * 12; // 12 layers 
+	   normseg  = MBarea[ist]; 
 	 }
 	 
 	 else {
 	   normdigi = MB4area[ise] * 8; // 8 layers
-	   normseg  = MB4area[ise] * 8; // 8 layers   //check ise->ist
+	   normseg  = MB4area[ise]; 
 	 }
 	 
 	 if (ist+1 ==4 && (ise+1 == 4 ||  ise+1 == 10) ) {normdigi *=2; normseg *=2;}
