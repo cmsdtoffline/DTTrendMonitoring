@@ -13,6 +13,7 @@
 #include "StatUtils.h"
 #include "TEfficiency.h"
 #include "plotter.h"
+#include "TStopwatch.h"
 
 int dead[10000][6];
 int Ndead=0;
@@ -27,7 +28,6 @@ If MaxDead > 0, dead wires will have efficiency zero while alive wires in the sa
 
 int lessentries=500000;
 
-
 void EfficiencyMonitor::PreLoop(){
 
    if (fChain == 0) return;
@@ -35,19 +35,17 @@ void EfficiencyMonitor::PreLoop(){
    Long64_t nentries = fChain->GetEntriesFast();
    Long64_t nRealEntries = fChain->GetEntries();
 
-   nentries=lessentries;
+   // nentries=lessentries;
 
    Long64_t nbytes = 0, nb = 0;
 
    ofstream DeadList;
    std::string deadname;
 
-
    deadname.append("data/DeadList/DeadList_"+fileName);
 
    //   cout<<deadname<<endl;
    DeadList.open (deadname.c_str());
-
 
    //Create a Histogram per layer 
    char go;
@@ -82,6 +80,7 @@ void EfficiencyMonitor::PreLoop(){
 	         [digi_sl->at(idigi)-1][digi_layer->at(idigi)-1]->Fill(float(digi_wire->at(idigi)));
       }
    }
+
    // analyze occupancy histos and fill dead channel table
    
    int nwire=0; int NwireTot=0;
@@ -208,22 +207,35 @@ if (Ndead==0) {
      
      if (jentry%50000 == 0) cout<<"Event "<<jentry<<" "<<setprecision (2)<<((jentry/float(nRealEntries))*100)<<" %  "<<endl;
      if (ientry < 0) break;
-     
 
+     /*   
+     //load only used tbranches
+     b_runnumber->GetEntry(jentry);
+     b_lumiblock->GetEntry(jentry);
+     b_PV_Nvtx->GetEntry(jentry);
+     b_Ndtsegments->GetEntry(jentry);
+     b_dtsegm4D_hasPhi->GetEntry(jentry);
+     b_dtsegm4D_hasZed->GetEntry(jentry);
+     b_dtsegm4D_phinhits->GetEntry(jentry);
+     b_dtsegm4D_x_dir_loc->GetEntry(jentry);
+     */ //fixme. maybe is better directly in .h 
+
+     //     cout<<runnumber<<" "<<!(std::find(dataContext.var["Run"].slice.begin(), dataContext.var["Run"].slice.end(), runnumber) != dataContext.var["Run"].slice.end())<<endl;
+   
      nb = fChain->GetEntry(jentry);   nbytes += nb;
      // if (Cut(ientry) < 0) continue;
 
+     if( !(std::find(dataContext.var["Run"].slice.begin(), dataContext.var["Run"].slice.end(), runnumber) != dataContext.var["Run"].slice.end()) ) continue; //fixme
 
      for(auto const& ivar : dataContext.var) { 
        if (ivar.second.name == "InsLumi")     dataContext.var[ivar.first].value = lumiperblock;  //add secons value for slices here? 
        else if (ivar.second.name =="Pileup" ) dataContext.var[ivar.first].value = PV_Nvtx;
-       else if (ivar.second.name =="BunchX" ) dataContext.var[ivar.first].value = bunchXing;
        else if (ivar.second.name =="Run")     dataContext.var[ivar.first].value = (float)runnumber; 
        else if (ivar.second.name =="Empty")   dataContext.var[ivar.first].value = 1.; // Default value for variables with no projection option 
+       //else if (ivar.second.name =="BunchX" ) dataContext.var[ivar.first].value = bunchXing; not used now
      }
 
      getBkgDigi(jentry);     
-
 
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
      // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } 
@@ -382,8 +394,9 @@ if (Ndead==0) {
 	     if (digi_sl->at(idigi) == 3 && sl != 1) continue;
 	     if (digi_layer->at(idigi) != lay+1)     continue;
 
-	     //let's loop all over the digis and take the closest digis to the extrapolated wire. 
+	     // let's loop all over the digis and take the closest digis to the extrapolated wire. 
 	     // Think about an extra condition on time.
+
              if (fabs(expW-digi_wire->at(idigi))<fabs(d)) {
                digiW=digi_wire->at(idigi);
 	       d=expW-digiW; 
@@ -576,8 +589,7 @@ void EfficiencyMonitor::SetRunSlices()
   Long64_t nentries     = fChain->GetEntriesFast();
   Long64_t nRealEntries = fChain->GetEntries();
 
-  //  int currentRun =0;
-  /* Loop used to collect the list of runs containend inside the TTree*/
+  /* Loop used to collect the list of runs containend inside the TTree */
 
   cout<<"Loop over the tree to create run list"<<endl;
   cout<<"Tree composed of "<<nRealEntries<<" entries "<<endl; 
@@ -586,30 +598,124 @@ void EfficiencyMonitor::SetRunSlices()
   for (Long64_t jentry=2; jentry<nentries;jentry++) {
 
     Long64_t ientry = LoadTree(jentry);
-    fChain->GetEntry(jentry);
-    
+   
     if (ientry < 0)  break;  
-    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;    
+    if (jentry%500000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;    
 
-    b_runnumber->GetEntry(jentry);
+    b_runnumber->GetEntry(jentry); 
     runNumber_Set.insert(runnumber);
   }
- 
- 
 
   for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
     dataContext.var["Run"].slice.push_back((float)*it);
   
-
-
   dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
-
-
+  
   // uncoment to check the run list
-
+  
   // cout<<"Run slice "<<endl;
   // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
   // cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+
+}
+
+void EfficiencyMonitor::checkPuLumiRatio(){
+
+  cout<<"Loop over the tree to create run list and check lumi PU ratio"<<endl;
+  if (fChain == 0) return;   
+  Long64_t nentries     = fChain->GetEntriesFast();
+  Long64_t nRealEntries = fChain->GetEntries();
+
+  std::set<Int_t> runNumber_Set;
+
+
+  TH2F * hPULumiVSrun = new TH2F("hPULumiVSrun","hPULumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1, 200,0,0.025);
+  TH2F * hPUvsLumi = new TH2F("hPUvsLumi","PUvsLumi", dataContext.var["InsLumi"].slice.size()-1, dataContext.var["InsLumi"].slice.data(),dataContext.var["Pileup"].slice.size()-1, dataContext.var["Pileup"].slice.data());
+
+
+  hPULumiVSrun->SetLabelSize(0.03);
+  hPULumiVSrun->SetMarkerSize(0.8);
+
+  map<int,int> runnumberMap;
+
+  int i =0;
+  for (std::vector<double>::iterator it = dataContext.var["Run"].slice.begin() ; it != dataContext.var["Run"].slice.end(); ++it){
+    runnumberMap[*it]=i;
+    i++;
+    hPULumiVSrun->GetXaxis()->SetBinLabel(i,to_string((int)*it).c_str());
+  }
+
+  TH1F * hRatio = new TH1F("hratio","hratio",200,0,0.025);
+  
+  dataContext.var["Run"].slice.clear();
+
+  Int_t preRunNumber = 0;
+
+  for (Long64_t jentry = 0; jentry<nentries; jentry++) {
+
+    if( jentry==nRealEntries-1 ) cout<<jentry<< " "<<nRealEntries-1<<endl;
+ 
+    Long64_t ientry = LoadTree(jentry);
+
+    b_runnumber->GetEntry(jentry);
+    b_lumiperblock->GetEntry(jentry);
+    b_PV_Nvtx->GetEntry(jentry);
+
+    if (ientry < 0)  break;
+    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;
+
+    if(jentry==0) preRunNumber = runnumber;
+
+    hPULumiVSrun->Fill(runnumberMap[runnumber], PV_Nvtx/lumiperblock);
+    hPUvsLumi->Fill(lumiperblock,PV_Nvtx);
+    if(preRunNumber == runnumber && (jentry != nRealEntries-1) ){
+      hRatio->Fill(PV_Nvtx/lumiperblock);
+      }
+    else {
+      cout<<runnumber<<" "<<hRatio->GetMean()<<endl;
+      if(hRatio->GetMean() < 0.0024) runNumber_Set.insert(preRunNumber);
+      hRatio->Reset();
+    }
+    preRunNumber = runnumber;  
+  }
+
+  for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
+    dataContext.var["Run"].slice.push_back((float)*it);
+  
+  dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
+  
+  // cout<<"Run slices"<<endl;
+  // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+  //   cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+
+  TCanvas *cGlob = new TCanvas("cGlob");
+
+  hPULumiVSrun->SetMarkerStyle(20);
+  hPULumiVSrun->SetMarkerColor(2);
+  hPULumiVSrun->Draw("colz");
+  hPULumiVSrun->ProfileX("_pfx",1,-1,"dsame"); 
+
+  hPULumiVSrun->SetTitle("Pileup/Instant lumi vs run ;Pileup/Instant lumi; run"); 
+
+  if(stat((dataContext.webFolder+"/"+outName+"/").c_str(),&st) != 0){
+    system(("mkdir "+dataContext.webFolder+"/"+outName).c_str());
+    system(("cp "+dataContext.webFolder+"/index.php " +dataContext.webFolder+"/"+outName).c_str());
+  }
+
+  if(stat((dataContext.webFolder+"/"+outName+"/Global").c_str(),&st) != 0){
+    system(("mkdir "+dataContext.webFolder+"/"+outName+"/Global").c_str());
+    system(("cp "+dataContext.webFolder+"/"+outName+"/index.php " +dataContext.webFolder+"/"+outName+"/Global").c_str());
+  }
+
+  cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiVsRun.png").c_str());
+  cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiVsRun.root").c_str());
+
+  hPUvsLumi->Draw("Colz");
+  hPUvsLumi->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["Pileup"].Label+";"+dataContext.var["InsLumi"].Label).c_str());
+
+  cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.png").c_str());
+  cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.root").c_str());
+
 }
 
 
@@ -688,8 +794,8 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
      }
 
      // add search for associated segments (standalone muons may not have matches)
-     
-     //if (Ncross>0) continue;
+  
+     // if (Ncross>0) continue;
      
      int word = Mu_segmentIndex_sta->at(imu);
      int count=0;
@@ -784,7 +890,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
        }
      }
    }
-
 
    for (int iwh=0; iwh<5; iwh++) {
      for (int ise=0; ise<12; ise++) {

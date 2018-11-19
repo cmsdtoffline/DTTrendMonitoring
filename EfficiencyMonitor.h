@@ -118,9 +118,9 @@ public :
    vector<float>   *dtsegm4D_x_dir_loc;
    vector<float>   *dtsegm4D_y_dir_loc;
    vector<float>   *dtsegm4D_z_dir_loc;
-   vector<float>   *dtsegm4D_cosx;
-   vector<float>   *dtsegm4D_cosy;
-   vector<float>   *dtsegm4D_cosz;
+   /* vector<float>   *dtsegm4D_cosx; */
+   /* vector<float>   *dtsegm4D_cosy; */
+   /* vector<float>   *dtsegm4D_cosz; */
    vector<float>   *dtsegm4D_phi;
    vector<float>   *dtsegm4D_theta;
    vector<float>   *dtsegm4D_eta;
@@ -149,38 +149,40 @@ public :
    TClonesArray    *dtsegm4D_z_hitsLayer;
    TClonesArray    *dtsegm4D_z_hitsTime;
    TClonesArray    *dtsegm4D_z_hitsTimeCali;
-   vector<short>   *cscsegm_ring;
-   vector<short>   *cscsegm_chamber;
-   vector<short>   *cscsegm_station;
-   vector<float>   *cscsegm_cosx;
-   vector<float>   *cscsegm_cosy;
-   vector<float>   *cscsegm_cosz;
-   vector<float>   *cscsegm_phi;
-   vector<float>   *cscsegm_eta;
-   vector<float>   *cscsegm_normchisq;
-   vector<short>   *cscsegm_nRecHits;
-   vector<short>   *ltTwinMuxIn_wheel;
-   vector<short>   *ltTwinMuxIn_sector;
-   vector<short>   *ltTwinMuxIn_station;
-   vector<short>   *ltTwinMuxIn_quality;
-   vector<short>   *ltTwinMuxIn_bx;
-   vector<float>   *ltTwinMuxIn_phi;
-   vector<float>   *ltTwinMuxIn_phiB;
-   vector<short>   *ltTwinMuxIn_is2nd;
-   vector<short>   *ltTwinMuxOut_wheel;
-   vector<short>   *ltTwinMuxOut_sector;
-   vector<short>   *ltTwinMuxOut_station;
-   vector<short>   *ltTwinMuxOut_quality;
-   vector<short>   *ltTwinMuxOut_rpcbit;
-   vector<short>   *ltTwinMuxOut_bx;
-   vector<float>   *ltTwinMuxOut_phi;
-   vector<float>   *ltTwinMuxOut_phiB;
-   vector<short>   *ltTwinMuxOut_is2nd;
-   vector<short>   *ltTwinMux_thWheel;
-   vector<short>   *ltTwinMux_thSector;
-   vector<short>   *ltTwinMux_thStation;
-   vector<short>   *ltTwinMux_thBx;
-   vector<short>   *ltTwinMux_thHits;
+
+   /* vector<short>   *cscsegm_ring; */
+   /* vector<short>   *cscsegm_chamber; */
+   /* vector<short>   *cscsegm_station; */
+   /* vector<float>   *cscsegm_cosx; */
+   /* vector<float>   *cscsegm_cosy; */
+   /* vector<float>   *cscsegm_cosz; */
+   /* vector<float>   *cscsegm_phi; */
+   /* vector<float>   *cscsegm_eta; */
+   /* vector<float>   *cscsegm_normchisq; */
+   /* vector<short>   *cscsegm_nRecHits; */
+   /* vector<short>   *ltTwinMuxIn_wheel; */
+   /* vector<short>   *ltTwinMuxIn_sector; */
+   /* vector<short>   *ltTwinMuxIn_station; */
+   /* vector<short>   *ltTwinMuxIn_quality; */
+   /* vector<short>   *ltTwinMuxIn_bx; */
+   /* vector<float>   *ltTwinMuxIn_phi; */
+   /* vector<float>   *ltTwinMuxIn_phiB; */
+   /* vector<short>   *ltTwinMuxIn_is2nd; */
+   /* vector<short>   *ltTwinMuxOut_wheel; */
+   /* vector<short>   *ltTwinMuxOut_sector; */
+   /* vector<short>   *ltTwinMuxOut_station; */
+   /* vector<short>   *ltTwinMuxOut_quality; */
+   /* vector<short>   *ltTwinMuxOut_rpcbit; */
+   /* vector<short>   *ltTwinMuxOut_bx; */
+   /* vector<float>   *ltTwinMuxOut_phi; */
+   /* vector<float>   *ltTwinMuxOut_phiB; */
+   /* vector<short>   *ltTwinMuxOut_is2nd; */
+   /* vector<short>   *ltTwinMux_thWheel; */
+   /* vector<short>   *ltTwinMux_thSector; */
+   /* vector<short>   *ltTwinMux_thStation; */
+   /* vector<short>   *ltTwinMux_thBx; */
+   /* vector<short>   *ltTwinMux_thHits; */
+
    vector<short>   *Mu_isMuGlobal;
    vector<short>   *Mu_isMuTracker;
 
@@ -220,11 +222,11 @@ public :
    TClonesArray    *Mu_matches_Wh;
    TClonesArray    *Mu_matches_Sec;
    TClonesArray    *Mu_matches_St;
-   vector<short>   *gmt_bx;
-   vector<float>   *gmt_phi;
-   vector<float>   *gmt_eta;
-   vector<float>   *gmt_pt;
-   vector<short>   *gmt_qual;
+   /* vector<short>   *gmt_bx; */
+   /* vector<float>   *gmt_phi; */
+   /* vector<float>   *gmt_eta; */
+   /* vector<float>   *gmt_pt; */
+   /* vector<short>   *gmt_qual; */
    //   vector<short>   *gmt_detector;
    /* vector<short>   *gmt_cands_fwd; */
    /* vector<short>   *gmt_cands_isRpc; */
@@ -234,33 +236,33 @@ public :
    /* vector<float>   *gmt_cands_pt; */
    /* vector<short>   *gmt_cands_qual; */
    /* vector<short>   *gmt_cands_ismatched; */
-   vector<short>   *gt_algo_bit;
-   vector<short>   *gt_algo_bx;
-   vector<short>   *gt_tt_bit;
-   vector<short>   *gt_tt_bx;
-   vector<int>     *rpc_region;
-   vector<int>     *rpc_clusterSize;
-   vector<int>     *rpc_strip;
-   vector<int>     *rpc_bx;
-   vector<int>     *rpc_station;
-   vector<int>     *rpc_sector;
-   vector<int>     *rpc_layer;
-   vector<int>     *rpc_subsector;
-   vector<int>     *rpc_roll;
-   vector<int>     *rpc_ring;
+   /* vector<short>   *gt_algo_bit; */
+   /* vector<short>   *gt_algo_bx; */
+   /* vector<short>   *gt_tt_bit; */
+   /* vector<short>   *gt_tt_bx; */
+   /* vector<int>     *rpc_region; */
+   /* vector<int>     *rpc_clusterSize; */
+   /* vector<int>     *rpc_strip; */
+   /* vector<int>     *rpc_bx; */
+   /* vector<int>     *rpc_station; */
+   /* vector<int>     *rpc_sector; */
+   /* vector<int>     *rpc_layer; */
+   /* vector<int>     *rpc_subsector; */
+   /* vector<int>     *rpc_roll; */
+   /* vector<int>     *rpc_ring; */
    Short_t         Ndigis;
    Short_t         Ndtsegments;
-   Short_t         Ncscsegments;
-   Short_t         NdtltTwinMuxOut;
-   Short_t         NdtltTwinMux_th;
-   Short_t         NdtltTwinMuxIn;
+   /* Short_t         Ncscsegments; */
+   /* Short_t         NdtltTwinMuxOut; */
+   /* Short_t         NdtltTwinMux_th; */
+   /* Short_t         NdtltTwinMuxIn; */
    Short_t         Nmuons;
-   Short_t         Ngmt;
+   //Short_t         Ngmt;
    //   Short_t         Ngmtcands;
-   Short_t         Ngtalgo;
-   Short_t         Ngttechtrig;
-   Short_t         Nhlt;
-   Short_t         NrpcRecHits;
+   /* Short_t         Ngtalgo; */
+   /* Short_t         Ngttechtrig; */
+   /* Short_t         Nhlt; */
+   /* Short_t         NrpcRecHits; */
 
    // List of branches
    TBranch        *b_runnumber;   //!
@@ -333,38 +335,38 @@ public :
    TBranch        *b_dtsegm4D_z_hitsLayer;   //!
    TBranch        *b_dtsegm4D_z_hitsTime;   //!
    TBranch        *b_dtsegm4D_z_hitsTimeCali;   //!
-   TBranch        *b_cscsegm_ring;   //!
-   TBranch        *b_cscsegm_chamber;   //!
-   TBranch        *b_cscsegm_station;   //!
-   TBranch        *b_cscsegm_cosx;   //!
-   TBranch        *b_cscsegm_cosy;   //!
-   TBranch        *b_cscsegm_cosz;   //!
-   TBranch        *b_cscsegm_phi;   //!
-   TBranch        *b_cscsegm_eta;   //!
-   TBranch        *b_cscsegm_normchisq;   //!
-   TBranch        *b_cscsegm_nRecHits;   //!
-   TBranch        *b_ltTwinMuxIn_wheel;   //!
-   TBranch        *b_ltTwinMuxIn_sector;   //!
-   TBranch        *b_ltTwinMuxIn_station;   //!
-   TBranch        *b_ltTwinMuxIn_quality;   //!
-   TBranch        *b_ltTwinMuxIn_bx;   //!
-   TBranch        *b_ltTwinMuxIn_phi;   //!
-   TBranch        *b_ltTwinMuxIn_phiB;   //!
-   TBranch        *b_ltTwinMuxIn_is2nd;   //!
-   TBranch        *b_ltTwinMuxOut_wheel;   //!
-   TBranch        *b_ltTwinMuxOut_sector;   //!
-   TBranch        *b_ltTwinMuxOut_station;   //!
-   TBranch        *b_ltTwinMuxOut_quality;   //!
-   TBranch        *b_ltTwinMuxOut_rpcbit;   //!
-   TBranch        *b_ltTwinMuxOut_bx;   //!
-   TBranch        *b_ltTwinMuxOut_phi;   //!
-   TBranch        *b_ltTwinMuxOut_phiB;   //!
-   TBranch        *b_ltTwinMuxOut_is2nd;   //!
-   TBranch        *b_ltTwinMux_thWheel;   //!
-   TBranch        *b_ltTwinMux_thSector;   //!
-   TBranch        *b_ltTwinMux_thStation;   //!
-   TBranch        *b_ltTwinMux_thBx;   //!
-   TBranch        *b_ltTwinMux_thHits;   //!
+   /* TBranch        *b_cscsegm_ring;   //! */
+   /* TBranch        *b_cscsegm_chamber;   //! */
+   /* TBranch        *b_cscsegm_station;   //! */
+   /* TBranch        *b_cscsegm_cosx;   //! */
+   /* TBranch        *b_cscsegm_cosy;   //! */
+   /* TBranch        *b_cscsegm_cosz;   //! */
+   /* TBranch        *b_cscsegm_phi;   //! */
+   /* TBranch        *b_cscsegm_eta;   //! */
+   /* TBranch        *b_cscsegm_normchisq;   //! */
+   /* TBranch        *b_cscsegm_nRecHits;   //! */
+   /* TBranch        *b_ltTwinMuxIn_wheel;   //! */
+   /* TBranch        *b_ltTwinMuxIn_sector;   //! */
+   /* TBranch        *b_ltTwinMuxIn_station;   //! */
+   /* TBranch        *b_ltTwinMuxIn_quality;   //! */
+   /* TBranch        *b_ltTwinMuxIn_bx;   //! */
+   /* TBranch        *b_ltTwinMuxIn_phi;   //! */
+   /* TBranch        *b_ltTwinMuxIn_phiB;   //! */
+   /* TBranch        *b_ltTwinMuxIn_is2nd;   //! */
+   /* TBranch        *b_ltTwinMuxOut_wheel;   //! */
+   /* TBranch        *b_ltTwinMuxOut_sector;   //! */
+   /* TBranch        *b_ltTwinMuxOut_station;   //! */
+   /* TBranch        *b_ltTwinMuxOut_quality;   //! */
+   /* TBranch        *b_ltTwinMuxOut_rpcbit;   //! */
+   /* TBranch        *b_ltTwinMuxOut_bx;   //! */
+   /* TBranch        *b_ltTwinMuxOut_phi;   //! */
+   /* TBranch        *b_ltTwinMuxOut_phiB;   //! */
+   /* TBranch        *b_ltTwinMuxOut_is2nd;   //! */
+   /* TBranch        *b_ltTwinMux_thWheel;   //! */
+   /* TBranch        *b_ltTwinMux_thSector;   //! */
+   /* TBranch        *b_ltTwinMux_thStation;   //! */
+   /* TBranch        *b_ltTwinMux_thBx;   //! */
+   /* TBranch        *b_ltTwinMux_thHits;   //! */
    TBranch        *b_Mu_isMuGlobal;   //!
    TBranch        *b_Mu_isMuTracker;   //!
 
@@ -405,11 +407,11 @@ public :
    TBranch        *b_Mu_z_mb2_mu;   //!
    TBranch        *b_Mu_phi_mb2_mu;   //!
    TBranch        *b_Mu_pseta_mb2_mu;   //!
-   TBranch        *b_gmt_bx;   //!
-   TBranch        *b_gmt_phi;   //!
-   TBranch        *b_gmt_eta;   //!
-   TBranch        *b_gmt_pt;   //!
-   TBranch        *b_gmt_qual;   //!
+   /* TBranch        *b_gmt_bx;   //! */
+   /* TBranch        *b_gmt_phi;   //! */
+   /* TBranch        *b_gmt_eta;   //! */
+   /* TBranch        *b_gmt_pt;   //! */
+   /* TBranch        *b_gmt_qual;   //! */
    /* TBranch        *b_gmt_detector;   //! */
    /* TBranch        *b_gmt_cands_fwd;   //! */
    /* TBranch        *b_gmt_cands_isRpc;   //! */
@@ -419,33 +421,33 @@ public :
    /* TBranch        *b_gmt_cands_pt;   //! */
    /* TBranch        *b_gmt_cands_qual;   //! */
    /* TBranch        *b_gmt_cands_ismatched;   //!g */
-   TBranch        *b_gt_algo_bit;   //!
-   TBranch        *b_gt_algo_bx;   //!
-   TBranch        *b_gt_tt_bit;   //!
-   TBranch        *b_gt_tt_bx;   //!
-   TBranch        *b_rpc_region;   //!
-   TBranch        *b_rpc_clusterSize;   //!
-   TBranch        *b_rpc_strip;   //!
-   TBranch        *b_rpc_bx;   //!
-   TBranch        *b_rpc_station;   //!
-   TBranch        *b_rpc_sector;   //!
-   TBranch        *b_rpc_layer;   //!
-   TBranch        *b_rpc_subsector;   //!
-   TBranch        *b_rpc_roll;   //!
-   TBranch        *b_rpc_ring;   //!
+   /* TBranch        *b_gt_algo_bit;   //! */
+   /* TBranch        *b_gt_algo_bx;   //! */
+   /* TBranch        *b_gt_tt_bit;   //! */
+   /* TBranch        *b_gt_tt_bx;   //! */
+   /* TBranch        *b_rpc_region;   //! */
+   /* TBranch        *b_rpc_clusterSize;   //! */
+   /* TBranch        *b_rpc_strip;   //! */
+   /* TBranch        *b_rpc_bx;   //! */
+   /* TBranch        *b_rpc_station;   //! */
+   /* TBranch        *b_rpc_sector;   //! */
+   /* TBranch        *b_rpc_layer;   //! */
+   /* TBranch        *b_rpc_subsector;   //! */
+   /* TBranch        *b_rpc_roll;   //! */
+   /* TBranch        *b_rpc_ring;   //! */
    TBranch        *b_Ndigis;   //!
    TBranch        *b_Ndtsegments;   //!
-   TBranch        *b_Ncscsegments;   //!
-   TBranch        *b_NdtltTwinMuxOut;   //!
-   TBranch        *b_NdtltTwinMux_th;   //!
-   TBranch        *b_NdtltTwinMuxIn;   //!
+   /* TBranch        *b_Ncscsegments;   //! */
+   /* TBranch        *b_NdtltTwinMuxOut;   //! */
+   /* TBranch        *b_NdtltTwinMux_th;   //! */
+   /* TBranch        *b_NdtltTwinMuxIn;   //! */
    TBranch        *b_Nmuons;   //!
-   TBranch        *b_Ngmt;   //!
+   //TBranch        *b_Ngmt;   //!
    //   TBranch        *b_Ngmtcands;   //!
-   TBranch        *b_Ngtalgo;   //!
-   TBranch        *b_Ngttt;   //!
-   TBranch        *b_Nhlt;   //!
-   TBranch        *b_NrpcRecHits;   //!
+   /* TBranch        *b_Ngtalgo;   //! */
+   /* TBranch        *b_Ngttt;   //! */
+   /* TBranch        *b_Nhlt;   //! */
+   /* TBranch        *b_NrpcRecHits;   //! */
 
    
    EfficiencyMonitor(context extContext, TTree *tree=0, std::string extFileName = "", std::string extOutName = "", std::string extLegacy = "");
@@ -462,7 +464,7 @@ public :
    void close();
    void plot();
    void SetRunSlices();
-
+   void checkPuLumiRatio();
    void  getBkgDigi(Int_t jentry);
 
 };
@@ -482,17 +484,32 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
       outName     = extOutName;
       dataContext = extContext; 
       Init(tree);
-      if(dataContext.name=="Increasing"){
+      
+      if(dataContext.name=="Fixed"){
 	if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
-	SetRunSlices(); 
+	  SetRunSlices(); 
+	  checkPuLumiRatio();	
 	}
 	else{
 	  cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
 	  abort();
 	}
       }
+      
+      else if(dataContext.name=="Increasing"){
+	if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
+	  SetRunSlices(); 
+	}
+	else{
+	  cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
+	  abort();
+	}
+      }
+      else { 
+	cout<<"ERROR, Wrong type of plots"<<endl;
+	abort();
+      }
       plots = new plotter(dataContext,legacyName,outName,fileName);
-
 }
 
 EfficiencyMonitor::~EfficiencyMonitor()
@@ -550,9 +567,9 @@ void EfficiencyMonitor::Init(TTree *tree)
    dtsegm4D_x_dir_loc = 0;
    dtsegm4D_y_dir_loc = 0;
    dtsegm4D_z_dir_loc = 0;
-   dtsegm4D_cosx = 0;
-   dtsegm4D_cosy = 0;
-   dtsegm4D_cosz = 0;
+   /* dtsegm4D_cosx = 0; */
+   /* dtsegm4D_cosy = 0; */
+   /* dtsegm4D_cosz = 0; */
    dtsegm4D_phi = 0;
    dtsegm4D_theta = 0;
    dtsegm4D_eta = 0;
@@ -581,38 +598,40 @@ void EfficiencyMonitor::Init(TTree *tree)
    dtsegm4D_z_hitsLayer = 0;
    dtsegm4D_z_hitsTime = 0;
    dtsegm4D_z_hitsTimeCali = 0;
-   cscsegm_ring = 0;
-   cscsegm_chamber = 0;
-   cscsegm_station = 0;
-   cscsegm_cosx = 0;
-   cscsegm_cosy = 0;
-   cscsegm_cosz = 0;
-   cscsegm_phi = 0;
-   cscsegm_eta = 0;
-   cscsegm_normchisq = 0;
-   cscsegm_nRecHits = 0;
-   ltTwinMuxIn_wheel = 0;
-   ltTwinMuxIn_sector = 0;
-   ltTwinMuxIn_station = 0;
-   ltTwinMuxIn_quality = 0;
-   ltTwinMuxIn_bx = 0;
-   ltTwinMuxIn_phi = 0;
-   ltTwinMuxIn_phiB = 0;
-   ltTwinMuxIn_is2nd = 0;
-   ltTwinMuxOut_wheel = 0;
-   ltTwinMuxOut_sector = 0;
-   ltTwinMuxOut_station = 0;
-   ltTwinMuxOut_quality = 0;
-   ltTwinMuxOut_rpcbit = 0;
-   ltTwinMuxOut_bx = 0;
-   ltTwinMuxOut_phi = 0;
-   ltTwinMuxOut_phiB = 0;
-   ltTwinMuxOut_is2nd = 0;
-   ltTwinMux_thWheel = 0;
-   ltTwinMux_thSector = 0;
-   ltTwinMux_thStation = 0;
-   ltTwinMux_thBx = 0;
-   ltTwinMux_thHits = 0;
+
+   /* cscsegm_ring = 0; */
+   /* cscsegm_chamber = 0; */
+   /* cscsegm_station = 0; */
+   /* cscsegm_cosx = 0; */
+   /* cscsegm_cosy = 0; */
+   /* cscsegm_cosz = 0; */
+   /* cscsegm_phi = 0; */
+   /* cscsegm_eta = 0; */
+   /* cscsegm_normchisq = 0; */
+   /* cscsegm_nRecHits = 0; */
+   /* ltTwinMuxIn_wheel = 0; */
+   /* ltTwinMuxIn_sector = 0; */
+   /* ltTwinMuxIn_station = 0; */
+   /* ltTwinMuxIn_quality = 0; */
+   /* ltTwinMuxIn_bx = 0; */
+   /* ltTwinMuxIn_phi = 0; */
+   /* ltTwinMuxIn_phiB = 0; */
+   /* ltTwinMuxIn_is2nd = 0; */
+   /* ltTwinMuxOut_wheel = 0; */
+   /* ltTwinMuxOut_sector = 0; */
+   /* ltTwinMuxOut_station = 0; */
+   /* ltTwinMuxOut_quality = 0; */
+   /* ltTwinMuxOut_rpcbit = 0; */
+   /* ltTwinMuxOut_bx = 0; */
+   /* ltTwinMuxOut_phi = 0; */
+   /* ltTwinMuxOut_phiB = 0; */
+   /* ltTwinMuxOut_is2nd = 0; */
+   /* ltTwinMux_thWheel = 0; */
+   /* ltTwinMux_thSector = 0; */
+   /* ltTwinMux_thStation = 0; */
+   /* ltTwinMux_thBx = 0; */
+   /* ltTwinMux_thHits = 0; */
+
    Mu_isMuGlobal = 0;
    Mu_isMuTracker = 0;
    Mu_isMuTrackerArb = 0;
@@ -649,11 +668,11 @@ void EfficiencyMonitor::Init(TTree *tree)
    Mu_z_mb2_mu = 0;
    Mu_phi_mb2_mu = 0;
    Mu_pseta_mb2_mu = 0;
-   gmt_bx = 0;
-   gmt_phi = 0;
-   gmt_eta = 0;
-   gmt_pt = 0;
-   gmt_qual = 0;
+   /* gmt_bx = 0; */
+   /* gmt_phi = 0; */
+   /* gmt_eta = 0; */
+   /* gmt_pt = 0; */
+   /* gmt_qual = 0; */
    /* gmt_detector = 0; */
    /* gmt_cands_fwd = 0; */
    /* gmt_cands_isRpc = 0; */
@@ -663,20 +682,20 @@ void EfficiencyMonitor::Init(TTree *tree)
    /* gmt_cands_pt = 0; */
    /* gmt_cands_qual = 0; */
    /* gmt_cands_ismatched = 0; */
-   gt_algo_bit = 0;
-   gt_algo_bx = 0;
-   gt_tt_bit = 0;
-   gt_tt_bx = 0;
-   rpc_region = 0;
-   rpc_clusterSize = 0;
-   rpc_strip = 0;
-   rpc_bx = 0;
-   rpc_station = 0;
-   rpc_sector = 0;
-   rpc_layer = 0;
-   rpc_subsector = 0;
-   rpc_roll = 0;
-   rpc_ring = 0;
+   /* gt_algo_bit = 0; */
+   /* gt_algo_bx = 0; */
+   /* gt_tt_bit = 0; */
+   /* gt_tt_bx = 0; */
+   /* rpc_region = 0; */
+   /* rpc_clusterSize = 0; */
+   /* rpc_strip = 0; */
+   /* rpc_bx = 0; */
+   /* rpc_station = 0; */
+   /* rpc_sector = 0; */
+   /* rpc_layer = 0; */
+   /* rpc_subsector = 0; */
+   /* rpc_roll = 0; */
+   /* rpc_ring = 0; */
    // Set branch addresses and branch pointers
    if (!tree) return;
    fChain = tree;
@@ -722,9 +741,9 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("dtsegm4D_x_dir_loc", &dtsegm4D_x_dir_loc, &b_dtsegm4D_x_dir_loc);
    fChain->SetBranchAddress("dtsegm4D_y_dir_loc", &dtsegm4D_y_dir_loc, &b_dtsegm4D_y_dir_loc);
    fChain->SetBranchAddress("dtsegm4D_z_dir_loc", &dtsegm4D_z_dir_loc, &b_dtsegm4D_z_dir_loc);
-   fChain->SetBranchAddress("dtsegm4D_cosx", &dtsegm4D_cosx, &b_dtsegm4D_cosx);
-   fChain->SetBranchAddress("dtsegm4D_cosy", &dtsegm4D_cosy, &b_dtsegm4D_cosy);
-   fChain->SetBranchAddress("dtsegm4D_cosz", &dtsegm4D_cosz, &b_dtsegm4D_cosz);
+   /* fChain->SetBranchAddress("dtsegm4D_cosx", &dtsegm4D_cosx, &b_dtsegm4D_cosx); */
+   /* fChain->SetBranchAddress("dtsegm4D_cosy", &dtsegm4D_cosy, &b_dtsegm4D_cosy); */
+   /* fChain->SetBranchAddress("dtsegm4D_cosz", &dtsegm4D_cosz, &b_dtsegm4D_cosz); */
    fChain->SetBranchAddress("dtsegm4D_phi", &dtsegm4D_phi, &b_dtsegm4D_phi);
    fChain->SetBranchAddress("dtsegm4D_theta", &dtsegm4D_theta, &b_dtsegm4D_theta);
    fChain->SetBranchAddress("dtsegm4D_eta", &dtsegm4D_eta, &b_dtsegm4D_eta);
@@ -753,38 +772,40 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("dtsegm4D_z_hitsLayer", &dtsegm4D_z_hitsLayer, &b_dtsegm4D_z_hitsLayer);
    fChain->SetBranchAddress("dtsegm4D_z_hitsTime", &dtsegm4D_z_hitsTime, &b_dtsegm4D_z_hitsTime);
    fChain->SetBranchAddress("dtsegm4D_z_hitsTimeCali", &dtsegm4D_z_hitsTimeCali, &b_dtsegm4D_z_hitsTimeCali);
-   fChain->SetBranchAddress("cscsegm_ring", &cscsegm_ring, &b_cscsegm_ring);
-   fChain->SetBranchAddress("cscsegm_chamber", &cscsegm_chamber, &b_cscsegm_chamber);
-   fChain->SetBranchAddress("cscsegm_station", &cscsegm_station, &b_cscsegm_station);
-   fChain->SetBranchAddress("cscsegm_cosx", &cscsegm_cosx, &b_cscsegm_cosx);
-   fChain->SetBranchAddress("cscsegm_cosy", &cscsegm_cosy, &b_cscsegm_cosy);
-   fChain->SetBranchAddress("cscsegm_cosz", &cscsegm_cosz, &b_cscsegm_cosz);
-   fChain->SetBranchAddress("cscsegm_phi", &cscsegm_phi, &b_cscsegm_phi);
-   fChain->SetBranchAddress("cscsegm_eta", &cscsegm_eta, &b_cscsegm_eta);
-   fChain->SetBranchAddress("cscsegm_normchisq", &cscsegm_normchisq, &b_cscsegm_normchisq);
-   fChain->SetBranchAddress("cscsegm_nRecHits", &cscsegm_nRecHits, &b_cscsegm_nRecHits);
-   fChain->SetBranchAddress("ltTwinMuxIn_wheel", &ltTwinMuxIn_wheel, &b_ltTwinMuxIn_wheel);
-   fChain->SetBranchAddress("ltTwinMuxIn_sector", &ltTwinMuxIn_sector, &b_ltTwinMuxIn_sector);
-   fChain->SetBranchAddress("ltTwinMuxIn_station", &ltTwinMuxIn_station, &b_ltTwinMuxIn_station);
-   fChain->SetBranchAddress("ltTwinMuxIn_quality", &ltTwinMuxIn_quality, &b_ltTwinMuxIn_quality);
-   fChain->SetBranchAddress("ltTwinMuxIn_bx", &ltTwinMuxIn_bx, &b_ltTwinMuxIn_bx);
-   fChain->SetBranchAddress("ltTwinMuxIn_phi", &ltTwinMuxIn_phi, &b_ltTwinMuxIn_phi);
-   fChain->SetBranchAddress("ltTwinMuxIn_phiB", &ltTwinMuxIn_phiB, &b_ltTwinMuxIn_phiB);
-   fChain->SetBranchAddress("ltTwinMuxIn_is2nd", &ltTwinMuxIn_is2nd, &b_ltTwinMuxIn_is2nd);
-   fChain->SetBranchAddress("ltTwinMuxOut_wheel", &ltTwinMuxOut_wheel, &b_ltTwinMuxOut_wheel);
-   fChain->SetBranchAddress("ltTwinMuxOut_sector", &ltTwinMuxOut_sector, &b_ltTwinMuxOut_sector);
-   fChain->SetBranchAddress("ltTwinMuxOut_station", &ltTwinMuxOut_station, &b_ltTwinMuxOut_station);
-   fChain->SetBranchAddress("ltTwinMuxOut_quality", &ltTwinMuxOut_quality, &b_ltTwinMuxOut_quality);
-   fChain->SetBranchAddress("ltTwinMuxOut_rpcbit", &ltTwinMuxOut_rpcbit, &b_ltTwinMuxOut_rpcbit);
-   fChain->SetBranchAddress("ltTwinMuxOut_bx", &ltTwinMuxOut_bx, &b_ltTwinMuxOut_bx);
-   fChain->SetBranchAddress("ltTwinMuxOut_phi", &ltTwinMuxOut_phi, &b_ltTwinMuxOut_phi);
-   fChain->SetBranchAddress("ltTwinMuxOut_phiB", &ltTwinMuxOut_phiB, &b_ltTwinMuxOut_phiB);
-   fChain->SetBranchAddress("ltTwinMuxOut_is2nd", &ltTwinMuxOut_is2nd, &b_ltTwinMuxOut_is2nd);
-   fChain->SetBranchAddress("ltTwinMux_thWheel", &ltTwinMux_thWheel, &b_ltTwinMux_thWheel);
-   fChain->SetBranchAddress("ltTwinMux_thSector", &ltTwinMux_thSector, &b_ltTwinMux_thSector);
-   fChain->SetBranchAddress("ltTwinMux_thStation", &ltTwinMux_thStation, &b_ltTwinMux_thStation);
-   fChain->SetBranchAddress("ltTwinMux_thBx", &ltTwinMux_thBx, &b_ltTwinMux_thBx);
-   fChain->SetBranchAddress("ltTwinMux_thHits", &ltTwinMux_thHits, &b_ltTwinMux_thHits);
+
+   /* fChain->SetBranchAddress("cscsegm_ring", &cscsegm_ring, &b_cscsegm_ring); */
+   /* fChain->SetBranchAddress("cscsegm_chamber", &cscsegm_chamber, &b_cscsegm_chamber); */
+   /* fChain->SetBranchAddress("cscsegm_station", &cscsegm_station, &b_cscsegm_station); */
+   /* fChain->SetBranchAddress("cscsegm_cosx", &cscsegm_cosx, &b_cscsegm_cosx); */
+   /* fChain->SetBranchAddress("cscsegm_cosy", &cscsegm_cosy, &b_cscsegm_cosy); */
+   /* fChain->SetBranchAddress("cscsegm_cosz", &cscsegm_cosz, &b_cscsegm_cosz); */
+   /* fChain->SetBranchAddress("cscsegm_phi", &cscsegm_phi, &b_cscsegm_phi); */
+   /* fChain->SetBranchAddress("cscsegm_eta", &cscsegm_eta, &b_cscsegm_eta); */
+   /* fChain->SetBranchAddress("cscsegm_normchisq", &cscsegm_normchisq, &b_cscsegm_normchisq); */
+   /* fChain->SetBranchAddress("cscsegm_nRecHits", &cscsegm_nRecHits, &b_cscsegm_nRecHits); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_wheel", &ltTwinMuxIn_wheel, &b_ltTwinMuxIn_wheel); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_sector", &ltTwinMuxIn_sector, &b_ltTwinMuxIn_sector); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_station", &ltTwinMuxIn_station, &b_ltTwinMuxIn_station); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_quality", &ltTwinMuxIn_quality, &b_ltTwinMuxIn_quality); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_bx", &ltTwinMuxIn_bx, &b_ltTwinMuxIn_bx); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_phi", &ltTwinMuxIn_phi, &b_ltTwinMuxIn_phi); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_phiB", &ltTwinMuxIn_phiB, &b_ltTwinMuxIn_phiB); */
+   /* fChain->SetBranchAddress("ltTwinMuxIn_is2nd", &ltTwinMuxIn_is2nd, &b_ltTwinMuxIn_is2nd); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_wheel", &ltTwinMuxOut_wheel, &b_ltTwinMuxOut_wheel); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_sector", &ltTwinMuxOut_sector, &b_ltTwinMuxOut_sector); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_station", &ltTwinMuxOut_station, &b_ltTwinMuxOut_station); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_quality", &ltTwinMuxOut_quality, &b_ltTwinMuxOut_quality); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_rpcbit", &ltTwinMuxOut_rpcbit, &b_ltTwinMuxOut_rpcbit); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_bx", &ltTwinMuxOut_bx, &b_ltTwinMuxOut_bx); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_phi", &ltTwinMuxOut_phi, &b_ltTwinMuxOut_phi); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_phiB", &ltTwinMuxOut_phiB, &b_ltTwinMuxOut_phiB); */
+   /* fChain->SetBranchAddress("ltTwinMuxOut_is2nd", &ltTwinMuxOut_is2nd, &b_ltTwinMuxOut_is2nd); */
+   /* fChain->SetBranchAddress("ltTwinMux_thWheel", &ltTwinMux_thWheel, &b_ltTwinMux_thWheel); */
+   /* fChain->SetBranchAddress("ltTwinMux_thSector", &ltTwinMux_thSector, &b_ltTwinMux_thSector); */
+   /* fChain->SetBranchAddress("ltTwinMux_thStation", &ltTwinMux_thStation, &b_ltTwinMux_thStation); */
+   /* fChain->SetBranchAddress("ltTwinMux_thBx", &ltTwinMux_thBx, &b_ltTwinMux_thBx); */
+   /* fChain->SetBranchAddress("ltTwinMux_thHits", &ltTwinMux_thHits, &b_ltTwinMux_thHits); */
+
    fChain->SetBranchAddress("Mu_isMuGlobal", &Mu_isMuGlobal, &b_Mu_isMuGlobal);
    fChain->SetBranchAddress("Mu_isMuTracker", &Mu_isMuTracker, &b_Mu_isMuTracker);
    fChain->SetBranchAddress("Mu_isMuTrackerArb", &Mu_isMuTrackerArb, &b_Mu_isMuTrackerArb);
@@ -821,11 +842,11 @@ void EfficiencyMonitor::Init(TTree *tree)
    fChain->SetBranchAddress("Mu_matches_Wh", &Mu_matches_Wh, &b_Mu_matches_Wh);
    fChain->SetBranchAddress("Mu_matches_Sec", &Mu_matches_Sec, &b_Mu_matches_Sec);
    fChain->SetBranchAddress("Mu_matches_St", &Mu_matches_St, &b_Mu_matches_St);
-   fChain->SetBranchAddress("gmt_bx", &gmt_bx, &b_gmt_bx);
-   fChain->SetBranchAddress("gmt_phi", &gmt_phi, &b_gmt_phi);
-   fChain->SetBranchAddress("gmt_eta", &gmt_eta, &b_gmt_eta);
-   fChain->SetBranchAddress("gmt_pt", &gmt_pt, &b_gmt_pt);
-   fChain->SetBranchAddress("gmt_qual", &gmt_qual, &b_gmt_qual);
+   /* fChain->SetBranchAddress("gmt_bx", &gmt_bx, &b_gmt_bx); */
+   /* fChain->SetBranchAddress("gmt_phi", &gmt_phi, &b_gmt_phi); */
+   /* fChain->SetBranchAddress("gmt_eta", &gmt_eta, &b_gmt_eta); */
+   /* fChain->SetBranchAddress("gmt_pt", &gmt_pt, &b_gmt_pt); */
+   /* fChain->SetBranchAddress("gmt_qual", &gmt_qual, &b_gmt_qual); */
    /* fChain->SetBranchAdress("gmt_detector", &gmt_detector, &b_gmt_detector); */
    /* fChain->SetBranchAddress("gmt_cands_fwd", &gmt_cands_fwd, &b_gmt_cands_fwd); */
    /* fChain->SetBranchAddress("gmt_cands_isRpc", &gmt_cands_isRpc, &b_gmt_cands_isRpc); */
@@ -835,34 +856,33 @@ void EfficiencyMonitor::Init(TTree *tree)
    /* fChain->SetBranchAddress("gmt_cands_pt", &gmt_cands_pt, &b_gmt_cands_pt); */
    /* fChain->SetBranchAddress("gmt_cands_qual", &gmt_cands_qual, &b_gmt_cands_qual); */
    /* fChain->SetBranchAddress("gmt_cands_ismatched", &gmt_cands_ismatched, &b_gmt_cands_ismatched); */
-
-   fChain->SetBranchAddress("gt_algo_bit", &gt_algo_bit, &b_gt_algo_bit);
-   fChain->SetBranchAddress("gt_algo_bx", &gt_algo_bx, &b_gt_algo_bx);
-   fChain->SetBranchAddress("gt_tt_bit", &gt_tt_bit, &b_gt_tt_bit);
-   fChain->SetBranchAddress("gt_tt_bx", &gt_tt_bx, &b_gt_tt_bx);
-   fChain->SetBranchAddress("rpc_region", &rpc_region, &b_rpc_region);
-   fChain->SetBranchAddress("rpc_clusterSize", &rpc_clusterSize, &b_rpc_clusterSize);
-   fChain->SetBranchAddress("rpc_strip", &rpc_strip, &b_rpc_strip);
-   fChain->SetBranchAddress("rpc_bx", &rpc_bx, &b_rpc_bx);
-   fChain->SetBranchAddress("rpc_station", &rpc_station, &b_rpc_station);
-   fChain->SetBranchAddress("rpc_sector", &rpc_sector, &b_rpc_sector);
-   fChain->SetBranchAddress("rpc_layer", &rpc_layer, &b_rpc_layer);
-   fChain->SetBranchAddress("rpc_subsector", &rpc_subsector, &b_rpc_subsector);
-   fChain->SetBranchAddress("rpc_roll", &rpc_roll, &b_rpc_roll);
-   fChain->SetBranchAddress("rpc_ring", &rpc_ring, &b_rpc_ring);
+   /* fChain->SetBranchAddress("gt_algo_bit", &gt_algo_bit, &b_gt_algo_bit); */
+   /* fChain->SetBranchAddress("gt_algo_bx", &gt_algo_bx, &b_gt_algo_bx); */
+   /* fChain->SetBranchAddress("gt_tt_bit", &gt_tt_bit, &b_gt_tt_bit); */
+   /* fChain->SetBranchAddress("gt_tt_bx", &gt_tt_bx, &b_gt_tt_bx); */
+   /* fChain->SetBranchAddress("rpc_region", &rpc_region, &b_rpc_region); */
+   /* fChain->SetBranchAddress("rpc_clusterSize", &rpc_clusterSize, &b_rpc_clusterSize); */
+   /* fChain->SetBranchAddress("rpc_strip", &rpc_strip, &b_rpc_strip); */
+   /* fChain->SetBranchAddress("rpc_bx", &rpc_bx, &b_rpc_bx); */
+   /* fChain->SetBranchAddress("rpc_station", &rpc_station, &b_rpc_station); */
+   /* fChain->SetBranchAddress("rpc_sector", &rpc_sector, &b_rpc_sector); */
+   /* fChain->SetBranchAddress("rpc_layer", &rpc_layer, &b_rpc_layer); */
+   /* fChain->SetBranchAddress("rpc_subsector", &rpc_subsector, &b_rpc_subsector); */
+   /* fChain->SetBranchAddress("rpc_roll", &rpc_roll, &b_rpc_roll); */
+   /* fChain->SetBranchAddress("rpc_ring", &rpc_ring, &b_rpc_ring); */
    fChain->SetBranchAddress("Ndigis", &Ndigis, &b_Ndigis);
    fChain->SetBranchAddress("Ndtsegments", &Ndtsegments, &b_Ndtsegments);
-   fChain->SetBranchAddress("Ncscsegments", &Ncscsegments, &b_Ncscsegments);
-   fChain->SetBranchAddress("NdtltTwinMuxOut", &NdtltTwinMuxOut, &b_NdtltTwinMuxOut);
-   fChain->SetBranchAddress("NdtltTwinMux_th", &NdtltTwinMux_th, &b_NdtltTwinMux_th);
-   fChain->SetBranchAddress("NdtltTwinMuxIn", &NdtltTwinMuxIn, &b_NdtltTwinMuxIn);
+   // fChain->SetBranchAddress("Ncscsegments", &Ncscsegments, &b_Ncscsegments);
+   /* fChain->SetBranchAddress("NdtltTwinMuxOut", &NdtltTwinMuxOut, &b_NdtltTwinMuxOut); */
+   /* fChain->SetBranchAddress("NdtltTwinMux_th", &NdtltTwinMux_th, &b_NdtltTwinMux_th); */
+   /* fChain->SetBranchAddress("NdtltTwinMuxIn", &NdtltTwinMuxIn, &b_NdtltTwinMuxIn); */
    fChain->SetBranchAddress("Nmuons", &Nmuons, &b_Nmuons);
-   fChain->SetBranchAddress("Ngmt", &Ngmt, &b_Ngmt);
+   // fChain->SetBranchAddress("Ngmt", &Ngmt, &b_Ngmt);
    //   fChain->SetBranchAddress("Ngmtcands", &Ngmtcands, &b_Ngmtcands);
-   fChain->SetBranchAddress("Ngtalgo", &Ngtalgo, &b_Ngtalgo);
-   fChain->SetBranchAddress("Ngttechtrig", &Ngttechtrig, &b_Ngttt);
-   fChain->SetBranchAddress("Nhlt", &Nhlt, &b_Nhlt);
-   fChain->SetBranchAddress("NrpcRecHits", &NrpcRecHits, &b_NrpcRecHits);
+   /* fChain->SetBranchAddress("Ngtalgo", &Ngtalgo, &b_Ngtalgo); */
+   /* fChain->SetBranchAddress("Ngttechtrig", &Ngttechtrig, &b_Ngttt); */
+   /* fChain->SetBranchAddress("Nhlt", &Nhlt, &b_Nhlt); */
+   /* fChain->SetBranchAddress("NrpcRecHits", &NrpcRecHits, &b_NrpcRecHits); */
    Notify();
 }
 
