@@ -207,25 +207,27 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
     
     if(inFileName==""){
 
-      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =  new EffTrend(("Eff"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
+      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  =  new EffTrend(("Eff"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
 								   dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() );
       if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  new EffTrend(("EffA"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
 								    dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() );
       
-      if(ivar.second.doBkg) Dist_MB4Bot[ivar.first] =  new DistTrend(("Hist"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
+      if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]    =  new DistTrend(("Hist"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
 								ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
       
       if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first] =  new DistTrend(("HistSeg"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
 								   ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
     }
     else{
-      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first] =   (EffTrend*) fIn->Get(("Eff"+ivar.second.name+"_MBBot").c_str());
-      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =   (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  =  (EffTrend*) fIn->Get(("Eff"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBBot").c_str());
       
-      if(ivar.second.doBkg) Dist_MB4Bot[ivar.first] =  (DistTrend*) fIn->Get(("Hist"+ivar.second.name+"_MBBot").c_str());
+      if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]    =  (DistTrend*) fIn->Get(("Hist"+ivar.second.name+"_MBBot").c_str());
       if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first] =  (DistTrend*) fIn->Get(("HistSeg"+ivar.second.name+"_MBBot").c_str());
     }
   }
+
+
 
   if(inFileName!=""){
     setAddBins();
@@ -274,8 +276,8 @@ void plotter::plot(string dateName){
   gStyle->SetOptStat(0);
   TGaxis::SetMaxDigits(4);
 
-  if(stat("plot/",&st) != 0)  system("mkdir plot/");
-  if(stat(("plot/"+dateName).c_str(),&st) != 0)   system(("mkdir plot/"+dateName).c_str());
+  //  if(stat("plot/",&st) != 0)  system("mkdir plot/"); 
+  //  if(stat(("plot/"+dateName).c_str(),&st) != 0)   system(("mkdir plot/"+dateName).c_str());
 
   if(stat((dataCont.webFolder+"/"+dateName+"/").c_str(),&st) != 0){
     system(("mkdir "+dataCont.webFolder+"/"+dateName).c_str());
@@ -287,13 +289,17 @@ void plotter::plot(string dateName){
   system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Efficiency").c_str());
   }
   
+if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st) != 0){
+  system(("mkdir "+dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str());
+  system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str());
+  }
+  
   if(stat((dataCont.webFolder+"/"+dateName+"/Background").c_str(),&st) != 0){
   system(("mkdir "+dataCont.webFolder+"/"+dateName+"/Background").c_str());
   system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Background").c_str());
   }
 
   fOut->cd();
- 
 
   for(auto const& ivar : dataCont.var) {
     for (int iwh=0; iwh<5; iwh++){
@@ -314,7 +320,6 @@ void plotter::plot(string dateName){
 	  
 	  if(ist!=3){
 	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetColor(6);
-
 	  }
 	}
 
@@ -325,12 +330,12 @@ void plotter::plot(string dateName){
 
 	 if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->ProfileX();
 	 if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->ProfileX();
-  
-	
+  	
 	if(ist!=3){
 	  if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);	  
 	}
       }
+
       if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
       if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->SetMarkerStyle(20);
       if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
@@ -370,10 +375,11 @@ void plotter::plot(string dateName){
   for(auto const& ivar : dataCont.var){ 
     if(! ivar.second.doEff) continue;
     for (int ist=0; ist<4; ist++){
+      cout<<"hei size "<<ivar.second.projSlice.size()<<endl;
       for(int bin = -1; bin<(int)ivar.second.projSlice.size(); bin++){ 
 	
 	if(bin==1 && !ivar.second.doProj) break;
-	if(bin!=0 && Eff_phiMBWh[ivar.first][0][ist]->checkProj(ivar.second.slice,bin,bin)) continue;
+	if(bin!=0 && Eff_phiMBWh[ivar.first][0][ist]->checkProj(ivar.second.projSlice,bin,bin)) continue;
 	
 	TLegend * legPhiMB = new TLegend(0.75,0.75,0.9,0.9); 
 	TCanvas * cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
@@ -412,8 +418,8 @@ void plotter::plot(string dateName){
 	
 	if(bin == 0)      cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
 	else if(bin==-1)  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.png").c_str());
-	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
-	
+	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+     
 	delete   cPhiMB;
       }      
     }
@@ -653,7 +659,6 @@ void plotter::plot(string dateName){
     cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+ivar.second.name+".png").c_str());
     delete cSegMB4Top ;
     
-
     // MB4 Bot
     TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
     cMB4Bot->SetGrid();
@@ -664,7 +669,6 @@ void plotter::plot(string dateName){
     
     cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".png").c_str());
     delete cMB4Bot;
-
 
     // MB4 Bot segment
     TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
@@ -866,6 +870,5 @@ int plotter::getdir(string dir, vector<string> &files){
   closedir(dp);
   return 0;
 }
-
 
 #endif
