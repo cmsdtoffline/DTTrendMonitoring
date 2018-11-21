@@ -15,12 +15,10 @@ Check-out the code from this repository.
 git clone https://github.com/cmsdtoffline/DTTrendMonitoring.git DTTrendMonitoring  
 ```
 ```
-
 cd DTTrendMonitoring/
 ```
 
 ```
-
 git checkout plotterClass
 ```
 
@@ -41,10 +39,8 @@ python createJSONs.py -e fileName.root -n refName -y year
 For example
 
 ```
-python createJSONs.py -e /eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/Express/DTTree_Run295463.root -n Run295463 -y 2017
+python createJSONs.py -e /eos/cms/store/group/dpg_dt/comm_dt/dtRootple2017/Express/DTTree_Run295463.root -y 2017
 ```
-
-- refName must have the format Run[number] in order to be used in the next step.
 
 - year is needed to compute the integrated luminosity from the begining of the first run of that year.
 
