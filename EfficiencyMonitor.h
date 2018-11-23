@@ -74,9 +74,10 @@ public :
 
    bkg::Bkg bkgCounts;
 
-   TTree          *fChain;   //!pointer to the analyzed TTree or TChain
-   Int_t           fCurrent; //!current Tree number in a TChain
+   TTree           *fChain;   //!pointer to the analyzed TTree or TChain
+   Int_t           fCurrent;  //!current Tree number in a TChain
    plotter         *plots;
+   // bool            doOnlyPlot_; //do only plots from stored results //del
 
    // Declaration of leaf types
    Int_t           runnumber;
@@ -450,7 +451,7 @@ public :
    /* TBranch        *b_NrpcRecHits;   //! */
 
    
-   EfficiencyMonitor(context extContext, TTree *tree=0, std::string extFileName = "", std::string extOutName = "", std::string extLegacy = "");
+   EfficiencyMonitor(context extContext, TTree *tree=0, std::string extFileName = "", std::string extOutName = "", std::string extLegacy = "",bool doOnlyPlot = 0);
    virtual ~EfficiencyMonitor();
    virtual Int_t    Cut(Long64_t entry);
    virtual Int_t    GetEntry(Long64_t entry);
@@ -472,44 +473,46 @@ public :
 
 #ifdef EfficiencyMonitor_cxx
 
-EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::string extFileName, std::string extOutName, std::string extLegacyName) : fChain(0)
+EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::string extFileName, std::string extOutName, std::string extLegacyName, bool doOnlyPlot) : fChain(0)
 {
-     if (tree == 0) {
-       cout<<"ERROR, the tree is Null"<<endl;   
-       abort();
-   }
 
-      fileName    = extFileName;
-      legacyName  = extLegacyName;
-      outName     = extOutName;
-      dataContext = extContext; 
-      Init(tree);
-      
-      if(dataContext.name=="Fixed"){
-	if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
-	  SetRunSlices(); 
-	  checkPuLumiRatio();	
-	}
-	else{
-	  cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
-	  abort();
-	}
-      }
-      
-      else if(dataContext.name=="Increasing"){
-	if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
-	  SetRunSlices(); 
-	}
-	else{
-	  cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
-	  abort();
-	}
-      }
-      else { 
-	cout<<"ERROR, Wrong type of plots"<<endl;
-	abort();
-      }
-      plots = new plotter(dataContext,legacyName,outName,fileName);
+  if (!doOnlyPlot && tree == 0) {
+    cout<<"ERROR, the tree is Null"<<endl;
+    abort();
+  }
+  
+  fileName    = extFileName;
+  legacyName  = extLegacyName;
+  outName     = extOutName;
+  dataContext = extContext; 
+  if(!doOnlyPlot) Init(tree);
+  
+  cout<<"hei 1"<<endl;
+  if(dataContext.name=="Fixed"){
+    if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
+      SetRunSlices(); 
+      //checkPuLumiRatio();	
+    }
+    else{
+      cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
+      abort();
+    }
+  }
+  
+  else if(dataContext.name=="Increasing"){
+    if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
+      if(!doOnlyPlot)  SetRunSlices(); 
+    }
+    else{
+      cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
+      abort();
+    }
+  }
+  else { 
+    cout<<"ERROR, Wrong type of plots"<<endl;
+    abort();
+  }
+  plots = new plotter(dataContext,legacyName,outName,fileName,doOnlyPlot);
 }
 
 EfficiencyMonitor::~EfficiencyMonitor()

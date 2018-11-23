@@ -208,20 +208,8 @@ if (Ndead==0) {
      if (jentry%50000 == 0) cout<<"Event "<<jentry<<" "<<setprecision (2)<<((jentry/float(nRealEntries))*100)<<" %  "<<endl;
      if (ientry < 0) break;
 
-     /*   
-     //load only used tbranches
-     b_runnumber->GetEntry(jentry);
-     b_lumiblock->GetEntry(jentry);
-     b_PV_Nvtx->GetEntry(jentry);
-     b_Ndtsegments->GetEntry(jentry);
-     b_dtsegm4D_hasPhi->GetEntry(jentry);
-     b_dtsegm4D_hasZed->GetEntry(jentry);
-     b_dtsegm4D_phinhits->GetEntry(jentry);
-     b_dtsegm4D_x_dir_loc->GetEntry(jentry);
-     */ //fixme. maybe is better directly in .h 
+     //if(!jentry%4 == 0) continue; //del //fixme  
 
-     //     cout<<runnumber<<" "<<!(std::find(dataContext.var["Run"].slice.begin(), dataContext.var["Run"].slice.end(), runnumber) != dataContext.var["Run"].slice.end())<<endl;
-   
      nb = fChain->GetEntry(jentry);   nbytes += nb;
      // if (Cut(ientry) < 0) continue;
 
@@ -234,6 +222,8 @@ if (Ndead==0) {
        else if (ivar.second.name =="Empty")   dataContext.var[ivar.first].value = 1.; // Default value for variables with no projection option 
        //else if (ivar.second.name =="BunchX" ) dataContext.var[ivar.first].value = bunchXing; not used now
      }
+
+     //  cout<<"lumi per block "<<lumiperblock<<endl; //del
 
      getBkgDigi(jentry);     
 
@@ -353,6 +343,7 @@ if (Ndead==0) {
 
 	     for(auto const& ivar : dataContext.var) {
 	       if(!ivar.second.doEff) continue;
+	       // cout<<ivar.second.projVar<<" lumi per block inside "<<dataContext.var[(ivar.second.projVar).c_str()].value<<endl; //del
 	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value );    
 	       plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	       // extra chamber of sector 4 (sector 13)

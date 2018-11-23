@@ -36,7 +36,7 @@ public :
   TFile          *fOut;
 
   context dataCont; //struct with the setting
-  bool    isSliceChanged = 0;
+  bool    isSliceChanged = 0; //is it used? fix it or delete it
   string  LumiFileName;
 
   Float_t TotLumi = 0;
@@ -62,7 +62,7 @@ public :
   map<string,DistTrend* >                          Dist_MB4Bot;
   map<string,DistTrend* >                          Dist_SegMB4Bot;
   
-  plotter(context extDataCont, std::string inFileName = "", std::string outFileName="", string LumiFileName_ = "");
+  plotter(context extDataCont, std::string inFileName = "", std::string outFileName="", string LumiFileName_ = "",bool doOnlyPlot = kFALSE);
 
   void   write();
   void   close();
@@ -77,7 +77,7 @@ public :
   ~plotter();
 };
 
-plotter::plotter(context extDataCont, std::string inFileName, std::string outFileName, std::string LumiFileName_){
+plotter::plotter(context extDataCont, std::string inFileName, std::string outFileName, std::string LumiFileName_, bool doOnlyPlot){
 
 
   dataCont = extDataCont;  
@@ -89,7 +89,7 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   }
   else  cout<<"Create new objects and new file "<<(outFileName+".root")<<endl;
   
-  fOut  = new TFile (("data/results/"+dataCont.name+"/"+outFileName+".root").c_str(),"RECREATE"); //FIXME. RECREATWE->CREATE
+  fOut  = new TFile (("data/results/"+dataCont.name+"/"+outFileName+".root").c_str(),"RECREATE"); //FIXME. RECREATE->CREATE
 
 
   LumiFileName = "DT_"+LumiFileName_;
@@ -126,28 +126,30 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 	if(inFileName==""){
 
 	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
-										   "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
-										  dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
+										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
+										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 
 	  
+	  
 	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
-										    "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
-										   dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
+										       "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
+										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 
-
+	  
+	  
 	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back(new DistTrend(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
-									       "St"+std::to_string(ist)).c_str(),"",
-									      //ivar.second.nBins,ivar.second.X0, ivar.second.X1, // equal bin constructor to be fix for increasing option.
-									      //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
-									      ivar.second.slice.size()-1,
-									      ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
-
+										    "St"+std::to_string(ist)).c_str(),"",
+										   //ivar.second.nBins,ivar.second.X0, ivar.second.X1, // equal bin constructor to be fix for increasing option.
+										   //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
+										   ivar.second.slice.size()-1,
+										   ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
+	  
 	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back(new DistTrend(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
-										  "St"+std::to_string(ist)).c_str(),"",		
-										 //ivar.second.nBins,ivar.second.X0, ivar.second.X1,						   
-										 //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
-										 ivar.second.slice.size()-1,
-										 ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
+										       "St"+std::to_string(ist)).c_str(),"",		
+										      //ivar.second.nBins,ivar.second.X0, ivar.second.X1,						   
+										      //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
+										      ivar.second.slice.size()-1,
+										      ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
 	  
 	}
 	else{
@@ -165,10 +167,11 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 	  if(inFileName==""){
 	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										     "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
-										    dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
+										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
+
 	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
-										     dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
+										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 	  }
 	  else{
 	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
@@ -182,11 +185,13 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 
 	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 									     "",nPoints-1,ivar.second.slice.data(),
-									     dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
+										ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
+
 
 	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 									      "",nPoints-1,ivar.second.slice.data(),
-									      dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() ));
+										ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
+
 
 	if(ivar.second.doBkg) Dist_MB4Top[ivar.first].push_back( new DistTrend(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str(),
 					      "",ivar.second.slice.size()-1,ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
@@ -208,9 +213,12 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
     if(inFileName==""){
 
       if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  =  new EffTrend(("Eff"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
-								   dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() );
+										ivar.second.projSlice.size()-1,ivar.second.projSlice.data() );
+
+
       if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  new EffTrend(("EffA"+ivar.second.name+"_MBBot").c_str(),"",nPoints-1,ivar.second.slice.data(),
-								    dataCont.var[ivar.second.projVar].slice.size()-1,dataCont.var[ivar.second.projVar].slice.data() );
+										ivar.second.projSlice.size()-1,ivar.second.projSlice.data() );
+
       
       if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]    =  new DistTrend(("Hist"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
 								ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
@@ -228,9 +236,20 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   }
 
 
-
   if(inFileName!=""){
-    setAddBins();
+    if(doOnlyPlot && (dataCont.var.find("IntLumi")==dataCont.var.end())){
+      const TArrayD * arr = Eff_phiMBWh["Run"][0][0]->GetArrayX();
+      std::vector<Double_t> xBins = {}; 
+      for(int bin = 1; bin<=arr->GetSize(); bin++) {
+	xBins.push_back(arr->GetArray()[bin-1]); 
+      }
+      dataCont.var["Run"].slice = xBins;
+      for(int bin = 1; bin<=arr->GetSize(); bin++) {
+	cout<<dataCont.var["Run"].slice[bin-1]<<endl;
+      }
+     }
+    else  setAddBins();
+      
   }
 }
 
@@ -375,9 +394,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
   for(auto const& ivar : dataCont.var){ 
     if(! ivar.second.doEff) continue;
     for (int ist=0; ist<4; ist++){
-      cout<<"hei size "<<ivar.second.projSlice.size()<<endl;
       for(int bin = -1; bin<(int)ivar.second.projSlice.size(); bin++){ 
-	
 	if(bin==1 && !ivar.second.doProj) break;
 	if(bin!=0 && Eff_phiMBWh[ivar.first][0][ist]->checkProj(ivar.second.projSlice,bin,bin)) continue;
 	
@@ -400,7 +417,6 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	}
 	
 	for (int iwh=0; iwh<5; iwh++){
-	  
 	  if(ivar.second.name=="Run"){
 	    if(bin == 0) Eff_phiMBWh[ivar.first][iwh][ist]->drawWithLumi(ivar.second.slice,0,-1,"samep");
 	    else Eff_phiMBWh[ivar.first][iwh][ist]->drawWithLumi(ivar.second.slice,bin,bin,"samep");
@@ -418,7 +434,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	
 	if(bin == 0)      cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
 	else if(bin==-1)  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.png").c_str());
-	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
      
 	delete   cPhiMB;
       }      
@@ -468,7 +484,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	    legTheMB->Draw("same");
 	    
 	    if(bin == 0)   cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".png").c_str());
-	    else cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	    else cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	    
 	    delete  cTheMB;
 	  }
@@ -515,7 +531,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	legPhiMB4Top->Draw("same");
 	
 	if(bin == 0)   cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".png").c_str());
-	else cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	else cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	
 	delete   cPhiMB4Top;
       }
@@ -542,7 +558,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	}
 	
 	if(bin == 0)   cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".png").c_str());
-	else cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	else cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	
 	delete   cPhiMB4Bot;
       }
@@ -694,12 +710,12 @@ void plotter::setPlots(){
 	 }
 	 else{
 	   if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->setEffBin();
-	    if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->setEffBin();
+	   if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->setEffBin();
 	 }
-	  if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){ 
-	    if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->set2DHistoBin();
-	    if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->set2DHistoBin();
-	  }
+	 if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){ 
+	   if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->set2DHistoBin();
+	   if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->set2DHistoBin();
+	 }
 	 if(ist!=3){
 	   if(ivar.second.name!="Run"){
 	     if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->setEffBin();
@@ -776,19 +792,19 @@ void plotter::setAddBins(){
 void plotter::addBinsSlice(const TArrayD * arr, vector<double> & slices){
 
   std::vector<Double_t> xBins = {}; 
-    for(int bin = 1; bin<=arr->GetSize(); bin++) {
-      xBins.push_back(arr->GetArray()[bin-1]); 
-    }
-    
-    //Delete last elements that was added just to have an extra item to have the last bin            
-    xBins.erase(xBins.end()-1);
-   
-    //insert in xBins the new runs
-    xBins.insert(xBins.end(), slices.begin(), slices.end());
-    
-    // update slice with old run numbers
-    slices= xBins; //check
-    isSliceChanged= true; 
+  for(int bin = 1; bin<=arr->GetSize(); bin++) {
+    xBins.push_back(arr->GetArray()[bin-1]); 
+  }
+  
+  //Delete last elements that was added just to have an extra item to have the last bin            
+  xBins.erase(xBins.end()-1);
+  
+  //insert in xBins the new runs
+  xBins.insert(xBins.end(), slices.begin(), slices.end());
+  
+  // update slice with old run numbers
+  slices = xBins; //check
+  isSliceChanged= true; 
 }
 
 
