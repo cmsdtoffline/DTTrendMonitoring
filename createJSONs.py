@@ -21,7 +21,7 @@ help="change year, deafault is 2018")
 extFile = options.extFile
 year    = options.year
 
-# import json
+
 sys.path.append('./Tools')
 
 import lumi_utils as lu
@@ -55,13 +55,27 @@ Dataset2018 = {"Run2018A": "/eos/cms/store/group/dpg_dt/comm_dt/dtRootple2018/Pr
                }
 
 
+TotLumiRun1      = 29445 *1e-3   # check fix. Find delivered and recorded
+TotLumiRun1Pbp   = 0.036 *1e-3
 
+TotLumipp2015    = 4220    *1e-3 # from 03/06/15 to 03/111/15
+TotLumippRef2015 = 28.82   *1e-3 # from 19/11/15 to 23/11/15
+TotLumiPbPb2015  = 0.0006  *1e-3 # from 25/11/15 to 13/12/15
+
+TotLumipp2016    = 40820   *1e-3 # from 22/04/16 to 27/07/216
+TotLumiPbp2016   = 0.188   *1e-3 # from 18/11/16 to 02/12/16
+
+TotLumipp2017    = 49790   *1e-3 # from 30/05/17 to 26/11/17
+TotLumippRef2017 = 334.27  *1e-3 # from 11/11/17 to 21/11/17 ?
+
+TotLumipp2018    = 68180   *1e-3 # from 17/04/18 to /11/18 
+TotLumiPbPb2018  = 0.00056 *1e-3 # from 08/11/18 to 20/11/18 
 
 def getLumis(inputFile):
 
     RunLumis = lu.RunLumis({})
     vals = []
-   # print "lu",lu.getRunLumis(fname),type(lu.getRunLumis(fname))
+
     vals.append(lu.getRunLumis(fname))
     allRunLumis = sum(vals, RunLumis)
     return allRunLumis
@@ -76,7 +90,6 @@ if __name__ == '__main__':
 
     else:  Dataset = {"singlefile":extFile}
 
-    print "dataset",Dataset
     # print "#################################"
     print "   Producing Lumi JSON starting from DT DQM TTree   "
 
@@ -86,12 +99,14 @@ if __name__ == '__main__':
     # for k, fname in Dataset2016.items():
     # The following looping method guaranitee and ordered loop onto the keys
 
-    if year=="2016":   firstRun = "271036"
-    elif year=="2017": firstRun = "294645"
-    elif year=="2018": firstRun = "314472" # precomissioning
+    if   year=="2015": firstRun = "247607" # first run 2015A
+    elif year=="2016": firstRun = "271036" # first run 2016A
+    elif year=="2017": firstRun = "294645" # first run 2017A
+    elif year=="2018": firstRun = "314472" # Collisions2018Commiss
     else: sys.exit("Wrong year")
 
     for key in sorted(Dataset):
+        print "running ",key
         fname = Dataset[key]
         # Class define in lumi_utils that handles Runs and Lumi Blocks
         datasetRunLumis = getLumis(fname)
@@ -100,7 +115,8 @@ if __name__ == '__main__':
         outFileTotal = path + 'IntLumi/Total'+year+'.json'
 
         for k, val in datasetRunLumis.getJson().items():
-            subprocess.call(["brilcalc", "lumi", "-u/pb", "-o","temp.csv", "--begin",firstRun,"--end",str(k)])
+
+            subprocess.call(["brilcalc", "lumi", "-u/fb", "-o","temp.csv", "--begin",firstRun,"--end",str(k)])
 
             fileTemp  = open("temp.csv", "r")
             runDic = {}
@@ -108,6 +124,7 @@ if __name__ == '__main__':
 
             with open(outFileTotal, mode ) as outjson:
                 line = subprocess.check_output(['tail', '-1', "temp.csv"])
+
                 try:
                     runDic = json.load(outjson)
                 except ValueError:
@@ -120,8 +137,26 @@ if __name__ == '__main__':
                 outjson.seek(0)  #should reset file position to the beginning.
 
                 runDic[k]    = line.split(",")
+
+                if runDic[k][0]=="#run:fill": sys.exit("Error: Something wrong with the selected run")
+
                 runDic[k][0] = runDic[k][0].replace("#","") 
                 runDic[k][5] = runDic[k][5].replace("\n","") 
+                
+                if   year=="2018": 
+                    runDic[k][4] = str(float(runDic[k][4]) + TotLumiRun1 + TotLumipp2015 +TotLumippRef2015 +TotLumiPbPb2015 + TotLumipp2016 +TotLumiPbp2016 + TotLumipp2017 + TotLumippRef2017)
+
+                elif year=="2017": 
+                    runDic[k][4] = str(float(runDic[k][4]) + TotLumiRun1 + TotLumipp2015 +TotLumippRef2015 +TotLumiPbPb2015 + TotLumipp2016 +TotLumiPbp2016)
+
+                elif year=="2016": 
+                    runDic[k][4] = str(float(runDic[k][4]) + TotLumiRun1 + TotLumipp2015 +TotLumippRef2015 +TotLumiPbPb2015)
+
+                elif year=="2015": 
+                    runDic[k][4] = str(float(runDic[k][4]) + TotLumiRun1)
+
+
+                #runDic[k][5] = str(float(runDic[k][5])+TotLumiRun1) To be fixed if recorded is needed
 
                 json.dumps('"comments":["nfill","nrun","nls","ncms","totdelivered(/pb)","totrecorded(/pb)"]',outjson, indent=4) #fixme
                 json.dump(runDic,outjson, indent=4)
