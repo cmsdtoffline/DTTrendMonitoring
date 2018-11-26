@@ -99,7 +99,7 @@
      "name":  "Empty",
      "Title": "Empty",
      "Label": "Empty",
-     "slice": [0.,1.],
+     "slice": [0.0,1.0],
      "nBins":10,
      "X0":0,
      "X1":0
