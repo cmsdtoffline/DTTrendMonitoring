@@ -73,6 +73,10 @@ void EffTrend::setTitle(const char *title){
     eff->SetTitle(strs[0].c_str());
 }
 
+void EffTrend:: draw2D(string option){
+  fPassedHistogram->Divide(fTotalHistogram);
+  fPassedHistogram->Draw(option.c_str());
+}
 
 
 void EffTrend:: draw(Int_t  firstxbin,
@@ -86,12 +90,13 @@ void EffTrend:: draw(Int_t  firstxbin,
   effNew->SetMarkerColor(eff->GetMarkerColor());
   effNew->SetLineColor(eff->GetLineColor());
   effNew->SetMarkerStyle(20);
+  effNew->SetMarkerSize(0.7);
   effNew->SetTitle(eff->GetTitle());
 
   effNew->GetXaxis()->SetTitle(xLabel.c_str());
   effNew->GetYaxis()->SetTitle(yLabel.c_str());
-  effNew->SetMinimum(0.89);
-  effNew->SetMaximum(1.02);
+  effNew->SetMinimum(0.92);
+  effNew->SetMaximum(1.01);
 
   effNew->SetName((hPass->GetName()+theName).c_str());
   eff = effNew;
@@ -138,6 +143,7 @@ void EffTrend:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
   effNew->SetMarkerColor(eff->GetMarkerColor());
   effNew->SetLineColor(eff->GetLineColor());
   effNew->SetMarkerStyle(20);
+  effNew->SetMarkerSize(0.7);
 
   effNew->GetYaxis()->SetTitle(yLabel.c_str()); 
   effNew->SetTitle(eff->GetTitle());
@@ -147,8 +153,8 @@ void EffTrend:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
   if(plotRuns)  eff->GetXaxis()->SetTitle("Run"); 
   else  eff->GetXaxis()->SetTitle(xLabel.c_str());
 
-  eff->SetMinimum(0.89);
-  eff->SetMaximum(1.02);
+  eff->SetMinimum(0.92);
+  eff->SetMaximum(1.01);
 
   eff->SetName((hPass->GetName()+theName).c_str());
   eff->Draw(option.c_str());
@@ -215,6 +221,10 @@ Color_t EffTrend::GetColor(){
 
 void EffTrend::SetMarkerStyle(Style_t mstyle){
   eff->SetMarkerStyle(mstyle);
+}
+
+void EffTrend::SetMarkerSize(Size_t msize){
+  eff->SetMarkerSize(msize);
 }
 
 void EffTrend::getIntLumiEff( vector<double> slices){

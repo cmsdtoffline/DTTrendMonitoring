@@ -487,7 +487,6 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
   dataContext = extContext; 
   if(!doOnlyPlot) Init(tree);
   
-  cout<<"hei 1"<<endl;
   if(dataContext.name=="Fixed"){
     if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
       SetRunSlices(); 

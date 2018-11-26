@@ -64,14 +64,13 @@ void run_IncreasingRange(string refName ="", string storingName ="", string stor
   
   
   //initialize variable struct  Var object, object name, json file, do eff plots, do bkg plots, do projections, variable for projections, is external variable
-  
+
   variables::initVar(Empty,"Empty","variablesSetting.json",0,0); 
   variables::initVar(BckGr,"Bkg","variablesSetting.json",0,0);  
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json",0,0);
-  
-  variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,1,1,"InsLumi",0);
-  //variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,1);
-  
+  variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,0,1,"InsLumi",0);
+    
+ 
   incrCont.name      = "Increasing";
   incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr},{Empty.name,Empty},{InsLumi.name,InsLumi}};
   incrCont.webFolder = "~/www/DT";

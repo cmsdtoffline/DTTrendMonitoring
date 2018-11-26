@@ -61,6 +61,7 @@ namespace variables{
     var.doProj = doProj;
 
     if(doProj){
+
       var.projVar = projVar;
       if(isExtProj){
 	var.projSlice = as_vector<double>(pTree,(projVar+".slice").c_str());
@@ -72,12 +73,9 @@ namespace variables{
 
     else{ //fake variable.
       var.projVar  = "Empty";
-      var.projSlice = {0}; 
+      var.projSlice = {0.,1.}; 
     }
-
-    
     return 1;
-    
   }
 }
 

@@ -37,6 +37,8 @@ class EffTrend: public TNamed
   void draw(Int_t  firstxbin = 0,
 		  Int_t  lastxbin = -1, string option= "");
 
+  void draw2D(string option = "colz");
+
   void drawWithLumi(vector<double> slices,
 		    Int_t  firstxbin,
 		    Int_t  lastxbin, string option, bool plotRuns = false);
@@ -48,6 +50,8 @@ class EffTrend: public TNamed
   void SetColor(Color_t mcolor = 1);  
 
   void SetMarkerStyle(Style_t mstyle = 1);
+
+  void SetMarkerSize(Size_t msize=1);
 
   void getIntLumiEff( vector<double> slices);
 

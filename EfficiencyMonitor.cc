@@ -208,24 +208,27 @@ if (Ndead==0) {
      if (jentry%50000 == 0) cout<<"Event "<<jentry<<" "<<setprecision (2)<<((jentry/float(nRealEntries))*100)<<" %  "<<endl;
      if (ientry < 0) break;
 
-     //if(!jentry%4 == 0) continue; //del //fixme  
-
      nb = fChain->GetEntry(jentry);   nbytes += nb;
      // if (Cut(ientry) < 0) continue;
 
      if( !(std::find(dataContext.var["Run"].slice.begin(), dataContext.var["Run"].slice.end(), runnumber) != dataContext.var["Run"].slice.end()) ) continue; //fixme
 
+     bool doBkg = kFALSE;
      for(auto const& ivar : dataContext.var) { 
        if (ivar.second.name == "InsLumi")     dataContext.var[ivar.first].value = lumiperblock;  //add secons value for slices here? 
        else if (ivar.second.name =="Pileup" ) dataContext.var[ivar.first].value = PV_Nvtx;
        else if (ivar.second.name =="Run")     dataContext.var[ivar.first].value = (float)runnumber; 
-       else if (ivar.second.name =="Empty")   dataContext.var[ivar.first].value = 1.; // Default value for variables with no projection option 
+       else if (ivar.second.name =="Empty")   dataContext.var[ivar.first].value = 0.; // Default value for variables with no projection option 
        //else if (ivar.second.name =="BunchX" ) dataContext.var[ivar.first].value = bunchXing; not used now
+
+       //Check if there are variables to plotted asa function of bkg.
+       if(ivar.second.doBkg){
+	
+	 doBkg= kTRUE;
+
+       }
      }
-
-     //  cout<<"lumi per block "<<lumiperblock<<endl; //del
-
-     getBkgDigi(jentry);     
+     if(doBkg)   getBkgDigi(jentry);     
 
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
      // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } 

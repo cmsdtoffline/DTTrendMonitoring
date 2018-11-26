@@ -88,7 +88,10 @@
      "slice": [],
      "nBins":0,	
      "X0":0,
-     "X1":0
+     "X1":0,
+     "projVar":"InsLumi",				    
+     "projSlice":[0.0,10000.0,15000.0,20000.0,25000.0]
+       
    },
 
 "Empty":
@@ -96,7 +99,7 @@
      "name":  "Empty",
      "Title": "Empty",
      "Label": "Empty",
-     "slice": [1.0,2.0,3.0],
+     "slice": [0.,1.],
      "nBins":10,
      "X0":0,
      "X1":0

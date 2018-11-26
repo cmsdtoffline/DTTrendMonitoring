@@ -124,18 +124,14 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 
       for (int ist=0; ist<4; ist++){
 	if(inFileName==""){
-
 	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 
-	  
-	  
+	  	  
 	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										       "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
-
-	  
 	  
 	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back(new DistTrend(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										    "St"+std::to_string(ist)).c_str(),"",
