@@ -84,7 +84,7 @@
    {
      "name":  "Run",
      "Title": "run",
-     "Label": "Int.Lumi. pb^{-1}",
+     "Label": "Int.Lumi. fb^{-1}",
      "slice": [],
      "nBins":0,	
      "X0":0,
