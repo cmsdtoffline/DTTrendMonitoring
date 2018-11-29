@@ -124,6 +124,7 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 
       for (int ist=0; ist<4; ist++){
 	if(inFileName==""){
+
 	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
 										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
@@ -304,11 +305,15 @@ void plotter::plot(string dateName){
   system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Efficiency").c_str());
   }
   
-if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st) != 0){
-  system(("mkdir "+dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str());
-  system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str());
+  for(auto const& ivar : dataCont.var) {
+
+    //check if some variables has projections and create folder
+    if( ivar.second.doProj  && stat((dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin").c_str(),&st) != 0){
+      system(("mkdir "+dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin").c_str());
+      system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin").c_str());
+    }
   }
-  
+
   if(stat((dataCont.webFolder+"/"+dateName+"/Background").c_str(),&st) != 0){
   system(("mkdir "+dataCont.webFolder+"/"+dateName+"/Background").c_str());
   system(("cp "+dataCont.webFolder+"/index.php " +dataCont.webFolder+"/"+dateName+"/Background").c_str());
@@ -393,7 +398,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
       for(int bin = -1; bin<(int)ivar.second.projSlice.size(); bin++){ 
 	if(bin==1 && !ivar.second.doProj) break;
 	if(bin!=0 && Eff_phiMBWh[ivar.first][0][ist]->checkProj(ivar.second.projSlice,bin,bin)) continue;
-	
+
 	TLegend * legPhiMB = new TLegend(0.75,0.75,0.9,0.9); 
 	TCanvas * cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
 	
@@ -430,7 +435,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	
 	if(bin == 0)      cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
 	else if(bin==-1)  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.png").c_str());
-	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	else cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str() );
      
 	delete   cPhiMB;
       }      
@@ -480,7 +485,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	    legTheMB->Draw("same");
 	    
 	    if(bin == 0)   cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".png").c_str());
-	    else cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	    else cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	    
 	    delete  cTheMB;
 	  }
@@ -527,7 +532,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	legPhiMB4Top->Draw("same");
 	
 	if(bin == 0)   cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".png").c_str());
-	else cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	else cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	
 	delete   cPhiMB4Top;
       }
@@ -554,7 +559,7 @@ if(stat((dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin").c_str(),&st)
 	}
 	
 	if(bin == 0)   cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".png").c_str());
-	else cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/InstLumiBin/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	else cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
 	
 	delete   cPhiMB4Bot;
       }

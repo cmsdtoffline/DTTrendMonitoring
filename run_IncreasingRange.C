@@ -68,9 +68,8 @@ void run_IncreasingRange(string refName ="", string storingName ="", string stor
   variables::initVar(Empty,"Empty","variablesSetting.json",0,0); 
   variables::initVar(BckGr,"Bkg","variablesSetting.json",0,0);  
   variables::initVar(InsLumi,"InsLumi","variablesSetting.json",0,0);
-  variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,0,1,"InsLumi",0);
-    
- 
+  variables::initVar(IntLumi,"IntLumi","variablesSetting.json",1,0,1);
+
   incrCont.name      = "Increasing";
   incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr},{Empty.name,Empty},{InsLumi.name,InsLumi}};
   incrCont.webFolder = "~/www/DT";

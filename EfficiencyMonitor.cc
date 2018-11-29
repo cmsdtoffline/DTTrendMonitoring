@@ -221,18 +221,14 @@ if (Ndead==0) {
        else if (ivar.second.name =="Empty")   dataContext.var[ivar.first].value = 0.; // Default value for variables with no projection option 
        //else if (ivar.second.name =="BunchX" ) dataContext.var[ivar.first].value = bunchXing; not used now
 
-       //Check if there are variables to plotted asa function of bkg.
-       if(ivar.second.doBkg){
-	
-	 doBkg= kTRUE;
-
-       }
+       //Check if there are variables to plotted as a function of the background. If yes compute the background.
+       if(ivar.second.doBkg) doBkg= kTRUE;
      }
      if(doBkg)   getBkgDigi(jentry);     
 
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
      // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } 
-     
+   
      // First search for Phi segments
           
      for (int iseg=0; iseg<Ndtsegments; iseg++) {
@@ -346,7 +342,6 @@ if (Ndead==0) {
 
 	     for(auto const& ivar : dataContext.var) {
 	       if(!ivar.second.doEff) continue;
-	       // cout<<ivar.second.projVar<<" lumi per block inside "<<dataContext.var[(ivar.second.projVar).c_str()].value<<endl; //del
 	       plots->Eff_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value );    
 	       plots->EffA_phiMBWh[ivar.first][dtsegm4D_wheel->at(iseg)+2][dtsegm4D_station->at(iseg)-1]->Fill(1,ivar.second.value,dataContext.var[(ivar.second.projVar).c_str()].value ); 
 	       // extra chamber of sector 4 (sector 13)
@@ -709,7 +704,6 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.root").c_str());
-
 }
 
 

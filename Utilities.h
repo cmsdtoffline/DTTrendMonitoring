@@ -43,7 +43,7 @@ namespace lumi{
 
 namespace variables{
   
-  bool initVar(Var & var, string varname, string filename, bool DoEff = 1, bool DoBkg =1, bool doProj = 0, string projVar = "", bool isExtProj = 1){    
+  bool initVar(Var & var, string varname, string filename, bool DoEff = 1, bool DoBkg =1, bool doProj = 0, string projVar = ""){    
 
     pt::ptree pTree;
     pt::read_json(filename.c_str(), pTree);
@@ -61,13 +61,13 @@ namespace variables{
     var.doProj = doProj;
 
     if(doProj){
-
-      var.projVar = projVar;
-      if(isExtProj){
-	var.projSlice = as_vector<double>(pTree,(projVar+".slice").c_str());
+      if(projVar==""){
+	var.projVar   = pTree.get<std::string>( (varname+".projVar").c_str());
+	var.projSlice = as_vector<double>(pTree,(varname+".projSlice").c_str());
       }
       else{
-	var.projSlice = as_vector<double>(pTree,(varname+".projSlice").c_str());
+	var.projVar   = projVar;
+	var.projSlice = as_vector<double>(pTree,(projVar+".slice").c_str());
       }
     } 
 

@@ -54,23 +54,24 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
 
   else {cout<<"Problems with files "<<endl;    exit(1);}
  
-  
   context FixedCont;
-  
-  FixedCont.name = "Fixed";
   
   Var InsLumi;
   Var Pileup;
   Var BkGr;
   Var Empty;
   
-  variables::initVar(Pileup,"Pileup","variablesSetting.json");
-  variables::initVar(InsLumi,"InsLumi","variablesSetting.json");
-  variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
-  variables::initVar(Empty,"Empty","variablesSetting.json",0,0);
 
+  //initialize variable struct  Var object, object name, json file, do eff plots, do bkg plots, do projections, variable for projections, is external variable
+
+
+  variables::initVar(Empty,"Empty","variablesSetting.json",0,0);
+  variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
+  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1);
+  variables::initVar(Pileup,"Pileup","variablesSetting.json");
+
+  FixedCont.name = "Fixed";
   FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty}};
-  FixedCont.nVar  = FixedCont.var.size();
   FixedCont.webFolder = "~/www/DT";
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName,doOnlyPlot);
