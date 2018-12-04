@@ -25,8 +25,15 @@ std::vector<T> as_vector(ptree const& pt, ptree::key_type const& key)
 namespace lumi{
   
   float getTotLumiRun(string run){
-    
-    string year = "2018";
+
+    string year; //= "2016";
+
+    //if   (float(run) == float("247607"))  year="2015";
+    if      ( (std::stof(run) > std::stof("271036")) && (std::stof(run) < std::stof("294645")))  year="2016"; 
+    else if ( (std::stof(run) > std::stof("294645")) && (std::stof(run) < std::stof("314472")))  year="2017";  
+    else if (  std::stof(run) > std::stof("314472"))  year="2018";  
+    else {cout<<"Wrong year"<<endl; abort();}
+	    		     
     string path = "data/IntLumi/";
     string inFileTotal = path + "Total"+year+".json";
     
@@ -35,9 +42,7 @@ namespace lumi{
     vector<float> runInfos;
     runInfos =  as_vector<float>(pTree,run.c_str());
     cout.precision(100000);
-    return runInfos.at(4);  
-    
-  }
+    return runInfos.at(4);}
 }
 
 
