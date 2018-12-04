@@ -198,8 +198,6 @@ if (Ndead==0) {
      while (idead!=0);
    }
 
-   Int_t currentRun = 0;
-
    cout<<"Reading tree"<<endl;
    for (Long64_t jentry=0; jentry<nentries;jentry++) {
 
@@ -705,6 +703,44 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.root").c_str());
 }
+
+
+void EfficiencyMonitor::checkRunStat(){
+
+  cout<<"Loop over the tree to create run list and select runs with enough statistic"<<endl;
+  if (fChain == 0) return;   
+  Long64_t nentries     = fChain->GetEntriesFast();
+  Long64_t nRealEntries = fChain->GetEntries();
+
+  Int_t preRunNumber = 0;
+ 
+  map<int,int> runnumberMap;
+
+  for (Long64_t jentry = 0; jentry<nentries; jentry++) {
+
+    if( jentry==nRealEntries-1 ) cout<<jentry<< " "<<nRealEntries-1<<endl;
+ 
+    Long64_t ientry = LoadTree(jentry);
+
+    b_runnumber->GetEntry(jentry);
+
+    if (ientry < 0)  break;
+    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;
+
+    runnumberMap[runnumber]+=1;
+  }
+
+  for( const auto& run_pair : runnumberMap ){
+    if( run_pair.second > 6000 )  dataContext.var["Run"].slice.push_back((float)run_pair.first); 
+  }
+  dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
+
+  // cout<<"Run slices"<<endl;
+  // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+  //   cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+}
+
+
 
 
 void EfficiencyMonitor::getBkgDigi(Int_t jentry){

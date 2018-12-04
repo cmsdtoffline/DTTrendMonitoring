@@ -465,8 +465,9 @@ public :
    void close();
    void plot();
    void SetRunSlices();
+   void checkRunStat();
    void checkPuLumiRatio();
-   void  getBkgDigi(Int_t jentry);
+   void getBkgDigi(Int_t jentry);
 
 };
 #endif
@@ -500,7 +501,10 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
   
   else if(dataContext.name=="Increasing"){
     if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
-      if(!doOnlyPlot)  SetRunSlices(); 
+      if(!doOnlyPlot){
+	checkRunStat();
+	//SetRunSlices(); 
+      }
     }
     else{
       cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
