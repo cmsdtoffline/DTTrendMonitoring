@@ -26,7 +26,7 @@ MaxDead = 0 allows an umbiased selection.
 If MaxDead > 0, dead wires will have efficiency zero while alive wires in the same segment won't contribute!
 */
 
-int lessentries=500000;
+int lessentries=50000;
 
 void EfficiencyMonitor::PreLoop(){
 
@@ -156,7 +156,7 @@ void EfficiencyMonitor::Loop()
 
    char go;
 
-   //   nentries=lessentries;
+   // nentries=lessentries;
 
    Long64_t nbytes = 0, nb = 0;
 
@@ -595,14 +595,17 @@ void EfficiencyMonitor::SetRunSlices()
 
   for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
     dataContext.var["Run"].slice.push_back((float)*it);
+
+  cout<<"original runs "<<dataContext.var["Run"].slice.size()<<endl;
   
   dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
   
   // uncoment to check the run list
   
-  // cout<<"Run slice "<<endl;
-  // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
-  // cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+
+  cout<<"Run slice "<<endl;
+  for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+  cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
 
 }
 
@@ -615,9 +618,11 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
   std::set<Int_t> runNumber_Set;
 
-
   TH2F * hPULumiVSrun = new TH2F("hPULumiVSrun","hPULumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1, 200,0,0.025);
+
   TH2F * hPUvsLumi = new TH2F("hPUvsLumi","PUvsLumi", dataContext.var["InsLumi"].slice.size()-1, dataContext.var["InsLumi"].slice.data(),dataContext.var["Pileup"].slice.size()-1, dataContext.var["Pileup"].slice.data());
+
+  TH2F * hPUvsLumiCut = new TH2F("hPUvsLumiCut","PUvsLumiCut", dataContext.var["InsLumi"].slice.size()-1, dataContext.var["InsLumi"].slice.data(),dataContext.var["Pileup"].slice.size()-1, dataContext.var["Pileup"].slice.data());
 
 
   hPULumiVSrun->SetLabelSize(0.03);
@@ -625,8 +630,8 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
   map<int,int> runnumberMap;
 
-  int i =0;
-  for (std::vector<double>::iterator it = dataContext.var["Run"].slice.begin() ; it != dataContext.var["Run"].slice.end(); ++it){
+  int i = 0;
+  for (std::vector<double>::iterator it = dataContext.var["Run"].slice.begin() ; it != dataContext.var["Run"].slice.end()-1; ++it){
     runnumberMap[*it]=i;
     i++;
     hPULumiVSrun->GetXaxis()->SetBinLabel(i,to_string((int)*it).c_str());
@@ -637,6 +642,10 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   dataContext.var["Run"].slice.clear();
 
   Int_t preRunNumber = 0;
+
+
+  Float_t puLumiCut = 0.0026;
+
 
   for (Long64_t jentry = 0; jentry<nentries; jentry++) {
 
@@ -655,15 +664,33 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
     hPULumiVSrun->Fill(runnumberMap[runnumber], PV_Nvtx/lumiperblock);
     hPUvsLumi->Fill(lumiperblock,PV_Nvtx);
-    if(preRunNumber == runnumber && (jentry != nRealEntries-1) ){
-      hRatio->Fill(PV_Nvtx/lumiperblock);
-      }
-    else {
-      cout<<runnumber<<" "<<hRatio->GetMean()<<endl;
-      if(hRatio->GetMean() < 0.0024) runNumber_Set.insert(preRunNumber);
-      hRatio->Reset();
+  }
+
+
+  TProfile *pr =  hPULumiVSrun->ProfileX("_pfx",1,-1,"dsame");
+
+  for(int bin = 1; bin<=hPULumiVSrun->GetXaxis()->GetNbins(); bin++){
+    //    cout<<bin<<" "<<hPULumiVSrun->GetXaxis()->GetBinLabel(bin)<<" "<<pr->GetBinContent(bin)<<endl;
+    if(pr->GetBinContent(bin) < puLumiCut){
+      runNumber_Set.insert(atoi(hPULumiVSrun->GetXaxis()->GetBinLabel(bin)));
     }
-    preRunNumber = runnumber;  
+  }
+
+
+  for (Long64_t jentry = 0; jentry<nentries; jentry++) {
+
+    if( jentry==nRealEntries-1 ) cout<<jentry<< " "<<nRealEntries-1<<endl;
+ 
+    Long64_t ientry = LoadTree(jentry);
+
+    b_runnumber->GetEntry(jentry);
+    b_lumiperblock->GetEntry(jentry);
+    b_PV_Nvtx->GetEntry(jentry);
+
+    if (ientry < 0)  break;
+    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;
+
+    if(runNumber_Set.find(runnumber)!=runNumber_Set.end())    hPUvsLumiCut->Fill(lumiperblock,PV_Nvtx);
   }
 
   for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
@@ -671,18 +698,18 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   
   dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
   
-  // cout<<"Run slices"<<endl;
-  // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
-  //   cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+  cout<<"Run slices"<<endl;
+  for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+    cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
 
-  TCanvas *cGlob = new TCanvas("cGlob");
+  TCanvas *cGlob = new TCanvas("cGlob","",1200,400);
 
   hPULumiVSrun->SetMarkerStyle(20);
   hPULumiVSrun->SetMarkerColor(2);
   hPULumiVSrun->Draw("colz");
   hPULumiVSrun->ProfileX("_pfx",1,-1,"dsame"); 
 
-  hPULumiVSrun->SetTitle("Pileup/Instant lumi vs run ;Pileup/Instant lumi; run"); 
+  hPULumiVSrun->SetTitle("Pileup/Instant lumi vs run ;run;Pileup/Instant lumi"); 
 
   if(stat((dataContext.webFolder+"/"+outName+"/").c_str(),&st) != 0){
     system(("mkdir "+dataContext.webFolder+"/"+outName).c_str());
@@ -702,6 +729,19 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.root").c_str());
+
+
+  hPUvsLumiCut->Draw("Colz");
+  hPUvsLumiCut->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["Pileup"].Label+";"+dataContext.var["InsLumi"].Label).c_str());
+
+  cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiCut.png").c_str());
+  cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiCut.root").c_str());
+
+  if(dataContext.var["Run"].slice.size()==1) {
+    cout<<"No runs with pu/lumi < "<<puLumiCut<<endl;
+    abort();
+
+  }
 }
 
 
@@ -716,31 +756,45 @@ void EfficiencyMonitor::checkRunStat(){
  
   map<int,int> runnumberMap;
 
-  for (Long64_t jentry = 0; jentry<nentries; jentry++) {
 
-    if( jentry==nRealEntries-1 ) cout<<jentry<< " "<<nRealEntries-1<<endl;
+  dataContext.var["Run"].slice.clear();
+
+  for (Long64_t jentry = 0; jentry<nentries; jentry++) {
  
     Long64_t ientry = LoadTree(jentry);
 
     b_runnumber->GetEntry(jentry);
 
     if (ientry < 0)  break;
-    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;
+    //    if (jentry%50000 == 0) cout<<"\rLoop event "<<jentry<<" "<<setprecision (2)<<(100*jentry/float(nRealEntries))<<" %    "<<endl;
 
     runnumberMap[runnumber]+=1;
   }
 
+  int minRunStat = 75000;
+
   for( const auto& run_pair : runnumberMap ){
-    if( run_pair.second > 6000 )  dataContext.var["Run"].slice.push_back((float)run_pair.first); 
+
+    //to remove single runs with problems
+    //    if(run_pair.first==302635 || run_pair.first==304737 || run_pair.first== 304740 || run_pair.first==304739 || run_pair.first==304738 ) continue;
+    if( run_pair.second > minRunStat )  dataContext.var["Run"].slice.push_back((float)run_pair.first); 
+
+    //    if( run_pair.first > 304737 && run_pair.first < 304740 && run_pair.second > 15000)  dataContext.var["Run"].slice.push_back((float)run_pair.first); 
   }
+  
+  if(dataContext.var["Run"].slice.size()==0) {
+    cout<<"No runs with more than "<<minRunStat<<" over the original "<<runnumberMap.size()<<" runs. Change run/file or change threshold "<<endl;
+    abort();
+  }
+  else
+    cout<<"selected "<<dataContext.var["Run"].slice.size()<<" runs over the original "<<runnumberMap.size()<<" runs, corresponding to "<<(dataContext.var["Run"].slice.size()/static_cast<double>(runnumberMap.size()))*100<<" \%"<<endl;
+  
   dataContext.var["Run"].slice.push_back( dataContext.var["Run"].slice.back()+1); //Add another element in order to have another bin for the last lumi point. It will be removed in case of concatantion with another file.
 
-  // cout<<"Run slices"<<endl;
-  // for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
-  //   cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
+  cout<<"Run slices"<<endl;
+  for(uint i =0; i<dataContext.var["Run"].slice.size(); i++)
+    cout<<setprecision(6)<<dataContext.var["Run"].slice.at(i)<<endl;
 }
-
-
 
 
 void EfficiencyMonitor::getBkgDigi(Int_t jentry){

@@ -115,24 +115,25 @@ void EffTrend:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
   
   const  TArrayD *arrY = fPassedHistogram->GetYaxis()->GetXbins();
   for(int bin = 1; bin <= nXBins; bin++){
+
     xBins.push_back(lumi::getTotLumiRun(to_string(static_cast<int>(slices[bin-1])))); 
   }
   
   float redCon = 400;
-  
+
   TH2F * hTot = new TH2F("","",100*xBins.size(), xBins.at(0)*(1-1/redCon) ,  xBins.back()*(1+1/redCon),nYBins,arrY->GetArray());
   TH2F * hPass = new TH2F("","",100*xBins.size(), xBins.at(0)*(1-1/redCon),  xBins.back()*(1+1/redCon),nYBins,arrY->GetArray());
   
-  for(int binx = 1; binx<=nXBins; binx++){  
+  for(uint binx = 1; binx<=xBins.size(); binx++){  
     for(int biny = 1; biny<=nYBins; biny++){  
       hTot->SetBinContent(hTot->FindBin(xBins[binx-1],arrY->GetArray()[biny-1]), fTotalHistogram->GetBinContent(binx,biny));
       hPass->SetBinContent(hPass->FindBin(xBins[binx-1],arrY->GetArray()[biny-1]), fPassedHistogram->GetBinContent(binx,biny));    
     }
   }  
   
-  const  TH1D *hPrPass =  hPass->ProjectionX("_passpx",firstxbin,lastxbin);
-  const  TH1D *hPrTot  =  hTot->ProjectionX("_totpx",firstxbin,lastxbin);
-  
+  TH1D *hPrPass =  hPass->ProjectionX("_passpx",firstxbin,lastxbin);
+  TH1D *hPrTot  =  hTot->ProjectionX("_totpx",firstxbin,lastxbin);
+
   TGraphAsymmErrors * effNew = new TGraphAsymmErrors(hPrPass,hPrTot,"cp");
   
   if(plotRuns){
@@ -142,7 +143,7 @@ void EffTrend:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
 }
   effNew->SetMarkerColor(eff->GetMarkerColor());
   effNew->SetLineColor(eff->GetLineColor());
-  effNew->SetMarkerStyle(20);
+  effNew->SetMarkerStyle(eff->GetMarkerStyle());
   effNew->SetMarkerSize(0.7);
 
   effNew->GetYaxis()->SetTitle(yLabel.c_str()); 
@@ -153,8 +154,8 @@ void EffTrend:: drawWithLumi(vector<double> slices,Int_t  firstxbin,
   if(plotRuns)  eff->GetXaxis()->SetTitle("Run"); 
   else  eff->GetXaxis()->SetTitle(xLabel.c_str());
 
-  eff->SetMinimum(0.92);
-  eff->SetMaximum(1.01);
+  eff->SetMinimum(0.93);
+  eff->SetMaximum(1.0);
 
   eff->SetName((hPass->GetName()+theName).c_str());
   eff->Draw(option.c_str());
@@ -221,6 +222,10 @@ Color_t EffTrend::GetColor(){
 
 void EffTrend::SetMarkerStyle(Style_t mstyle){
   eff->SetMarkerStyle(mstyle);
+}
+
+Style_t EffTrend::GetMarkerStyle(){
+  return  eff->GetMarkerStyle();
 }
 
 void EffTrend::SetMarkerSize(Size_t msize){

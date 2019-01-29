@@ -60,20 +60,35 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
   Var Pileup;
   Var BkGr;
   Var Empty;
-  
+  Var IntLumi;
 
   //initialize variable struct  Var object, object name, json file, do eff plots, do bkg plots, do projections, variable for projections, is external variable
 
 
   variables::initVar(Empty,"Empty","variablesSetting.json",0,0);
   variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
-  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1);
-  variables::initVar(Pileup,"Pileup","variablesSetting.json");
+  //  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1);
+  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1); //Fix
+  variables::initVar(Pileup,"Pileup","variablesSetting.json",1,1);
+  //  variables::initVar(Pileup,"Pileup","variablesSetting.json");
+
+  //Used to skip runs with lumi/PU to high.
+  variables::initVar(IntLumi,"IntLumi","variablesSetting.json",0,0);
+
 
   FixedCont.name = "Fixed";
-  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty}};
-  FixedCont.webFolder = "~/www/DT";
-  
+  //FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty}};
+  FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty},{IntLumi.name,IntLumi}};
+  FixedCont.webFolder = "~/www/DTOld";
+
+  FixedCont.wwCanvas  = 500;
+  FixedCont.whCanvas  = 400;
+
+  FixedCont.legx1 = 0.7;
+  FixedCont.legy1 = 0.7;
+  FixedCont.legx2 = 0.89;
+  FixedCont.legy2 = 0.89;
+
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName,doOnlyPlot);
 
   std::ifstream ifs(("data/DeadList/DeadList_"+refName).c_str(), std::ios::ate); // std::ios::ate means open at end

@@ -51,6 +51,8 @@ class EffTrend: public TNamed
 
   void SetMarkerStyle(Style_t mstyle = 1);
 
+  Style_t GetMarkerStyle();
+
   void SetMarkerSize(Size_t msize=1);
 
   void getIntLumiEff( vector<double> slices);

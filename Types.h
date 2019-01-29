@@ -34,10 +34,16 @@ struct context{
   std::string name;
   std::map<string,Var> var;
   string webFolder;
-  
+
+  int wwCanvas;
+  int whCanvas;
+
+  float legx1;
+  float legy1;
+  float legx2;
+  float legy2;
+
 };
-
-
 #endif
 
 

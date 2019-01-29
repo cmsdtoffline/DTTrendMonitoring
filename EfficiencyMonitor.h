@@ -77,7 +77,6 @@ public :
    TTree           *fChain;   //!pointer to the analyzed TTree or TChain
    Int_t           fCurrent;  //!current Tree number in a TChain
    plotter         *plots;
-   // bool            doOnlyPlot_; //do only plots from stored results //del
 
    // Declaration of leaf types
    Int_t           runnumber;
@@ -489,25 +488,25 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
   if(!doOnlyPlot) Init(tree);
   
   if(dataContext.name=="Fixed"){
-    if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
+    if ( dataContext.var.find("Run") != dataContext.var.end() ) {	
       SetRunSlices(); 
-      //checkPuLumiRatio();	
+      checkPuLumiRatio();    //To select only runs with a a pu/Lumi under a threshold
     }
     else{
-      cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
+      cout<<"ERROR, Variables named IntLumi not found. It is needed for run selection"<<endl;
       abort();
     }
   }
   
   else if(dataContext.name=="Increasing"){
-    if ( dataContext.var.find("IntLumi") == dataContext.var.end() ) {	
+    if ( dataContext.var.find("Run") != dataContext.var.end() ) {	
       if(!doOnlyPlot){
-	checkRunStat();
 	//SetRunSlices(); 
+	checkRunStat(); //To select runs with a statistic above a certain threshold
       }
     }
     else{
-      cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type "<<endl;
+      cout<<"ERROR, Variables named IntLumi not found. It is needed for Incr run type"<<endl;
       abort();
     }
   }

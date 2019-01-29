@@ -48,7 +48,6 @@ void run_IncreasingRange(string refName ="", string storingName ="", string stor
     chain->Add(run5.c_str());
   }
     else if(run0=="" && storedName != "") {
-    cout<<("Plotting the stored results of "+storedName).c_str()<<endl;
     doOnlyPlot=kTRUE;
   }
 
@@ -72,7 +71,15 @@ void run_IncreasingRange(string refName ="", string storingName ="", string stor
 
   incrCont.name      = "Increasing";
   incrCont.var       = { {IntLumi.name,IntLumi},{BckGr.name,BckGr},{Empty.name,Empty},{InsLumi.name,InsLumi}};
-  incrCont.webFolder = "~/www/DT";
+  incrCont.webFolder = "~/www/DTOld";
+
+  incrCont.wwCanvas  = 1200;
+  incrCont.whCanvas  = 400;
+ 
+  incrCont.legx1 = 0.79;
+  incrCont.legy1 = 0.72;
+  incrCont.legx2 = 0.89;
+  incrCont.legy2 = 0.89;
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(incrCont,chain,refName.c_str(),storingName,storedName,doOnlyPlot);
   

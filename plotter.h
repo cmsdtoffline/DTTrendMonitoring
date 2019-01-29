@@ -26,6 +26,10 @@
 #include <boost/numeric/conversion/cast.hpp>
 #include "Utilities.h"
 #include <TLegendEntry.h>
+#include <TLine.h>
+#include <TText.h>
+#include <TPaveText.h>
+#include <TLatex.h>
 
 struct stat st;
 
@@ -71,6 +75,8 @@ public :
   void   setAddBins();
   int    getdir(string dir, vector<string> &files);   // Take a vector of list and push inside the files inside a directory. Used for lumi per run files.
 
+  string wheelStr(int iwh);
+
   float  getLumiRun(string Run);    // Get integrated luminosity from the begining of the plot range.
   void addBinsSlice(const TArrayD * arr, vector<double> & slices); 
 
@@ -84,23 +90,22 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
   if(inFileName!=""){    
     fIn  = new TFile (("data/results/"+dataCont.name+"/"+inFileName+".root").c_str());
     if (!fIn){ cout<<"File In doesn't exist or can't be open"<<endl;    abort();}
-    cout<<"Take objects from file "<<inFileName+".root"<<endl;
+   
+    if(doOnlyPlot) cout<<("Plotting the stored results of "+inFileName).c_str()<<endl;
+    else cout<<"Taking objects from file "<<inFileName+".root"<<endl;
   }
-  else  cout<<"Create new objects and new file "<<(outFileName+".root")<<endl;
+  else  cout<<"Creat new objects and new file "<<(outFileName+".root")<<endl;
   
   fOut  = new TFile (("data/results/"+dataCont.name+"/"+outFileName+".root").c_str(),"RECREATE"); //FIXME. RECREATE->CREATE
 
-
   LumiFileName = "DT_"+LumiFileName_;
   for(auto const& ivar : dataCont.var){ 
-
     Eff_phiMBWh[ivar.first]    = vector<vector<EffTrend*> > ();
     EffA_phiMBWh[ivar.first]   = vector<vector<EffTrend*> > ();
     Eff_theMBWh[ivar.first]    = vector<vector<EffTrend*> > ();
     EffA_theMBWh[ivar.first]   = vector<vector<EffTrend*> > ();
     Eff_phiMB4Top[ivar.first]  = vector<EffTrend*>  ();
     EffA_phiMB4Top[ivar.first] = vector<EffTrend*>  ();
-
 
     Dist_MBWh[ivar.first]      = vector<vector<DistTrend*> > ();
     Dist_SegMBWh[ivar.first]   = vector<vector<DistTrend*> > ();
@@ -109,7 +114,6 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
     Dist_SegMB4Top[ivar.first] = vector<DistTrend*>  ();
     
     int nPoints = ivar.second.slice.size();
-
     for (int iwh=0; iwh<5; iwh++){
 
       Eff_phiMBWh[ivar.first].push_back(vector<EffTrend*> ());
@@ -124,23 +128,23 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
       for (int ist=0; ist<4; ist++){
 	if(inFileName==""){
 
-	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("Eff"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 
 	  	  
-	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( new EffTrend(("EffA"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 										       "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 	  
-	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back(new DistTrend(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back(new DistTrend(("Hist"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 										    "St"+std::to_string(ist)).c_str(),"",
-										   //ivar.second.nBins,ivar.second.X0, ivar.second.X1, // equal bin constructor to be fix for increasing option.
+										   //ivar.second.nBins,ivar.second.X0, ivar.second.X1, // equal bins constructor to be fix for increasing option.
 										   //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
 										   ivar.second.slice.size()-1,
 										   ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
 	  
-	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back(new DistTrend(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back(new DistTrend(("HistSeg"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 										       "St"+std::to_string(ist)).c_str(),"",		
 										      //ivar.second.nBins,ivar.second.X0, ivar.second.X1,						   
 										      //dataCont.var["Bkg"].nBins,dataCont.var["Bkg"].X0,dataCont.var["Bkg"].X1)); 
@@ -148,31 +152,39 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
 										      ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data()));
 	  
 	}
-	else{
-	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( (EffTrend*)  fIn->Get(("Eff"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	else{   
+
+	  //	  wheelStr(int iwh)
+
+	  //cout<<iwh<<" "<<("Eff"+ivar.second.name+"_MBWh"+wheelStr(iwh)+"St"+std::to_string(ist)).c_str()<<endl;  //fixme
+
+	  if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh].push_back( (EffTrend*)  fIn->Get(("Eff"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 											   "St"+std::to_string(ist)).c_str()));  
-	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh].push_back( (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 											    "St"+std::to_string(ist)).c_str()));
-	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back( (DistTrend*)     fIn->Get(("Hist"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+
+	  if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh].push_back( (DistTrend*)     fIn->Get(("Hist"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 											    "St"+std::to_string(ist)).c_str()));
-	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back( (DistTrend*)  fIn->Get(("HistSeg"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh].push_back( (DistTrend*)  fIn->Get(("HistSeg"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 											    "St"+std::to_string(ist)).c_str()));	  
 	}
 	
 	if (ist!=3){
 	  if(inFileName==""){
-	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+
+
+	  if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffThe"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 										     "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 
-	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back( new EffTrend(("EffAThe"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 										      "St"+std::to_string(ist)).c_str(),"",nPoints-1,ivar.second.slice.data(),
 										      ivar.second.projSlice.size()-1,ivar.second.projSlice.data() ));
 	  }
-	  else{
-	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	  else{   
+	    if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffThe"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 													  "St"+std::to_string(ist)).c_str()));
-	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffAThe"+ivar.second.name+"_MBWh"+std::to_string(iwh-2)+
+	    if(ivar.second.doEff) EffA_theMBWh[ivar.first][iwh].push_back(  (EffTrend*) fIn->Get(("EffAThe"+ivar.second.name+"_MBWh"+wheelStr(iwh)+
 											       "St"+std::to_string(ist)).c_str()));
 	  }
 	}
@@ -199,7 +211,6 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
       else{
 	if(ivar.second.doEff) Eff_phiMB4Top[ivar.first].push_back(  (EffTrend*) fIn->Get(("Eff"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
 	if(ivar.second.doEff) EffA_phiMB4Top[ivar.first].push_back(  (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
-
 	if(ivar.second.doBkg) Dist_MB4Top[ivar.first].push_back( (DistTrend*) fIn->Get(("Hist"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
 	if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first].push_back( (DistTrend*) fIn->Get(("HistSeg"+ivar.second.name+"_MBTopWh"+std::to_string(iwh-2)).c_str()));
       }
@@ -222,30 +233,28 @@ plotter::plotter(context extDataCont, std::string inFileName, std::string outFil
       if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first] =  new DistTrend(("HistSeg"+ivar.second.name+"_MBBot").c_str(),"",ivar.second.slice.size()-1,
 								   ivar.second.slice.data(),dataCont.var["Bkg"].slice.size()-1,dataCont.var["Bkg"].slice.data());
     }
-    else{
+    else{ 
       if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]  =  (EffTrend*) fIn->Get(("Eff"+ivar.second.name+"_MBBot").c_str());
       if(ivar.second.doEff) EffA_phiMB4Bot[ivar.first] =  (EffTrend*) fIn->Get(("EffA"+ivar.second.name+"_MBBot").c_str());
-      
       if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]    =  (DistTrend*) fIn->Get(("Hist"+ivar.second.name+"_MBBot").c_str());
       if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first] =  (DistTrend*) fIn->Get(("HistSeg"+ivar.second.name+"_MBBot").c_str());
     }
   }
 
-
   if(inFileName!=""){
-    if(doOnlyPlot && (dataCont.var.find("IntLumi")==dataCont.var.end())){
+    if(doOnlyPlot && (dataCont.var.find("Run")!=dataCont.var.end()) && (dataCont.var.find("Run"))->second.doEff ){
       const TArrayD * arr = Eff_phiMBWh["Run"][0][0]->GetArrayX();
       std::vector<Double_t> xBins = {}; 
       for(int bin = 1; bin<=arr->GetSize(); bin++) {
 	xBins.push_back(arr->GetArray()[bin-1]); 
       }
       dataCont.var["Run"].slice = xBins;
-      for(int bin = 1; bin<=arr->GetSize(); bin++) {
-	cout<<dataCont.var["Run"].slice[bin-1]<<endl;
-      }
+      //uncomment to see the runs
+      /* for(int bin = 1; bin<=arr->GetSize(); bin++) { */
+      /* 	cout<<dataCont.var["Run"].slice[bin-1]<<endl; */
+      /* } */
      }
-    else  setAddBins();
-      
+    else {  setAddBins();}
   }
 }
 
@@ -287,9 +296,37 @@ void plotter::close(){
 
 void plotter::plot(string dateName){
 
+  //run period lines:
+
+  map<float,string> runPeriods = {};
+  
+  //runPeriods[]=A "2016-Apr-22";
+  //  runPeriods[33.6968206]="Run2016B";
+  runPeriods[39.9798206]="2016-Jun-24";  //"Run2016C";
+  runPeriods[43.2788206]="2016-Jul-04";  //"Run2016D";
+  runPeriods[48.3698206]="2016-Jul-15";  //"Run2016E";
+  runPeriods[52.6348206]="2016-Jul-29";  //"Run2016F";  
+  runPeriods[56.4198206]="2016-Aug-14";  //"Run2016G";
+  runPeriods[64.8798206]="2016-Sep-16";  //Run2016H";
+  // runPeriods[75.1350086]="2017-May-19";//"Run2017A";
+  runPeriods[76.1190086]="2017-Jun-16";  //"Run2017B";  
+  runPeriods[82.6210086]="2017-Jul-18";  //"Run2017C";
+  runPeriods[94.9950086]="2017-Aug-30";  //"Run2017D";
+  runPeriods[99.9610086]="2017-Sep-20";  //"Run2017E";
+  runPeriods[110.429008]="2017-Sep-28";  //"Run2017F"; 
+  // runPeriods[126.139008]="Run2017G";   
+  // runPeriods[126.494008]="Run2017H";
+  runPeriods[127.588278]="2018-Apr-26";  //"Run2018A";   
+  runPeriods[143.196278]="2018-May-28";  //"Run2018B"; 
+  runPeriods[151.214278]="2018-Jul-07";  //"Run2018C";
+  runPeriods[158.597278]="2018-Jul-27";  //"Run2018D";   
+  //  runPeriods[194.942278]="Run2018E"; 
+
   setPlots();
+
   gStyle->SetOptStat(0);
   TGaxis::SetMaxDigits(4);
+  gStyle->SetCanvasColor(0);
 
   //  if(stat("plot/",&st) != 0)  system("mkdir plot/"); 
   //  if(stat(("plot/"+dateName).c_str(),&st) != 0)   system(("mkdir plot/"+dateName).c_str());
@@ -320,6 +357,15 @@ void plotter::plot(string dateName){
 
   fOut->cd();
 
+  int markerStyle = 20;
+  int wwCanvas = dataCont.wwCanvas;
+  int whCanvas = dataCont.whCanvas;
+
+  float legx1 =  dataCont.legx1;
+  float legy1 =  dataCont.legy1;
+  float legx2 =  dataCont.legx2;
+  float legy2 =  dataCont.legy2;
+
   for(auto const& ivar : dataCont.var) {
     for (int iwh=0; iwh<5; iwh++){
       for (int ist=0; ist<4; ist++){
@@ -342,22 +388,22 @@ void plotter::plot(string dateName){
 	  }
 	}
 
-	if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
-	if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
-	if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);
+	if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->SetMarkerStyle(markerStyle);
+	if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->SetMarkerStyle(markerStyle);
+	if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->SetMarkerStyle(markerStyle);
 	//profile of 2D histograms
 
 	 if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->ProfileX();
 	 if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->ProfileX();
   	
 	if(ist!=3){
-	  if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetMarkerStyle(20);	  
+	  if(ivar.second.doEff) Eff_theMBWh[ivar.first][iwh][ist]->SetMarkerStyle(markerStyle);	  
 	}
       }
 
-      if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
-      if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->SetMarkerStyle(20);
-      if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->SetMarkerStyle(20);
+      if(ivar.second.doEff) Eff_phiMB4Top[ivar.first][iwh]->SetMarkerStyle(markerStyle);
+      if(ivar.second.doBkg) Dist_MB4Top[ivar.first][iwh]->SetMarkerStyle(markerStyle);
+      if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->SetMarkerStyle(markerStyle);
       
       if(iwh!=4){
 
@@ -376,34 +422,41 @@ void plotter::plot(string dateName){
       if(ivar.second.doBkg) Dist_SegMB4Top[ivar.first][iwh]->ProfileX();
     }
 
-    if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetMarkerStyle(markerStyle);
     if(ivar.second.doEff) Eff_phiMB4Bot[ivar.first]->SetColor(1);
 
 
-    if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->SetMarkerStyle(markerStyle);
     if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->SetColor(1);
    
-    if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->SetMarkerStyle(20);
+    if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->SetMarkerStyle(markerStyle);
     if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->SetColor(1);
     
     if(ivar.second.doBkg) Dist_MB4Bot[ivar.first]->ProfileX();
     if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->ProfileX();
     
   }
-  
+
   for(auto const& ivar : dataCont.var){ 
     if(! ivar.second.doEff) continue;
     for (int ist=0; ist<4; ist++){
       for(int bin = -1; bin<(int)ivar.second.projSlice.size(); bin++){ 
+
+	cout<<ivar.second.name<< " "<<bin<<endl;
+	if(bin<0 && ivar.second.name!="Run"){
+	  continue;
+	}
 	if(bin==1 && !ivar.second.doProj) break;
 	if(bin!=0 && Eff_phiMBWh[ivar.first][0][ist]->checkProj(ivar.second.projSlice,bin,bin)) continue;
 
-	TLegend * legPhiMB = new TLegend(0.75,0.75,0.9,0.9); 
-	TCanvas * cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
+	TLegend * legPhiMB = new TLegend(legx1, legy1, legx2,legy2);
+					 //0.79,0.72,0.89,0.89);
+
+
+	TCanvas * cPhiMB = new TCanvas(("cPhiMB"+(std::to_string(ist+1))+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
 	
 	cPhiMB->SetGrid();
-	
-	Eff_phiMBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+" eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
+	Eff_phiMBWh[ivar.first][0][ist]->setTitle((";"+ivar.second.Label+"; Hit Efficiency of #Phi Layers").c_str()); 
 	
 	if(ivar.second.name=="Run"){
 	  // Bin -1 amnd 0 ared used to draw the inclusive plots
@@ -426,17 +479,62 @@ void plotter::plot(string dateName){
 	    else Eff_phiMBWh[ivar.first][iwh][ist]->draw(bin,bin,"samep");
 	  }
 	  
-	  TLegendEntry *le  = legPhiMB->AddEntry(Eff_phiMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	  TLegendEntry *le  = legPhiMB->AddEntry(Eff_phiMBWh[ivar.first][iwh][ist],("MB"+std::to_string(ist+1)+"  Wheel "+std::to_string(iwh-2)).c_str(),"lpe");
 	  le->SetMarkerColor(Eff_phiMBWh[ivar.first][iwh][ist]->GetColor() ); 
+	  le->SetMarkerStyle(Eff_phiMBWh[ivar.first][iwh][ist]->GetMarkerStyle() ); 
+
 	}
-	
+
+	if(ivar.second.name=="Run"){
+	  for( const auto& run_pair : runPeriods ){
+	    TLine *lineRun = new TLine(run_pair.first,0.93,run_pair.first,1.0);
+	    lineRun->SetLineStyle(2);
+	    lineRun->Draw("same");
+	    TPaveText *rText = new TPaveText(run_pair.first+0.2,0.94,run_pair.first+2,0.95);
+	    rText->SetFillColor(0);
+	    TText *text = rText->AddText((run_pair.second).c_str());
+	    text->SetTextAngle(90);
+	    text->SetTextAlign(22);
+	    text->SetTextSize(.03);
+	    rText->Draw("same");
+	  }
+	}
+
+        TPad  *CMSPad  = new TPad("cmspad","cmspad",0.1,0.93,0.9,0.99);
+	CMSPad->SetTopMargin (0.0);
+	CMSPad->SetRightMargin (0.045);
+	CMSPad->SetLeftMargin (0.17);
+	CMSPad->SetBottomMargin(0.50);
+	CMSPad->Draw();
+	CMSPad->cd();
+
+	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
+
+	CMSTitle->SetNDC();
+	CMSTitle->SetTextColor(1);
+	CMSTitle->SetTextSize(0.71);
+	CMSTitle->SetTextFont(42);
+	CMSTitle->SetTextAlign(32);
+	CMSTitle->SetTextAngle(0);
+	CMSTitle->Draw();
+
+	Period->SetNDC();
+	Period->SetTextColor(1);
+	Period->SetTextSize(0.71);
+	Period->SetTextFont(42);
+	Period->SetTextAlign(32);
+	Period->SetTextAngle(0);
+	Period->Draw();
+	cPhiMB->cd();
+
 	legPhiMB->Draw("same");
-	
+
 	if(bin == 0)      {
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".root").c_str());
 	}
-	else if(bin==-1){
+	else if(bin==-1 && ivar.second.name=="Run"){
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.png").c_str());
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.root").c_str());
 	}
@@ -447,6 +545,7 @@ void plotter::plot(string dateName){
 	delete   cPhiMB;
       }      
     }
+
     for (int ist=0; ist<4; ist++){      
       //theta
       
@@ -456,13 +555,14 @@ void plotter::plot(string dateName){
 	    
 	    if(bin==1 && !ivar.second.doProj) break;
 	    if(bin!=0 && Eff_theMBWh[ivar.first][0][ist]->checkProj(ivar.second.slice,bin,bin)) continue;
-	    
-	    TLegend * legTheMB = new TLegend(0.75,0.75,0.9,0.9); 
-	    TCanvas * cTheMB = new TCanvas(("cTheMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
+
+ 	    TLegend * legTheMB = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.79,0.31,0.89,0.49); 	   
+	    TCanvas * cTheMB = new TCanvas(("cTheMB"+(std::to_string(ist+1))+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
 	    
 	    cTheMB->SetGrid();	    
 
-	    Eff_theMBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+" eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
+
+	    Eff_theMBWh[ivar.first][0][ist]->setTitle((";"+ivar.second.Label+"; Hit Efficiency of #theta Layers").c_str()); 
 	    
 	    
 	    if(ivar.second.name=="Run"){
@@ -485,11 +585,59 @@ void plotter::plot(string dateName){
 		else Eff_theMBWh[ivar.first][iwh][ist]->draw(bin,bin,"samep");
 	      }
 	      
-	      TLegendEntry *le  = legTheMB->AddEntry(Eff_theMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	      TLegendEntry *le  = legTheMB->AddEntry(Eff_theMBWh[ivar.first][iwh][ist],("MB"+std::to_string(ist+1)+"  Wheel "+std::to_string(iwh-2)).c_str(),"lpe");
 	      le->SetMarkerColor(Eff_theMBWh[ivar.first][iwh][ist]->GetColor() ); 
+	      le->SetMarkerStyle(Eff_phiMBWh[ivar.first][iwh][ist]->GetMarkerStyle() ); 
 	    }
 	    
 	    legTheMB->Draw("same");
+
+	    
+	    if(ivar.second.name=="Run"){
+	      for( const auto& run_pair : runPeriods ){
+		TLine *lineRun = new TLine(run_pair.first,0.93,run_pair.first,1.0);
+		lineRun->SetLineStyle(2);
+		lineRun->Draw("same");
+		TPaveText *rText = new TPaveText(run_pair.first+0.2,0.94,run_pair.first+2,0.95);
+		rText->SetFillColor(0);
+		TText *text = rText->AddText((run_pair.second).c_str());
+		text->SetTextAngle(90);
+		text->SetTextAlign(22);
+		text->SetTextSize(.03);
+		rText->Draw("same");
+	      }
+	    }
+
+        TPad  *CMSPad  = new TPad("cmspad","cmspad",0.1,0.93,0.9,0.99);
+
+	CMSPad->SetTopMargin (0.0);
+	CMSPad->SetRightMargin (0.045);
+	CMSPad->SetLeftMargin (0.17);
+	CMSPad->SetBottomMargin(0.50);
+	CMSPad->Draw();
+	CMSPad->cd();
+
+	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
+
+	CMSTitle->SetNDC();
+	CMSTitle->SetTextColor(1);
+	CMSTitle->SetTextSize(0.71);
+	CMSTitle->SetTextFont(42);
+	CMSTitle->SetTextAlign(32);
+	CMSTitle->SetTextAngle(0);
+	CMSTitle->Draw();
+
+	Period->SetNDC();
+	Period->SetTextColor(1);
+	Period->SetTextSize(0.71);
+	Period->SetTextFont(42);
+	Period->SetTextAlign(32);
+	Period->SetTextAngle(0);
+	Period->Draw();
+	cTheMB->cd();
+
+	    
 	    
 	    if(bin == 0){
 	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".png").c_str());
@@ -503,7 +651,6 @@ void plotter::plot(string dateName){
 	  }
 	}
       }
-      
       //phi MB4 Top
       
       for(uint bin = 0; bin<ivar.second.projSlice.size(); bin++){ 
@@ -511,11 +658,13 @@ void plotter::plot(string dateName){
 	if(bin==1 && !ivar.second.doProj) break;
 	if(bin!=0 && Eff_phiMB4Top[ivar.first][0]->checkProj(ivar.second.slice,bin,bin)) continue;	  
 	
-	TLegend * legPhiMB4Top = new TLegend(0.75,0.75,0.9,0.9); 
-	TCanvas * cPhiMB4Top = new TCanvas(("cPhiMB4Top"+ivar.second.name).c_str());
+	TLegend * legPhiMB4Top = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.79,0.72,0.89,0.89); /fixme
+
+	TCanvas * cPhiMB4Top = new TCanvas(("cPhiMB4Top"+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
 	cPhiMB4Top->SetGrid();	
 
-	Eff_phiMB4Top[ivar.first][0]->setTitle(("MB4Top  eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
+	Eff_phiMB4Top[ivar.first][0]->setTitle((";"+ivar.second.Label+"; Hit Efficiency of #Phi Layers").c_str()); 
+	//Eff_phiMB4Top[ivar.first][0]->setTitle(("MB4Top  eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
 	
 	if(ivar.second.name=="Run"){
 	  if(bin == 0)  Eff_phiMB4Top[ivar.first][0]->drawWithLumi(ivar.second.slice,0,-1,"ap"); 
@@ -537,12 +686,61 @@ void plotter::plot(string dateName){
 	    else Eff_phiMB4Top[ivar.first][iwh]->draw(bin,bin,"samep");
 	  }
 	  
-	  TLegendEntry *le  = legPhiMB4Top->AddEntry(Eff_phiMB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	  TLegendEntry *le  = legPhiMB4Top->AddEntry(Eff_phiMB4Top[ivar.first][iwh],("MB4Top  Wheel "+std::to_string(iwh-2)).c_str(),"lpe");
 	  le->SetMarkerColor(Eff_phiMB4Top[ivar.first][iwh]->GetColor() ); 
+	  le->SetMarkerStyle(Eff_phiMB4Top[ivar.first][iwh]->GetMarkerStyle() ); 
 	}
 	
 	legPhiMB4Top->Draw("same");
 	
+
+	if(ivar.second.name=="Run"){
+	  for( const auto& run_pair : runPeriods ){
+	    TLine *lineRun = new TLine(run_pair.first,0.93,run_pair.first,1.0);
+	    lineRun->SetLineStyle(2);
+	    lineRun->Draw("same");
+	    TPaveText *rText = new TPaveText(run_pair.first+0.2,0.94,run_pair.first+2,0.95);
+	    rText->SetFillColor(0);
+	    TText *text = rText->AddText((run_pair.second).c_str());
+	    text->SetTextAngle(90);
+	    text->SetTextAlign(22);
+	    text->SetTextSize(.03);
+	    rText->Draw("same");
+	  }
+	}
+
+        TPad  *CMSPad  = new TPad("cmspad","cmspad",0.1,0.93,0.9,0.99);
+
+	CMSPad->SetTopMargin (0.0);
+	CMSPad->SetRightMargin (0.045);
+	CMSPad->SetLeftMargin (0.17);
+	CMSPad->SetBottomMargin(0.50);
+	CMSPad->Draw();
+	CMSPad->cd();
+
+	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
+
+	CMSTitle->SetNDC();
+	CMSTitle->SetTextColor(1);
+	CMSTitle->SetTextSize(0.71);
+	CMSTitle->SetTextFont(42);
+	CMSTitle->SetTextAlign(32);
+	CMSTitle->SetTextAngle(0);
+	CMSTitle->Draw();
+
+	Period->SetNDC();
+	Period->SetTextColor(1);
+	Period->SetTextSize(0.71);
+	Period->SetTextFont(42);
+	Period->SetTextAlign(32);
+	Period->SetTextAngle(0);
+	Period->Draw();
+
+	cPhiMB4Top->cd();
+
+	   
+
 	if(bin == 0) {
 	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".png").c_str());
 	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".root").c_str());
@@ -561,10 +759,14 @@ void plotter::plot(string dateName){
 	if(bin==1 && !ivar.second.doProj) break;
 	if(bin!=0 && Eff_phiMB4Bot[ivar.first]->checkProj(ivar.second.slice,bin,bin)) continue;
 	
-	TCanvas * cPhiMB4Bot = new TCanvas(("cPhiMB4Bot"+ivar.second.name).c_str());
+	TCanvas * cPhiMB4Bot   = new TCanvas(("cPhiMB4Bot"+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
+
+	TLegend * legPhiMB4Bot = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.79,0.72,0.89,0.89); 
+
 	cPhiMB4Bot->SetGrid();	
 
-	Eff_phiMB4Bot[ivar.first]->setTitle(("MB4Bot  eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
+	Eff_phiMB4Bot[ivar.first]->setTitle((";"+ivar.second.Label+"; Hit Efficiency of #Phi Layer").c_str()); 
+	//Eff_phiMB4Bot[ivar.first]->setTitle(("MB4Bot  eff vs "+ivar.second.Title+";"+ivar.second.Label+";Eff").c_str()); 
 	
 	if(ivar.second.name=="Run"){
 	  if(bin == 0)  Eff_phiMB4Bot[ivar.first]->drawWithLumi(ivar.second.slice,0,-1,"ap"); 
@@ -574,7 +776,59 @@ void plotter::plot(string dateName){
 	  if(bin == 0)  Eff_phiMB4Bot[ivar.first]->draw(0,-1,"ap"); 
 	  else 	  Eff_phiMB4Bot[ivar.first]->draw(bin,bin,"ap");			    
 	}
-	
+
+	TLegendEntry *le  = legPhiMB4Bot->AddEntry(Eff_phiMB4Bot[ivar.first],"MB4Bot","lpe");
+	le->SetMarkerColor(Eff_phiMB4Bot[ivar.first]->GetColor() ); 
+	le->SetMarkerStyle(Eff_phiMB4Bot[ivar.first]->GetMarkerStyle() ); 	
+	legPhiMB4Bot->Draw("same");
+
+  
+	if(ivar.second.name=="Run"){
+	  for( const auto& run_pair : runPeriods ){
+	    TLine *lineRun = new TLine(run_pair.first,0.93,run_pair.first,1.0);
+	    lineRun->SetLineStyle(2);
+	    lineRun->Draw("same");
+	    TPaveText *rText = new TPaveText(run_pair.first+0.2,0.94,run_pair.first+2,0.95);
+	    rText->SetFillColor(0);
+	    TText *text = rText->AddText((run_pair.second).c_str());
+	    text->SetTextAngle(90);
+	    text->SetTextAlign(22);
+	    text->SetTextSize(.03);
+	    rText->Draw("same");
+	  }
+	}
+
+
+        TPad  *CMSPad  = new TPad("cmspad","cmspad",0.1,0.93,0.9,0.99);
+
+	CMSPad->SetTopMargin (0.0);
+	CMSPad->SetRightMargin (0.045);
+	CMSPad->SetLeftMargin (0.17);
+	CMSPad->SetBottomMargin(0.50);
+	CMSPad->Draw();
+	CMSPad->cd();
+
+	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
+
+	CMSTitle->SetNDC();
+	CMSTitle->SetTextColor(1);
+	CMSTitle->SetTextSize(0.71);
+	CMSTitle->SetTextFont(42);
+	CMSTitle->SetTextAlign(32);
+	CMSTitle->SetTextAngle(0);
+	CMSTitle->Draw();
+
+	Period->SetNDC();
+	Period->SetTextColor(1);
+	Period->SetTextSize(0.71);
+	Period->SetTextFont(42);
+	Period->SetTextAlign(32);
+	Period->SetTextAngle(0);
+	Period->Draw();
+
+	cPhiMB4Bot->cd();
+
 	if(bin == 0){
 	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".png").c_str());
 	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".root").c_str());
@@ -600,18 +854,18 @@ void plotter::plot(string dateName){
       }
 
       //phi
-      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
+      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
       cMB->SetGrid();
 
-      Dist_MBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
+      Dist_MBWh[ivar.first][0][ist]->SetMaximum(Max*1.45);
       Dist_MBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+"bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
       Dist_MBWh[ivar.first][0][ist]->draw("E1");
       
 
-      TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
+      TLegend * legMB = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
 	Dist_MBWh[ivar.first][iwh][ist]->draw("sameE1");
-	TLegendEntry *le = legMB->AddEntry(Dist_MBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	TLegendEntry *le = legMB->AddEntry(Dist_MBWh[ivar.first][iwh][ist],("MB"+std::to_string(ist+1)+"Wh"+std::to_string(iwh-2)).c_str(),"lpe");
 	le->SetMarkerColor(Dist_MBWh[ivar.first][iwh][ist]->GetColor());
       }
 
@@ -632,16 +886,16 @@ void plotter::plot(string dateName){
       }
 
       //phi
-      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str());
+      TCanvas *cMB = new TCanvas(("cMB"+(std::to_string(ist+1))+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
       cMB->SetGrid();
-      Dist_SegMBWh[ivar.first][0][ist]->SetMaximum(Max*1.3);
+      Dist_SegMBWh[ivar.first][0][ist]->SetMaximum(Max*1.45);
       Dist_SegMBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+" segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
       Dist_SegMBWh[ivar.first][0][ist]->draw("E1");
       
-      TLegend * legMB = new TLegend(0.75,0.75,0.9,0.9);
+      TLegend * legMB = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
 	Dist_SegMBWh[ivar.first][iwh][ist]->draw("sameE1");
-	TLegendEntry *le = legMB->AddEntry(Dist_SegMBWh[ivar.first][iwh][ist],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+	TLegendEntry *le = legMB->AddEntry(Dist_SegMBWh[ivar.first][iwh][ist],("MB"+std::to_string(ist+1)+"Wh"+std::to_string(iwh-2)).c_str(),"lpe");
 	le->SetMarkerColor(Dist_SegMBWh[ivar.first][iwh][ist]->GetColor());
       }
       
@@ -658,17 +912,17 @@ void plotter::plot(string dateName){
     float_t Max = 0;
     for (int iwh=0; iwh<5; iwh++) if(Dist_MB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Dist_MB4Top[ivar.first][iwh]->GetProfMax();
     
-    TCanvas *cMB4Top = new TCanvas(("cMB4Top"+ivar.second.name).c_str());
+    TCanvas *cMB4Top = new TCanvas(("cMB4Top"+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
     cMB4Top->SetGrid();
-    Dist_MB4Top[ivar.first][0]->SetMaximum(Max*1.3);
+    Dist_MB4Top[ivar.first][0]->SetMaximum(Max*1.4);
     Dist_MB4Top[ivar.first][0]->setTitle(("MBTop segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
     Dist_MB4Top[ivar.first][0]->draw("E1");
     
-    TLegend * legMB4Top = new TLegend(0.75,0.75,0.9,0.9);
+    TLegend * legMB4Top = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.75,0.75,0.9,0.9);
 
     for (int iwh=0; iwh<5; iwh++){
       Dist_MB4Top[ivar.first][iwh]->draw("sameE1");
-      TLegendEntry *le = legMB4Top->AddEntry(Dist_MB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      TLegendEntry *le = legMB4Top->AddEntry(Dist_MB4Top[ivar.first][iwh],("MB4Top Wh"+std::to_string(iwh-2)).c_str(),"lpe");
       le->SetMarkerColor(Dist_MB4Top[ivar.first][iwh]->GetColor());  
     }    
     legMB4Top->Draw("same");
@@ -683,17 +937,17 @@ void plotter::plot(string dateName){
     Max = 0;
     for (int iwh=0; iwh<5; iwh++) if(Dist_SegMB4Top[ivar.first][iwh]->GetProfMax() > Max) Max = Dist_SegMB4Top[ivar.first][iwh]->GetProfMax();
     
-    TCanvas *cSegMB4Top = new TCanvas(("cSegMB4Top"+ivar.second.name).c_str());
+    TCanvas *cSegMB4Top = new TCanvas(("cSegMB4Top"+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
     cSegMB4Top->SetGrid();
 
-    Dist_SegMB4Top[ivar.first][0]->SetMaximum(Max*1.3);
+    Dist_SegMB4Top[ivar.first][0]->SetMaximum(Max*1.45);
     Dist_SegMB4Top[ivar.first][0]->setTitle(("MB4Top segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
     Dist_SegMB4Top[ivar.first][0]->draw("E1");
     
-    TLegend * legSegMB4Top = new TLegend(0.75,0.75,0.9,0.9);
+    TLegend * legSegMB4Top = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.75,0.75,0.9,0.9);
     for (int iwh=0; iwh<5; iwh++){
       Dist_SegMB4Top[ivar.first][iwh]->draw("sameE1");
-      TLegendEntry *le = legSegMB4Top->AddEntry(Dist_SegMB4Top[ivar.first][iwh],("Wh"+std::to_string(iwh-2)).c_str(),"lpe");
+      TLegendEntry *le = legSegMB4Top->AddEntry(Dist_SegMB4Top[ivar.first][iwh],("MB4Top Wh"+std::to_string(iwh-2)).c_str(),"lpe");
       le->SetMarkerColor(Dist_SegMB4Top[ivar.first][iwh]->GetColor());
     }
    
@@ -703,11 +957,11 @@ void plotter::plot(string dateName){
     delete cSegMB4Top ;
     
     // MB4 Bot
-    TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
+    TCanvas *cMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
     cMB4Bot->SetGrid();
 
     Dist_MB4Bot[ivar.first]->setTitle(("MB4Bot bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-    Dist_MB4Bot[ivar.first]->SetMaximum( Dist_MB4Bot[ivar.first]->GetProfMax()*1.3);
+    Dist_MB4Bot[ivar.first]->SetMaximum( Dist_MB4Bot[ivar.first]->GetProfMax()*1.45);
     Dist_MB4Bot[ivar.first]->draw("E1");
     
     cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".png").c_str());
@@ -715,11 +969,11 @@ void plotter::plot(string dateName){
     delete cMB4Bot;
 
     // MB4 Bot segment
-    TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str());
+    TCanvas *cSegMB4Bot = new TCanvas(("cMB4Bot"+ivar.second.name).c_str(),"",wwCanvas,whCanvas);
     cSegMB4Bot->SetGrid();    
 
     Dist_SegMB4Bot[ivar.first]->setTitle(("MB4Bot segment bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
-    Dist_SegMB4Bot[ivar.first]->SetMaximum( Dist_SegMB4Bot[ivar.first]->GetProfMax()*1.3);
+    Dist_SegMB4Bot[ivar.first]->SetMaximum( Dist_SegMB4Bot[ivar.first]->GetProfMax()*1.45);
     Dist_SegMB4Bot[ivar.first]->draw("E1");
     
     cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+ivar.second.name+".png").c_str());
@@ -778,13 +1032,13 @@ void plotter::setPlots(){
        if(ivar.second.doBkg) Dist_SegMB4Bot[ivar.first]->set2DHistoBin();
      }
    }
+
 }
 
 
 void plotter::setAddBins(){
-  
     for(auto & ivar : dataCont.var) {
-    if(ivar.second.name=="Run"){
+    if(ivar.second.name=="Run" && ivar.second.doEff )  {
 
       addBinsSlice(Eff_phiMBWh[ivar.first][0][0]->GetArrayX(), ivar.second.slice);
 
@@ -915,5 +1169,11 @@ int plotter::getdir(string dir, vector<string> &files){
   closedir(dp);
   return 0;
 }
+
+string plotter::wheelStr(int iwh){
+  if(iwh-2<0)   return "M"+std::to_string(abs(iwh-2));
+  else return std::to_string(iwh-2);
+}
+
 
 #endif
