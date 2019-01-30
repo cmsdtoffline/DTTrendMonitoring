@@ -619,11 +619,8 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   std::set<Int_t> runNumber_Set;
 
   TH2F * hPULumiVSrun = new TH2F("hPULumiVSrun","hPULumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1, 200,0,0.025);
-
-  TH2F * hPUvsLumi = new TH2F("hPUvsLumi","PUvsLumi", dataContext.var["InsLumi"].slice.size()-1, dataContext.var["InsLumi"].slice.data(),dataContext.var["Pileup"].slice.size()-1, dataContext.var["Pileup"].slice.data());
-
-  TH2F * hPUvsLumiCut = new TH2F("hPUvsLumiCut","PUvsLumiCut", dataContext.var["InsLumi"].slice.size()-1, dataContext.var["InsLumi"].slice.data(),dataContext.var["Pileup"].slice.size()-1, dataContext.var["Pileup"].slice.data());
-
+  TH2F * hPUvsLumi = new TH2F("hPUvsLumi","PUvsLumi",2000,0,20000,120,0,120);
+  TH2F * hPUvsLumiCut = new TH2F("hPUvsLumiCut","PUvsLumiCut",2000,0,20000,120,0,120);
 
   hPULumiVSrun->SetLabelSize(0.03);
   hPULumiVSrun->SetMarkerSize(0.8);
@@ -725,14 +722,13 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiVsRun.root").c_str());
 
   hPUvsLumi->Draw("Colz");
-  hPUvsLumi->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["Pileup"].Label+";"+dataContext.var["InsLumi"].Label).c_str());
+  hPUvsLumi->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["InsLumi"].Label+";"+dataContext.var["Pileup"].Label).c_str());
 
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.root").c_str());
 
-
   hPUvsLumiCut->Draw("Colz");
-  hPUvsLumiCut->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["Pileup"].Label+";"+dataContext.var["InsLumi"].Label).c_str());
+  hPUvsLumiCut->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["InsLumi"].Label+";"+dataContext.var["Pileup"].Label).c_str());
 
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiCut.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiCut.root").c_str());
