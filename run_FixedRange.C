@@ -67,19 +67,16 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
 
   variables::initVar(Empty,"Empty","variablesSetting.json",0,0);
   variables::initVar(BkGr,"Bkg","variablesSetting.json",1,0);
-  //  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1);
-  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1); //Fix
+  variables::initVar(InsLumi,"InsLumi","variablesSetting.json",1,1,1); 
   variables::initVar(Pileup,"Pileup","variablesSetting.json",1,1);
-  //  variables::initVar(Pileup,"Pileup","variablesSetting.json");
 
   //Used to skip runs with lumi/PU to high.
   variables::initVar(IntLumi,"IntLumi","variablesSetting.json",0,0);
 
 
   FixedCont.name = "Fixed";
-  //FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty}};
   FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty},{IntLumi.name,IntLumi}};
-  FixedCont.webFolder = "~/www/DTOld";
+  FixedCont.webFolder = "~/www/DT";
 
   FixedCont.wwCanvas  = 500;
   FixedCont.whCanvas  = 400;
