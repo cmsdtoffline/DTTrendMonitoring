@@ -4,6 +4,7 @@
 #include <iostream>
 #include <fstream>
 #include <TH2.h>
+#include <TF1.h>
 #include <TProfile.h>
 #include <TStyle.h>
 #include <TCanvas.h>
@@ -27,6 +28,8 @@ If MaxDead > 0, dead wires will have efficiency zero while alive wires in the sa
 */
 
 int lessentries=50000;
+
+map<int,vector<float>> runInstLumiMap; //to save min and max right inst lumi per run
 
 void EfficiencyMonitor::PreLoop(){
 
@@ -222,6 +225,8 @@ if (Ndead==0) {
        //Check if there are variables to plotted as a function of the background. If yes compute the background.
        if(ivar.second.doBkg) doBkg= kTRUE;
      }
+
+     if(lumiperblock <= runInstLumiMap[runnumber].at(0) || lumiperblock >= runInstLumiMap[runnumber].at(1) ) continue;
      if(doBkg)   getBkgDigi(jentry);     
 
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
@@ -609,7 +614,27 @@ void EfficiencyMonitor::SetRunSlices()
 
 }
 
+
+Double_t squareFunc ( Double_t *x, Double_t *parm){
+
+  if(x[0]>=parm[0] && x[0]<=parm[1] ) return parm[2];
+  else if(x[0]<parm[0]) return parm[3];
+  else  return parm[4];
+
+} 
+
+
 void EfficiencyMonitor::checkPuLumiRatio(){
+
+  if(stat((dataContext.webFolder+"/"+outName+"/").c_str(),&st) != 0){
+    system(("mkdir "+dataContext.webFolder+"/"+outName).c_str());
+    system(("cp "+dataContext.webFolder+"/index.php " +dataContext.webFolder+"/"+outName).c_str());
+  }
+  
+  if(stat((dataContext.webFolder+"/"+outName+"/Global").c_str(),&st) != 0){
+    system(("mkdir "+dataContext.webFolder+"/"+outName+"/Global").c_str());
+    system(("cp "+dataContext.webFolder+"/"+outName+"/index.php " +dataContext.webFolder+"/"+outName+"/Global").c_str());
+  }
 
   cout<<"Loop over the tree to create run list and check lumi PU ratio"<<endl;
   if (fChain == 0) return;   
@@ -619,6 +644,9 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   std::set<Int_t> runNumber_Set;
 
   TH2F * hPULumiVSrun = new TH2F("hPULumiVSrun","hPULumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1, 200,0,0.025);
+
+  TH2F * hLumiVSrun = new TH2F("hLumiVSrun","hLumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1,1000,0,30000);
+
   TH2F * hPUvsLumi = new TH2F("hPUvsLumi","PUvsLumi",2000,0,20000,120,0,120);
   TH2F * hPUvsLumiCut = new TH2F("hPUvsLumiCut","PUvsLumiCut",2000,0,20000,120,0,120);
 
@@ -632,15 +660,12 @@ void EfficiencyMonitor::checkPuLumiRatio(){
     runnumberMap[*it]=i;
     i++;
     hPULumiVSrun->GetXaxis()->SetBinLabel(i,to_string((int)*it).c_str());
+    hLumiVSrun->GetXaxis()->SetBinLabel(i,to_string((int)*it).c_str());
   }
 
   TH1F * hRatio = new TH1F("hratio","hratio",200,0,0.025);
-  
-  dataContext.var["Run"].slice.clear();
 
   Int_t preRunNumber = 0;
-
-
   Float_t puLumiCut = 0.0026;
 
 
@@ -659,19 +684,54 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
     if(jentry==0) preRunNumber = runnumber;
 
+    if( !(std::find(dataContext.var["Run"].slice.begin(), dataContext.var["Run"].slice.end(), runnumber) != dataContext.var["Run"].slice.end()) ) continue; //needed in case of run stat selection 
+
     hPULumiVSrun->Fill(runnumberMap[runnumber], PV_Nvtx/lumiperblock);
     hPUvsLumi->Fill(lumiperblock,PV_Nvtx);
+    hLumiVSrun->Fill(runnumberMap[runnumber], lumiperblock);
+
   }
 
-
   TProfile *pr =  hPULumiVSrun->ProfileX("_pfx",1,-1,"dsame");
-
   for(int bin = 1; bin<=hPULumiVSrun->GetXaxis()->GetNbins(); bin++){
     //    cout<<bin<<" "<<hPULumiVSrun->GetXaxis()->GetBinLabel(bin)<<" "<<pr->GetBinContent(bin)<<endl;
     if(pr->GetBinContent(bin) < puLumiCut){
       runNumber_Set.insert(atoi(hPULumiVSrun->GetXaxis()->GetBinLabel(bin)));
     }
   }
+
+  // Set min max instant luminosity using a fit of the instant lumi distribtion per run with a specific function. To be improved. It's needed to remove lumisection with wrong instant lumi.
+
+  for(int bin = 1; bin<=hLumiVSrun->GetXaxis()->GetNbins(); bin++){
+
+    TCanvas *c1 = new TCanvas("c1","c1"); 
+
+    TH1D *pr = hLumiVSrun->ProjectionY("_px",bin,bin);
+
+    float_t mean = pr->GetMean();
+    float_t rms = pr->GetRMS();
+
+    cout<<atoi(hLumiVSrun->GetXaxis()->GetBinLabel(bin))<<" rms "<<rms<<" mean "<<mean<<endl;
+
+    TF1  *f1 = new TF1("f1",squareFunc,mean-4*rms,mean+4*rms,5);
+    f1->SetParameters(mean-1.5*rms,mean+2.5*rms,pr->GetEntries()/rms*10.,10.,0.);
+
+    pr->Fit("f1","LMR");
+
+    c1->SaveAs((dataContext.webFolder+"/"+outName+"/Global/lumiperblock_run"+to_string(atoi(hLumiVSrun->GetXaxis()->GetBinLabel(bin)))+".png").c_str());
+
+    cout<<"min "<<setprecision(6)<<f1->GetParameter(0)<<endl;
+    cout<<"max "<<setprecision(6)<<f1->GetParameter(1)<<endl;
+
+    runInstLumiMap[atoi(hLumiVSrun->GetXaxis()->GetBinLabel(bin))].push_back(f1->GetParameter(0));
+    runInstLumiMap[atoi(hLumiVSrun->GetXaxis()->GetBinLabel(bin))].push_back(f1->GetParameter(1));
+
+    }
+
+
+  cout<<"Min and max instant Lumi value from fit:"<<endl;
+  for( const auto& run_pair : runInstLumiMap )
+    cout<<setprecision(6)<<run_pair.first<<" "<< run_pair.second[0]<<" "<<run_pair.second[1]<<endl;
 
 
   for (Long64_t jentry = 0; jentry<nentries; jentry++) {
@@ -689,6 +749,9 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
     if(runNumber_Set.find(runnumber)!=runNumber_Set.end())    hPUvsLumiCut->Fill(lumiperblock,PV_Nvtx);
   }
+
+  //clear run vector in order to push back the new elements
+  dataContext.var["Run"].slice.clear();
 
   for (std::set<int>::iterator it= runNumber_Set.begin(); it!= runNumber_Set.end(); ++it)
     dataContext.var["Run"].slice.push_back((float)*it);
@@ -708,26 +771,18 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 
   hPULumiVSrun->SetTitle("Pileup/Instant lumi vs run ;run;Pileup/Instant lumi"); 
 
-  if(stat((dataContext.webFolder+"/"+outName+"/").c_str(),&st) != 0){
-    system(("mkdir "+dataContext.webFolder+"/"+outName).c_str());
-    system(("cp "+dataContext.webFolder+"/index.php " +dataContext.webFolder+"/"+outName).c_str());
-  }
-
-  if(stat((dataContext.webFolder+"/"+outName+"/Global").c_str(),&st) != 0){
-    system(("mkdir "+dataContext.webFolder+"/"+outName+"/Global").c_str());
-    system(("cp "+dataContext.webFolder+"/"+outName+"/index.php " +dataContext.webFolder+"/"+outName+"/Global").c_str());
-  }
-
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiVsRun.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiVsRun.root").c_str());
 
   hPUvsLumi->Draw("Colz");
+  hPUvsLumi->ProfileX("_pfx",1,-1,"dsame"); 
   hPUvsLumi->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["InsLumi"].Label+";"+dataContext.var["Pileup"].Label).c_str());
 
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.png").c_str());
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumi.root").c_str());
 
   hPUvsLumiCut->Draw("Colz");
+  hPUvsLumiCut->ProfileX("_pfx",1,-1,"dsame"); 
   hPUvsLumiCut->SetTitle((dataContext.var["Pileup"].Title+" vs "+dataContext.var["InsLumi"].Title+";"+dataContext.var["InsLumi"].Label+";"+dataContext.var["Pileup"].Label).c_str());
 
   cGlob->SaveAs((dataContext.webFolder+"/"+outName+"/Global/PileUpVsLumiCut.png").c_str());
@@ -741,7 +796,7 @@ void EfficiencyMonitor::checkPuLumiRatio(){
 }
 
 
-void EfficiencyMonitor::checkRunStat(){
+void EfficiencyMonitor::checkRunStat(  int minRunStat ){
 
   cout<<"Loop over the tree to create run list and select runs with enough statistic"<<endl;
   if (fChain == 0) return;   
@@ -766,8 +821,6 @@ void EfficiencyMonitor::checkRunStat(){
 
     runnumberMap[runnumber]+=1;
   }
-
-  int minRunStat = 75000;
 
   for( const auto& run_pair : runnumberMap ){
 

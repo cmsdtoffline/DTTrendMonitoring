@@ -464,7 +464,7 @@ public :
    void close();
    void plot();
    void SetRunSlices();
-   void checkRunStat();
+   void checkRunStat(int minRunStat);
    void checkPuLumiRatio();
    void getBkgDigi(Int_t jentry);
 
@@ -489,8 +489,9 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
   
   if(dataContext.name=="Fixed"){
     if ( dataContext.var.find("Run") != dataContext.var.end() ) {	
-      SetRunSlices(); 
-      checkPuLumiRatio();    //To select only runs with a a pu/Lumi under a threshold
+      checkRunStat(20000); //To select runs with a statistic above a certain threshold
+      //	SetRunSlices(); 
+      checkPuLumiRatio();    //To select only runs with a a pu/Lumi under a threshold and remove event with wrong inst lumi
     }
     else{
       cout<<"ERROR, Variables named IntLumi not found. It is needed for run selection"<<endl;
@@ -502,7 +503,7 @@ EfficiencyMonitor::EfficiencyMonitor(context extContext, TTree *tree , std::stri
     if ( dataContext.var.find("Run") != dataContext.var.end() ) {	
       if(!doOnlyPlot){
 	//SetRunSlices(); 
-	checkRunStat(); //To select runs with a statistic above a certain threshold
+	checkRunStat(75000); //To select runs with a statistic above a certain threshold
       }
     }
     else{
