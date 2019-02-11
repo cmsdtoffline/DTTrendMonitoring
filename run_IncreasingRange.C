@@ -80,6 +80,10 @@ void run_IncreasingRange(string refName ="", string storingName ="", string stor
   incrCont.legy1 = 0.72;
   incrCont.legx2 = 0.89;
   incrCont.legy2 = 0.89;
+
+  incrCont.titleX = 0.4;
+  incrCont.titleY = 0.09;
+
   
   EfficiencyMonitor *eff = new EfficiencyMonitor(incrCont,chain,refName.c_str(),storingName,storedName,doOnlyPlot);
   

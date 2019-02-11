@@ -366,6 +366,11 @@ void plotter::plot(string dateName){
   float legx2 =  dataCont.legx2;
   float legy2 =  dataCont.legy2;
 
+  float titleX =  dataCont.titleX;
+  float titleY =  dataCont.titleY;
+
+
+
   for(auto const& ivar : dataCont.var) {
     for (int iwh=0; iwh<5; iwh++){
       for (int ist=0; ist<4; ist++){
@@ -508,7 +513,7 @@ void plotter::plot(string dateName){
 	CMSPad->Draw();
 	CMSPad->cd();
 
-	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *CMSTitle = new TLatex(titleX,titleY,"CMS Preliminary, pp collisions (13 TeV)");
 	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
 
 	CMSTitle->SetNDC();
@@ -617,7 +622,7 @@ void plotter::plot(string dateName){
 	CMSPad->Draw();
 	CMSPad->cd();
 
-	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *CMSTitle = new TLatex(titleX,titleY,"CMS Preliminary, pp collisions (13 TeV)");
 	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
 
 	CMSTitle->SetNDC();
@@ -718,7 +723,7 @@ void plotter::plot(string dateName){
 	CMSPad->Draw();
 	CMSPad->cd();
 
-	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *CMSTitle = new TLatex(titleX,titleY,"CMS Preliminary, pp collisions (13 TeV)");
 	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
 
 	CMSTitle->SetNDC();
@@ -808,7 +813,7 @@ void plotter::plot(string dateName){
 	CMSPad->Draw();
 	CMSPad->cd();
 
-	TLatex *CMSTitle = new TLatex(0.28,0.09,"CMS Preliminary, pp collisions (13 TeV)");
+	TLatex *CMSTitle = new TLatex(titleX,titleY,"CMS Preliminary, pp collisions (13 TeV)");
 	TLatex *Period   = new TLatex(0.99,0.09,"Run II Data");
 
 	CMSTitle->SetNDC();
@@ -861,7 +866,6 @@ void plotter::plot(string dateName){
       Dist_MBWh[ivar.first][0][ist]->setTitle(("MB"+(std::to_string(ist+1))+"bkg vs "+ivar.second.Title+";"+ivar.second.Label+";Rate(Hz/cm^{2})").c_str());
       Dist_MBWh[ivar.first][0][ist]->draw("E1");
       
-
       TLegend * legMB = new TLegend(legx1, legy1, legx2,legy2);//new TLegend(0.75,0.75,0.9,0.9);
       for (int iwh=0; iwh<5; iwh++){
 	Dist_MBWh[ivar.first][iwh][ist]->draw("sameE1");
@@ -992,8 +996,11 @@ void plotter::setPlots(){
 	   if(ivar.second.doBkg) Dist_SegMBWh[ivar.first][iwh][ist]->getIntLumiHisto();
 	 }
 	 else{
-	   if(ivar.second.doEff) Eff_phiMBWh[ivar.first][iwh][ist]->setEffBin();
-	   if(ivar.second.doEff) EffA_phiMBWh[ivar.first][iwh][ist]->setEffBin();
+	   if(ivar.second.doEff){
+	     //	     if(ivar.second.name == "Bkg")  Eff_phiMBWh[ivar.first][iwh][ist]->setEffBin(); //fixme
+	     Eff_phiMBWh[ivar.first][iwh][ist]->setEffBin();
+	     EffA_phiMBWh[ivar.first][iwh][ist]->setEffBin();
+	   }
 	 }
 	 if(ivar.second.name != "Run" &&  ivar.second.name != "Bkg"){ 
 	   if(ivar.second.doBkg) Dist_MBWh[ivar.first][iwh][ist]->set2DHistoBin();

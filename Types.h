@@ -43,6 +43,8 @@ struct context{
   float legx2;
   float legy2;
 
+  float titleX;
+  float titleY;
 };
 #endif
 

@@ -76,7 +76,7 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
 
   FixedCont.name = "Fixed";
   FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty},{IntLumi.name,IntLumi}};
-  FixedCont.webFolder = "~/www/DT";
+  FixedCont.webFolder = "~/www/DTOld";
 
   FixedCont.wwCanvas  = 500;
   FixedCont.whCanvas  = 400;
@@ -85,6 +85,9 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
   FixedCont.legy1 = 0.7;
   FixedCont.legx2 = 0.89;
   FixedCont.legy2 = 0.89;
+
+  FixedCont.titleX = 0.7;
+  FixedCont.titleY = 0.09;
 
   EfficiencyMonitor *eff = new EfficiencyMonitor(FixedCont,chain,refName.c_str(),storingName,storedName,doOnlyPlot);
 
