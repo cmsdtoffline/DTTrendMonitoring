@@ -76,7 +76,7 @@ void run_FixedRange(string refName ="", string storingName ="", string storedNam
 
   FixedCont.name = "Fixed";
   FixedCont.var   = { {InsLumi.name,InsLumi},{Pileup.name,Pileup},{BkGr.name,BkGr},{Empty.name,Empty},{IntLumi.name,IntLumi}};
-  FixedCont.webFolder = "~/www/DTOld";
+  FixedCont.webFolder = "~/www/DT";
 
   FixedCont.wwCanvas  = 500;
   FixedCont.whCanvas  = 400;
