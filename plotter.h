@@ -537,14 +537,17 @@ void plotter::plot(string dateName){
 
 	if(bin == 0)      {
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".png").c_str());
+	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".pdf").c_str());
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+".root").c_str());
 	}
 	else if(bin==-1 && ivar.second.name=="Run"){
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.png").c_str());
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.root").c_str());
+	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_runs.pdf").c_str());
 	}
 	else{
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str() );
+	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".pdf")).c_str() );
 	  cPhiMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".root")).c_str() );
 	}
 	delete   cPhiMB;
@@ -646,10 +649,12 @@ void plotter::plot(string dateName){
 	    
 	    if(bin == 0){
 	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".png").c_str());
+	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".pdf").c_str());
 	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+".root").c_str());
 	    }
 	    else{
 	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".pdf")).c_str());
 	      cTheMB->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB"+(std::to_string(ist+1))+"TheEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".root")).c_str());
 	    }
 	    delete  cTheMB;
@@ -748,10 +753,12 @@ void plotter::plot(string dateName){
 
 	if(bin == 0) {
 	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".png").c_str());
+	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".pdf").c_str());
 	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Top"+"PhiEffVs"+ivar.second.name+".root").c_str());
 	}
 	else {
 	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".pdf")).c_str());
 	  cPhiMB4Top->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Top"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".root")).c_str());
 	}
 	delete   cPhiMB4Top;
@@ -836,10 +843,12 @@ void plotter::plot(string dateName){
 
 	if(bin == 0){
 	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".png").c_str());
+	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".pdf").c_str());
 	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+".root").c_str());
 	}
 	else{
 	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".png")).c_str());
+	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".pdf")).c_str());
 	  cPhiMB4Bot->SaveAs( (dataCont.webFolder+"/"+dateName+"/Efficiency/"+ivar.second.projVar+"Bin/"+"MB4Bot"+"PhiEffVs"+ivar.second.name+"_"+ivar.second.projVar+"_"+(boost::str(boost::format("%1%-%2%") % ivar.second.projSlice.at(bin-1) % ivar.second.projSlice.at(bin) )+".root")).c_str());
 	}
 	delete   cPhiMB4Bot;
@@ -875,6 +884,7 @@ void plotter::plot(string dateName){
 
       legMB->Draw("same");
       cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+ivar.second.name+".png").c_str());
+      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+ivar.second.name+".pdf").c_str());
       cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"BkgVs"+ivar.second.name+".root").c_str());
    
       delete  cMB ;
@@ -905,6 +915,7 @@ void plotter::plot(string dateName){
       
       legMB->Draw("same");
       cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"SegBkgVs"+ivar.second.name+".png").c_str());
+      cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"SegBkgVs"+ivar.second.name+".pdf").c_str());
       cMB->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB"+(std::to_string(ist+1))+"SegBkgVs"+ivar.second.name+".root").c_str());
       delete  cMB ;
      }
@@ -931,6 +942,7 @@ void plotter::plot(string dateName){
     }    
     legMB4Top->Draw("same");
     cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+ivar.second.name+".png").c_str());
+    cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+ivar.second.name+".pdf").c_str());
     cMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopBkgVs"+ivar.second.name+".root").c_str());
     delete cMB4Top ;
     
@@ -957,6 +969,7 @@ void plotter::plot(string dateName){
    
     legSegMB4Top->Draw("same");
     cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+ivar.second.name+".png").c_str());
+    cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+ivar.second.name+".pdf").c_str());
     cSegMB4Top->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4TopSegBkgVs"+ivar.second.name+".root").c_str());
     delete cSegMB4Top ;
     
@@ -969,6 +982,7 @@ void plotter::plot(string dateName){
     Dist_MB4Bot[ivar.first]->draw("E1");
     
     cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".png").c_str());
+    cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".pdf").c_str());
     cMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotBkgVs"+ivar.second.name+".root").c_str());
     delete cMB4Bot;
 
@@ -981,6 +995,7 @@ void plotter::plot(string dateName){
     Dist_SegMB4Bot[ivar.first]->draw("E1");
     
     cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+ivar.second.name+".png").c_str());
+    cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+ivar.second.name+".pdf").c_str());
     cSegMB4Bot->SaveAs((dataCont.webFolder+"/"+dateName+"/Background/"+"MB4BotSegBkgVs"+ivar.second.name+".root").c_str());
     delete cSegMB4Bot;
   }
