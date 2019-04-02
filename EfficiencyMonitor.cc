@@ -231,9 +231,67 @@ if (Ndead==0) {
 
      // if (lumiperblock > dataContext.slices[0].back()) { cout<<" luminosity out of range!! "<< lumiperblock<<endl; continue; }
      // if (PV_Nvtx > dataContext.slices[1].back())      { cout<<" PU out of range!! "        << PV_Nvtx<<endl;      continue; } 
-   
+     
+     
+     int ChambCross[100][3];
+     for (int i=0; i<100; i++) for (int geo=0; geo<3; geo++) ChambCross[i][geo]=-999;
+     int NChambCross=0;
+     
+     for (int imu=0; imu<Nmuons; imu++) {
+       
+       int Ncross = Mu_nMatches->at(imu); 
+       
+       //cout<<"muon "<<imu<<" cross chamber "<<NChambCross<<" isglobal "<<Mu_isMuGlobal->at(imu)<<" istracker "<<Mu_isMuTracker->at(imu)<<" isstandalone "<<Mu_isMuStandAlone->at(imu)<<endl;
+       //     if (Mu_isMuGlobal->at(imu) || Mu_isMuTracker->at(imu)) check->Fill(Mu_eta->at(imu),float(Ncross));                  
+       TVectorF *Mu_cross_Wh=(TVectorF*)Mu_matches_Wh->At(imu);
+       TVectorF *Mu_cross_Se=(TVectorF*)Mu_matches_Sec->At(imu);
+       TVectorF *Mu_cross_St=(TVectorF*)Mu_matches_St->At(imu);
+       
+       for (int ich=0; ich<Ncross; ich++) {
+	 
+	 int wheel    = (*Mu_cross_Wh)(ich);
+	 int sector   = (*Mu_cross_Se)(ich);
+	 int station  = (*Mu_cross_St)(ich);
+	 
+	 ChambCross[NChambCross][0] = wheel;
+	 ChambCross[NChambCross][1] = sector;
+	 ChambCross[NChambCross][2] = station;
+	 
+	 if (NChambCross<99) NChambCross++;
+	 else {
+	   cout<<" warning event "<<jentry<<" "<<Nmuons<<" muons, more than 100 chamber crossed! "<<endl;
+	   break;
+	 }
+       }
+       // add search for associated segments (standalone muons may not have matches)
+       
+       // if (Ncross>0) continue;
+       
+       int word = Mu_segmentIndex_sta->at(imu);
+       int count=0;
+       
+       while (word>1) {
+	 while (word % 2 == 0) {
+	   count++;
+	   word=word>>1;
+	 }
+	 
+	 ChambCross[NChambCross][0] = dtsegm4D_wheel->at(count);
+	 ChambCross[NChambCross][1] = dtsegm4D_sector->at(count);
+	 ChambCross[NChambCross][2] = dtsegm4D_station->at(count);
+	 
+	 if (NChambCross<99) NChambCross++;
+	 else {
+	   cout<<" warning event "<<jentry<<" "<<Nmuons<<" muons, more than 100 chamber crossed! "<<endl;
+	   break;
+	 }
+	 count++; word=word>>1;
+       }
+     } // leave muon loop: now I have all chambers crossed + associated segments!
+     
+
      // First search for Phi segments
-          
+     
      for (int iseg=0; iseg<Ndtsegments; iseg++) {
        //selection
        if (!dtsegm4D_hasPhi->at(iseg)) continue;
@@ -244,6 +302,19 @@ if (Ndead==0) {
        
        if (fabs(dtsegm4D_x_dir_loc->at(iseg))>0.7) continue; // angle
        
+       bool muonMatch = false; 
+       for (int icross=0; icross<NChambCross; icross++) {
+	 
+	 if (digi_wheel->at(iseg)   == ChambCross[icross][0] &&
+	     digi_sector->at(iseg)  == ChambCross[icross][1] &&
+	     digi_station->at(iseg) == ChambCross[icross][2] ){
+	   muonMatch = true;	 
+	   break;
+	 }
+       }
+
+       if(!muonMatch) continue;
+
        TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
        
        // If a hit is missing, let us check that the extrapolation doesn't fall beyond layer or cross a dead cell!
@@ -455,7 +526,19 @@ if (Ndead==0) {
        
        //if (fabs(dtsegm4D_y_dir_loc->at(iseg))>0.7) continue; // angle WARNING!!! try and disable this for theta layers!
        if (seg_znhits < 3) continue; // piuttosto ovvio!!!  :-)
-       
+
+       bool muonMatch = false; 
+       for (int icross=0; icross<NChambCross; icross++) {
+       	 if (digi_wheel->at(iseg)   == ChambCross[icross][0] &&
+       	     digi_sector->at(iseg)  == ChambCross[icross][1] &&
+       	     digi_station->at(iseg) == ChambCross[icross][2] ){
+       	   muonMatch = true;	 
+       	   break;
+       	 }
+       }
+
+       if(!muonMatch) continue;
+
        TVectorF *expWire=(TVectorF*)dtsegm4D_hitsExpWire->At(iseg);
        //	expWire->Print();
        
@@ -491,7 +574,6 @@ if (Ndead==0) {
 	   // this segment crosses at least 1 dead cell: drop it!
 	 }
        }
-       
        int NHits=0; int missingLayer=-1;
        
        TVectorF *hitLayerZ = (TVectorF*)dtsegm4D_z_hitsLayer->At(iseg);
@@ -527,7 +609,6 @@ if (Ndead==0) {
 	 int lay = missingLayer-1;
 	 
 	 // is there a digi within the expected tube?
-	 
 	 float digiW=-1.;
 	 float d =1000000;
 	 int iex = missingLayer+3;
@@ -558,7 +639,6 @@ if (Ndead==0) {
 	 return;
        }
      }
-    
    }
 }
 
@@ -644,9 +724,7 @@ void EfficiencyMonitor::checkPuLumiRatio(){
   std::set<Int_t> runNumber_Set;
 
   TH2F * hPULumiVSrun = new TH2F("hPULumiVSrun","hPULumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1, 200,0,0.025);
-
   TH2F * hLumiVSrun = new TH2F("hLumiVSrun","hLumiVSrun", dataContext.var["Run"].slice.size()-1, 0,dataContext.var["Run"].slice.size()-1,1000,0,30000);
-
   TH2F * hPUvsLumi = new TH2F("hPUvsLumi","PUvsLumi",2000,0,20000,120,0,120);
   TH2F * hPUvsLumiCut = new TH2F("hPUvsLumiCut","PUvsLumiCut",2000,0,20000,120,0,120);
 
@@ -890,7 +968,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 
    int ChambCross[100][3];
    for (int i=0; i<100; i++) for (int geo=0; geo<3; geo++) ChambCross[i][geo]=-999;
-   
    int NChambCross=0;
 
    //   cout<<"Nmuons "<<Nmuons<<endl;;   
@@ -926,8 +1003,7 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
      
      int word = Mu_segmentIndex_sta->at(imu);
      int count=0;
-       
-     while (word>1) {
+     while (word>1){
        while (word % 2 == 0) {
 	 count++;
 	 word=word>>1;
@@ -971,7 +1047,6 @@ void EfficiencyMonitor::getBkgDigi(Int_t jentry){
 	 break;
        }
      }
-     
      if (digibkg) {
        //       timebkg->Fill(digi_time->at(idigi));
        if (digi_sector->at(idigi)<13)        NdigiBkg[digi_wheel->at(idigi)+2][digi_sector->at(idigi)-1][digi_station->at(idigi)-1]++;
